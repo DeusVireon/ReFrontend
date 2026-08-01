@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* 启用主题变体 */
+/* @custom-variant light (&:is(.light *)); */
+
+:root {
+    --color-positive: oklch(0.8 0.1 170);
+    --color-positive-dark: oklch(0.45 0.08 170);
+    --color-attention: oklch(0.8 0.15 65);
+    --color-attention-dark: oklch(0.48 0.1 65);
+    --color-negative: oklch(0.65 0.22 15);
+    --color-negative-dark: oklch(0.45 0.18 15);
+    --color-accent-light: oklch(0.8 0.09 260);
+    --color-accent-light-t60: oklch(0.8 0.09 260 / 0.6);
+    --color-accent: oklch(0.68 0.16 270);
+    --color-accent-t60: oklch(0.65 0.18 270 / 0.6);
+    --color-accent-purple-light: oklch(0.8 0.08 288);
+    --color-accent-purple: oklch(0.725 0.15 288);
+    --color-accent-cyan-light: oklch(0.88 0.1 210);
+    --color-accent-cyan: oklch(0.78 0.1 220);
+    --color-theme-7: oklch(0.74 0.08 280);
+    --color-theme-6: oklch(0.6 0.10 280);
+    --color-theme-5: oklch(0.5 0.08 280);
+    --color-theme-4: oklch(0.42 0.064 280);
+    --color-theme-3: oklch(0.32 0.048 280);
+    --color-theme-2: oklch(0.2 0.032 280);
+    --color-theme-1: oklch(0.12 0.032 280);
+    --color-gray-7: oklch(0.7 0.02 280);
+    --color-gray-4: oklch(0.42 0.02 280);
+    --color-gray-3: oklch(0.32 0.02 280);
+    --color-gray-2: oklch(0.2 0.02 280);
+    --color-text: oklch(0.85 0 0);
+}
+
+/* .light {
+  主题变体 空置 
+} */
+
+@theme inline {
+    --color-*: initial;
+    --color-white: #ffffff;
+    --color-black: #000000;
+    --color-debug: #ff00ff;
+    --color-text: var(--color-text);
+    --color-positive: var(--color-positive);
+    --color-positive-dark: var(--color-positive-dark);
+    --color-attention: var(--color-attention);
+    --color-attention-dark: var(--color-attention-dark);
+    --color-negative: var(--color-negative);
+    --color-negative-dark: var(--color-negative-dark);
+    --color-accent-light: var(--color-accent-light);
+    --color-accent-light-t60: var(--color-accent-light-t60);
+    --color-accent: var(--color-accent);
+    --color-accent-t60: var(--color-accent-t60);
+    --color-accent-purple-light: var(--color-accent-purple-light);
+    --color-accent-purple: var(--color-accent-purple);
+    --color-accent-cyan-light: var(--color-accent-cyan-light);
+    --color-accent-cyan: var(--color-accent-cyan);
+    --color-theme-7: var(--color-theme-7);
+    --color-theme-6: var(--color-theme-6);
+    --color-theme-5: var(--color-theme-5);
+    --color-theme-4: var(--color-theme-4);
+    --color-theme-3: var(--color-theme-3);
+    --color-theme-2: var(--color-theme-2);
+    --color-theme-1: var(--color-theme-1);
+    --color-gray-7: var(--color-gray-7);
+    --color-gray-4: var(--color-gray-4);
+    --color-gray-3: var(--color-gray-3);
+    --color-gray-2: var(--color-gray-2);
+    --color-white: var(--color-white);
+    --animate-expand-right: expandRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+
+@keyframes expandRight {
+    from {
+        clip-path: inset(0 100% 0 0);
+        /* 完全裁切（从右侧往左裁到 100%） */
+    }
+
+    to {
+        clip-path: inset(0 0 0 0);
+        /* 完全展示 */
+    }
+}
