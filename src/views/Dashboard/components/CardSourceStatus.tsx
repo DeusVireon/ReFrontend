@@ -1,12 +1,18 @@
 import { cn } from '@/lib/utils'
+import { useSensorByID } from '../stores/SensorByID'
+import { useShallow } from 'zustand/react/shallow';
 
 export function CardSourceStatus() {
     return (
-        <div className="grid gap-2"><MatrixGrid items={Array.from({ length: 23 }, (_, i) => ({
-            id: i + 1,
-            status: Math.floor(Math.random() * 2),
-        }))} />
-            <div className="text-gray-7 text-right">Sensor Total: 23</div></div>
+        <div className="grid gap-2">
+
+
+            {/* <MatrixGrid items={Array.from({ length: 23 }, (_, i) => ({
+                id: i + 1,
+                status: Math.floor(Math.random() * 2),
+            }))} /> */}
+            <div className="text-gray-7 text-right">Sensor Total: 23</div>
+        </div>
     )
 }
 
@@ -29,4 +35,8 @@ function MatrixGrid({ items }: { items: Array<{ id: number; status: number }> })
             ))}
         </div>
     )
+}
+
+function SensorStatusCell() {
+    // const ids = useMatrixStore(useShallow((state) => state.ids));
 }

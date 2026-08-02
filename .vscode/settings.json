@@ -4,7 +4,9 @@
     // },
     "css.lint.unknownAtRules": "ignore",
     "cSpell.words": [
+        "drei",
         "gltf",
-        "subaccent"
+        "subaccent",
+        "transferrables"
     ]
 }
