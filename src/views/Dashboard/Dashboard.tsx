@@ -44,8 +44,8 @@ function BottomCardGroup() {
 
 function RightCardGroup() {
     return <div className="absolute top-16 right-0 w-[25vw] h-[calc(75vh-4rem-1rem)] pr-6 \
-                         grid grid-rows-2 gap-2">
-        <CardAlerts />
+                         grid grid-rows-3 gap-2">
+        <div className="row-span-2"><CardAlerts /></div>
         <CardLogs />
     </div >
 }

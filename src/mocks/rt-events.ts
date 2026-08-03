@@ -73,9 +73,9 @@ export function createMockSystemStatusPayload(): SystemStatus {
     ];
 
     const abnormalTexts = [
-        '组件响应超时，重连中', // 13字
+        '组件响应超时', // 13字
         '服务异常失败', // 14字
-        '连接建立失败，无响应', // 14字
+        '连接建立失败', // 14字
     ];
 
     // 辅助函数：随机获取数组中的一个元素
@@ -110,4 +110,50 @@ export function createMockSystemStatusPayload(): SystemStatus {
         HistoryAnalyzerText: historyAnalyzer.text,
         PredictorText: predictor.text,
     };
+}
+
+export interface AlertData {
+    id: number;
+    title: string;
+    content: string;
+    level: number;
+    triggerTime: string;
+}
+
+// 常量池
+const ALERT_TITLES = ['设备运行状态异常告警'];
+const ALERT_CONTENTS = ['检测到系统指标超出预警阈值，请尽快排查原因并处理。'];
+
+// 全局递增 ID 计数器
+let currentAlertId = 1;
+
+export function createMockAlertDataPayload(): AlertData {
+    // 1. id 递增
+    const id = currentAlertId++;
+
+    // 2. 概率分布计算：60% 为 1，30% 为 2，10% 为 3
+    const rand = Math.random();
+    let level = 1;
+    if (rand < 0.60) {
+        level = 1;
+    } else if (rand < 0.90) { // 0.60 + 0.30
+        level = 2;
+    } else {
+        level = 3;
+    }
+
+    return {
+        id,
+        title: ALERT_TITLES[0],
+        content: ALERT_CONTENTS[0],
+        level,
+        triggerTime: new Date().toISOString(),
+    };
+}
+
+/**
+ * 辅助函数：重置 ID 计数器（适用于单元测试或重置 Mock 状态）
+ */
+export function resetAlertIdCounter(startId: number = 1) {
+    currentAlertId = startId;
 }

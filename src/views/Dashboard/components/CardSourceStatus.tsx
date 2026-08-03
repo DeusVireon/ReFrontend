@@ -8,27 +8,25 @@ export function CardSourceStatus() {
     return (
         <div className="grid gap-2">
             <MatrixGrid />
-            {/* <MatrixGrid items={Array.from({ length: 23 }, (_, i) => ({
-                id: i + 1,
-                status: Math.floor(Math.random() * 2),
-            }))} /> */}
             <div className="text-gray-7 text-right">Sensor Total: {ids.length}</div>
         </div>
     )
 }
 
 function MatrixGrid() {
-    const CellMemo = memo(SensorStatusCell)
+
     const ids = useSensorData(useShallow((state) => state.idList));
 
     return (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(20px,1fr))] gap-1.5">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(18px,1fr))] gap-1.5">
             {ids.map((item) => (
-                <CellMemo key={item} id={item} />
+                <SensorStatusCellMemo key={item} id={item} />
             ))}
         </div>
     )
 }
+
+const SensorStatusCellMemo = memo(SensorStatusCell)
 
 function SensorStatusCell({ id }: { id: string }) {
     const status = useSensorData(useShallow((state) => state.sensorByID[id]));

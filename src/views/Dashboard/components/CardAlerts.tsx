@@ -2,24 +2,37 @@ import { cn } from "@/lib/utils"
 import { SideCard } from "./SideCard"
 import { ScrollArea } from "./ScrollArea"
 import { formatShowTime } from "./utils"
+import { useShallow } from 'zustand/react/shallow';
+import { useAlertData } from "../stores/AlertData"
+import { memo } from "react"
+
 export function CardAlerts() {
+
+    const alerts = useAlertData(useShallow((state) => state.idList));
+
     return (
         <SideCard title="告警列表" className="pb-3">
             <ScrollArea>
-                <AlertItem title="浓度达到 80mg/m^3" body="10" time="2026-07-30T05:20:00Z" level={0} />
-                <AlertItem title="浓度达到 80mg/m^3" body="10" time="2026-07-30T05:20:00Z" level={3} />
-                <AlertItem title="浓度达到 80mg/m^3" body="10" time="2026-07-30T05:20:00Z" level={2} />
-                <AlertItem title="浓度达到 80mg/m^3" body="10" time="2026-07-30T05:20:00Z" level={1} />
+                {alerts.map((id) => (
+                    <AlertItemMemo key={id} id={id} />
+                ))}
             </ScrollArea>
         </SideCard>
     )
 }
 
-function AlertItem({ title, body, time, level }: { title: string; body: string; time: string; level: number }) {
+const AlertItemMemo = memo(AlertItem)
+
+function AlertItem({ id }: { id: number }) {
+    const alert = useAlertData(useShallow((state) => state.alertByID[id]));
+
+    if (!alert) {
+        return null;
+    }
 
     let levelText
 
-    switch (level) {
+    switch (alert.level) {
         case 0:
             levelText = "INFO"
             break
@@ -41,24 +54,27 @@ function AlertItem({ title, body, time, level }: { title: string; body: string; 
             "flex rounded-xs w-full \
                 border border-gray-3/30 animate-expand-right"
             , {
-                "bg-gray-4/30": level === 0,
-                "bg-accent/30": level === 1,
-                "bg-attention-dark/30": level === 2,
-                "bg-negative-dark/30": level === 3,
+                "bg-gray-4/30": alert.level === 0,
+                "bg-accent/30": alert.level === 1,
+                "bg-attention-dark/30": alert.level === 2,
+                "bg-negative-dark/30": alert.level === 3,
             })}>
             <div className={cn("w-1", {
-                "bg-gray-7": level === 0,
-                "bg-accent-light": level === 1,
-                "bg-attention": level === 2,
-                "bg-negative": level === 3,
+                "bg-gray-7": alert.level === 0,
+                "bg-accent-light": alert.level === 1,
+                "bg-attention": alert.level === 2,
+                "bg-negative": alert.level === 3,
             })}></div>
             <div className="flex-row w-full px-2 py-1">
                 <div className="flex justify-between text-xs text-gray-7">
                     <div>{levelText}</div>
-                    <div>{formatShowTime(time)}</div>
+                    <div>{formatShowTime(alert.triggerTime)}</div>
                 </div>
                 <div className="flex">
-                    <div className="font-semibold">{title}</div>
+                    <div className="font-semibold">{alert.title}</div>
+                </div>
+                <div className="flex">
+                    <div className="text-sm">{alert.content}</div>
                 </div>
             </div>
         </div>

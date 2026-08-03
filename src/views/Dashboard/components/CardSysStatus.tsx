@@ -16,7 +16,7 @@ function StatusBadge({ name, text, color }: { name: string; text: string; color:
     return (
         <div key={text} className="animate-flash-highlight items-center gap-2">
             <div className={cn(
-                "flex rounded-xs px-2 py-1.5 w-full \
+                "flex rounded-xs px-2 py-1 w-full \
                 border border-gray-3/35"
                 , {
                     "bg-attention-dark/60": color === 0,
