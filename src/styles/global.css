@@ -69,6 +69,7 @@
     --color-gray-2: var(--color-gray-2);
     --color-white: var(--color-white);
     --animate-expand-right: expandRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    --animate-flash-highlight: flashHighlight 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 
@@ -81,5 +82,17 @@
     to {
         clip-path: inset(0 0 0 0);
         /* 完全展示 */
+    }
+}
+
+@keyframes flashHighlight {
+    from {
+        filter: brightness(1.6);
+        /* 起始瞬间提亮至 160%（可根据需求调整为 1.5 ~ 2） */
+    }
+
+    to {
+        filter: brightness(1);
+        /* 平滑恢复至原状态 */
     }
 }

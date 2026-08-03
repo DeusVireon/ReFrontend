@@ -9,12 +9,16 @@ interface SensorInfo {
     value: string
 }
 
+interface SensorInfos {
+    sensors: SensorInfo[];
+}
+
 interface SensorDataStore {
     idList: string[]
     sensorByID: Record<string, SensorInfo>
     attrMap: Record<string, string> // attrKey -> sensorID
 
-    updateSensors: (payload: SensorInfo[]) => void;
+    updateSensors: (payload: SensorInfos) => void;
 }
 
 export const useSensorByID = create<SensorDataStore>((set) => ({
@@ -22,15 +26,15 @@ export const useSensorByID = create<SensorDataStore>((set) => ({
     sensorByID: {},
     attrMap: {},
 
-    updateSensors: (payload: SensorInfo[]) => {
-        if (!Array.isArray(payload) || payload.length === 0) return;
-
+    updateSensors: (payload: SensorInfos) => {
+        console.log(payload, payload.sensors.length)
+        if (!Array.isArray(payload.sensors) || payload.sensors.length === 0) return;
         set((state) => {
             const nextSensorByID = { ...state.sensorByID };
             const nextAttrMap = { ...state.attrMap };
             const newIds: string[] = [];
 
-            for (const item of payload) {
+            for (const item of payload.sensors) {
                 if (!item || !item.id) continue;
                 // 判断是否为新的传感器
                 const existingSensor = state.sensorByID[item.id];
@@ -63,7 +67,7 @@ export const useSensorByID = create<SensorDataStore>((set) => ({
     },
 }));
 
-RTEventMgrInst.handle<SensorInfo[]>("sensor.update", (payload: SensorInfo[]) => {
-    console.log("Received sensor.update event:", payload);
+
+RTEventMgrInst.handle<SensorInfos>("sensor.update", (payload: SensorInfos) => {
     useSensorByID.getState().updateSensors(payload);
 })
