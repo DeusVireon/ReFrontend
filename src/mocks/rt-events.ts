@@ -157,3 +157,52 @@ export function createMockAlertDataPayload(): AlertData {
 export function resetAlertIdCounter(startId: number = 1) {
     currentAlertId = startId;
 }
+
+export interface LogData {
+    id: number;
+    name: string;
+    content: string;
+    level: number;
+    triggerTime: string;
+}
+
+// 常量池
+const LOG_NAMES = ['系统', '推理', '回溯分析', '数据库'];
+const LOG_CONTENTS = ['执行完成'];
+
+// 全局递增 ID 计数器
+let currentLogId = 1;
+
+export function createMockLogDataPayload(): LogData {
+    // 1. id 递增
+    const id = currentLogId++;
+
+    // 2. 随机选取名称
+    const name = LOG_NAMES[Math.floor(Math.random() * LOG_NAMES.length)];
+
+    // 3. 概率分布计算：60% 为 1，30% 为 2，10% 为 3
+    const rand = Math.random();
+    let level = 1;
+    if (rand < 0.60) {
+        level = 1;
+    } else if (rand < 0.90) { // 0.60 + 0.30
+        level = 2;
+    } else {
+        level = 3;
+    }
+
+    return {
+        id,
+        name,
+        content: LOG_CONTENTS[0],
+        level,
+        triggerTime: new Date().toISOString(),
+    };
+}
+
+/**
+ * 辅助函数：重置 ID 计数器（适用于单元测试或重置 Mock 状态）
+ */
+export function resetLogIdCounter(startId: number = 1) {
+    currentLogId = startId;
+}

@@ -34,6 +34,5 @@ export const useSystemStatus = create<SystemStatusStore>((set) => ({
 }));
 
 RTEventMgrInst.handle<SystemStatus>("system.status", (payload: SystemStatus) => {
-    console.log("Received system.status event:", payload);
     useSystemStatus.getState().updateSystemStatus(payload);
 });

@@ -43,6 +43,5 @@ export const useAlertData = create<AlertDataStore>((set) => ({
 }));
 
 RTEventMgrInst.handle<AlertData>("alert.data", (payload: AlertData) => {
-    console.log("Received alert.data event:", payload);
     useAlertData.getState().addAlert(payload);
 });
