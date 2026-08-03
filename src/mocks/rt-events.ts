@@ -206,3 +206,69 @@ export function createMockLogDataPayload(): LogData {
 export function resetLogIdCounter(startId: number = 1) {
     currentLogId = startId;
 }
+
+export interface OverallStatus {
+    sysStatus: number;
+    sysPrompt: string;
+    bizStatus: number;
+    bizPrompt: string;
+}
+
+// 系统提示语常量池（按状态 -1, 0, 1 映射）
+const SYS_PROMPT_POOL: Record<number, string[]> = {
+    1: [
+        '',
+    ],
+    0: [
+        '服务响应迟缓',
+    ],
+    '-1': [
+        '服务连接中断',
+        '推理服务异常',
+    ],
+};
+
+// 业务提示语常量池（按状态 -1, 0, 1 映射）
+const BIZ_PROMPT_POOL: Record<number, string[]> = {
+    1: [
+        '',
+    ],
+    0: [
+        '回溯推理提示异常',
+        '预测推理提示超标',
+    ],
+    '-1': [
+        '多个传感器未响应',
+        '预测推理提示严重超标',
+    ],
+};
+
+// 辅助函数：根据状态从对应的常量池中随机选取一条提示语
+const getRandomPrompt = (pool: Record<number, string[]>, status: number): string => {
+    const list = pool[status] || pool[1];
+    return list[Math.floor(Math.random() * list.length)];
+};
+
+// 辅助函数：生成 -1 / 0 / 1 概率状态（按 70% 正常(1)、20% 警告(0)、10% 异常(-1)）
+const generateStatus = (): number => {
+    const rand = Math.random();
+    if (rand < 0.70) {
+        return 1;
+    } else if (rand < 0.90) { // 0.70 + 0.20
+        return 0;
+    } else {
+        return -1;
+    }
+};
+
+export function createMockOverallStatusPayload(): OverallStatus {
+    const sysStatus = generateStatus();
+    const bizStatus = generateStatus();
+
+    return {
+        sysStatus,
+        sysPrompt: getRandomPrompt(SYS_PROMPT_POOL, sysStatus),
+        bizStatus,
+        bizPrompt: getRandomPrompt(BIZ_PROMPT_POOL, bizStatus),
+    };
+}

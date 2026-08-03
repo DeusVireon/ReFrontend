@@ -2,7 +2,7 @@
 import { http, HttpResponse } from 'msw'
 import {
     createMockSensorPayload, createMockSystemStatusPayload,
-    createMockAlertDataPayload, createMockLogDataPayload
+    createMockAlertDataPayload, createMockLogDataPayload, createMockOverallStatusPayload
 } from './rt-events'
 import { sse } from 'msw'
 
@@ -11,6 +11,7 @@ type SSEEventMap = {
     'system.status': string
     'alert.data': string
     'system.log': string
+    'system.overall': string
 }
 
 export const handlers = [
@@ -47,13 +48,21 @@ export const handlers = [
                 event: 'system.log',
                 data: JSON.stringify(createMockLogDataPayload()),
             })
-        }, 1000)
+        }, 10000)
+
+        const overallStatusIntervalId = setInterval(() => {
+            client.send({
+                event: 'system.overall',
+                data: JSON.stringify(createMockOverallStatusPayload()),
+            })
+        }, 10000)
 
         request.signal.addEventListener('abort', () => {
             clearInterval(intervalId)
             clearInterval(systemStatusIntervalId)
             clearInterval(alertDataIntervalId)
             clearInterval(logDataIntervalId)
+            clearInterval(overallStatusIntervalId)
         })
     }),
 ]

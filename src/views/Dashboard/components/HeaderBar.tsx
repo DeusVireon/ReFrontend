@@ -1,7 +1,9 @@
 import { cn } from "@/lib/utils"
 import { CircleCheck, TriangleAlert, OctagonAlert, ChevronRight, Settings } from "lucide-react"
 import React, { useState, useEffect } from 'react';
+import { useOverallStatus } from "../stores/OverallStatus";
 export function HeaderBar() {
+    const overallStatus = useOverallStatus((state) => state.overallStatus);
     return (
         <div className="absolute top-0 left-0 w-full h-16 \
         bg-linear-to-b from-theme-1/75 via-theme-1/20 via-75% to-theme-1/0 \
@@ -9,9 +11,8 @@ export function HeaderBar() {
         flex justify-between">
             <div className="flex py-2.5 pl-6"><TimeArea /></div>
             <div className="flex py-3 pr-6 gap-4">
-                <StatusBadge name="监测" description="超标预警: 80mg/m^ +75min" status={0} />
-                <StatusBadge name="系统" description="未连接" status={-1} />
-                <StatusBadge name="页面" description="" status={1} />
+                <StatusBadge name="系统" description={overallStatus.sysPrompt} status={overallStatus.sysStatus} />
+                <StatusBadge name="监测" description={overallStatus.bizPrompt} status={overallStatus.bizStatus} />
                 <SettingsButton />
             </div>
 
