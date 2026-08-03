@@ -1,10 +1,10 @@
 import { cn } from '@/lib/utils'
 import { memo } from 'react';
-import { useSensorByID } from '../stores/SensorByID'
+import { useSensorData } from '../stores/SensorData'
 import { useShallow } from 'zustand/react/shallow';
 
 export function CardSourceStatus() {
-    const ids = useSensorByID(useShallow((state) => state.idList));
+    const ids = useSensorData(useShallow((state) => state.idList));
     return (
         <div className="grid gap-2">
             <MatrixGrid />
@@ -19,10 +19,10 @@ export function CardSourceStatus() {
 
 function MatrixGrid() {
     const CellMemo = memo(SensorStatusCell)
-    const ids = useSensorByID(useShallow((state) => state.idList));
+    const ids = useSensorData(useShallow((state) => state.idList));
 
     return (
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(18px,1fr))] gap-1.5">
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(20px,1fr))] gap-1.5">
             {ids.map((item) => (
                 <CellMemo key={item} id={item} />
             ))}
@@ -31,7 +31,7 @@ function MatrixGrid() {
 }
 
 function SensorStatusCell({ id }: { id: string }) {
-    const status = useSensorByID(useShallow((state) => state.sensorByID[id]));
+    const status = useSensorData(useShallow((state) => state.sensorByID[id]));
 
     if (!status) {
         return null;

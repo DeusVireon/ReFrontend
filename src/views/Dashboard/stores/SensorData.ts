@@ -21,13 +21,12 @@ interface SensorDataStore {
     updateSensors: (payload: SensorInfos) => void;
 }
 
-export const useSensorByID = create<SensorDataStore>((set) => ({
+export const useSensorData = create<SensorDataStore>((set) => ({
     idList: [],
     sensorByID: {},
     attrMap: {},
 
     updateSensors: (payload: SensorInfos) => {
-        console.log(payload, payload.sensors.length)
         if (!Array.isArray(payload.sensors) || payload.sensors.length === 0) return;
         set((state) => {
             const nextSensorByID = { ...state.sensorByID };
@@ -69,5 +68,5 @@ export const useSensorByID = create<SensorDataStore>((set) => ({
 
 
 RTEventMgrInst.handle<SensorInfos>("sensor.update", (payload: SensorInfos) => {
-    useSensorByID.getState().updateSensors(payload);
+    useSensorData.getState().updateSensors(payload);
 })
