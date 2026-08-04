@@ -10,7 +10,7 @@ import { ToolAISug } from "./components/ToolAISug"
 
 export function DashboardView() {
     return <div className="relative h-screen w-screen bg-theme-5">
-        <ModelView />
+        <div className="isolate"><ModelView /></div>
         <BottomCardGroup />
         <RightCardGroup />
         <LeftAISugZone />

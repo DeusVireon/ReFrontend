@@ -11,8 +11,8 @@ export function HeaderBar() {
         flex justify-between">
             <div className="flex py-2.5 pl-6"><TimeArea /></div>
             <div className="flex py-3 pr-6 gap-4">
-                <StatusBadge name="系统" description={overallStatus.sysPrompt} status={overallStatus.sysStatus} />
                 <StatusBadge name="监测" description={overallStatus.bizPrompt} status={overallStatus.bizStatus} />
+                <StatusBadge name="系统" description={overallStatus.sysPrompt} status={overallStatus.sysStatus} />
                 <SettingsButton />
             </div>
 

@@ -51,7 +51,8 @@ export function FloorPlane() {
         <mesh rotation={[-Math.PI / 2, 0, 0]}>
             {/* 替换为你实际需要的几何体尺寸 */}
             <planeGeometry args={[1024, 1024]} />
-
+            {/* <color attach="background" args={["#9cbff8"]} />
+            <fogExp2 attach="fog" args={["#9cbff8", 0.07]} /> */}
             {/* 3. 声明式 R3F 亚金属材质 */}
             <meshStandardMaterial
                 map={gridTexture}
