@@ -7,23 +7,31 @@ import { CardForecast } from "./components/CardForecast"
 import { CardLogs } from "./components/CardLogs"
 import { CardAlerts } from "./components/CardAlerts"
 import { ToolAISug } from "./components/ToolAISug"
+import { VerticalToggleGroup } from './components/ToolPartSelector';
 
 export function DashboardView() {
     return <div className="relative h-screen w-screen bg-theme-5">
         <div className="isolate"><ModelView /></div>
         <BottomCardGroup />
         <RightCardGroup />
-        <LeftAISugZone />
+        <LeftToolZone />
         <HeaderBar />
     </div>
 }
 
-function LeftAISugZone() {
+function LeftToolZone() {
     return (
-        <div className="absolute bottom-[25vh] left-0 pb-6 px-6 \
+        <div>
+            <div className="absolute bottom-[25vh] left-0 pb-6 px-6 \
                         flex gap-2">
-            <ToolAISug />
+                <ToolAISug />
+
+            </div>
+            <div className="absolute top-1/2 -translate-y-3/4 left-0 px-6 flex">
+                <VerticalToggleGroup />
+            </div>
         </div>
+
     )
 }
 

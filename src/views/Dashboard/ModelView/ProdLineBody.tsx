@@ -2,16 +2,9 @@ import React, { useEffect, useMemo, useCallback } from 'react';
 import { useGLTF } from '@react-three/drei';
 import { type ThreeEvent, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { useViewStateStore } from './ViewState';
+import { useModelViewStateStore } from '../stores/ModelViewState';
 import { createBreathingCoverMaterial, createFresnelMaterial } from './MaterialUtils';
-
-const GROUP_PREFIXES = ['rotor_',
-    'desorption_fan_',
-    'absorption_fan_',
-    'conbustion_chamber_',
-    'concentrated_',
-    'inlet_',
-    'outlet_'];
+import { ModelPartGroup } from '../stores/ModelViewState';
 
 const SELECTION_COLOR = "#7290fa";
 const WARNING_COLOR = '#f73d62';
@@ -21,9 +14,9 @@ export function ProdLineBody() {
     const { scene } = useGLTF('/ProdLineMain.glb');
 
     // 订阅 Zustand 状态与 Action
-    const activeGroup = useViewStateStore((state) => state.selectedGroup);
-    const toggleGroupAct = useViewStateStore((state) => state.toggleSelection);
-    const setActiveGroupAct = useViewStateStore((state) => state.selectGroup);
+    const activeGroup = useModelViewStateStore((state) => state.selectedGroup);
+    const toggleGroupAct = useModelViewStateStore((state) => state.toggleSelection);
+    const setActiveGroupAct = useModelViewStateStore((state) => state.selectGroup);
 
     // 创建 Shader 材质
     const selectionMat = useMemo(() => {
@@ -124,13 +117,9 @@ function initializeModelMaterials(scene: THREE.Group) {
     });
 }
 
-function getGroupPrefix(meshName: string): string | null {
-    for (const prefix of GROUP_PREFIXES) {
-        if (meshName.startsWith(prefix)) {
-            return prefix;
-        }
-    }
-    return null;
+function getGroupPrefix(meshName: string): ModelPartGroup | null {
+    const prefixes = Object.values(ModelPartGroup) as ModelPartGroup[];
+    return prefixes.find(prefix => meshName.startsWith(prefix)) ?? null;
 }
 
 export function toggleSelectionHighlight(targetMesh: THREE.Mesh, material: THREE.Material, enable: boolean) {

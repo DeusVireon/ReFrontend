@@ -12,7 +12,7 @@
     --color-negative-dark: oklch(0.45 0.18 15);
     --color-accent-light: oklch(0.8 0.09 260);
     --color-accent-light-t60: oklch(0.8 0.09 260 / 0.6);
-    --color-accent: oklch(0.68 0.16 270);
+    --color-accent: oklch(0.65 0.18 270);
     --color-accent-t60: oklch(0.65 0.18 270 / 0.6);
     --color-accent-purple-light: oklch(0.8 0.08 288);
     --color-accent-purple: oklch(0.725 0.15 288);
