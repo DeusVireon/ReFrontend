@@ -3,7 +3,7 @@ import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei'
 import { FloatingDataBoard } from './ModelItems'
 import { FloorPlane } from "./FloorPlane"
 import { ProdLineBody } from "./ProdLineBody"
-import { ModelPartEnum, useModelViewStateStore } from '../stores/ModelViewState';
+import { useModelViewStateStore } from '../stores/ModelViewState';
 export function ModelView() {
     return (
         // 1. 使用 Tailwind 打造全屏 3D 画布容器 (relative + full w/h)

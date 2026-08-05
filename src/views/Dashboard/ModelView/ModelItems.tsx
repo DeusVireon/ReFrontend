@@ -1,84 +1,10 @@
 import { useShallow } from 'zustand/shallow';
-import { ModelPartEnum } from '../stores/ModelViewState';
-import { useSensorData, AttrKeyEnum, type AttrDataHistory } from '../stores/SensorData';
+import { useModelViewStateStore } from '../stores/ModelViewState';
+import { useSensorData, type AttrDataHistory } from '../stores/SensorData';
+import { BOARD_PROP_MAP, type DataItemProps } from '../models/BoardPropMap';
+import { ModelPartEnum } from '../models/ModelPartEnum';
+import { AttrKeyEnum } from "../models/AttrKeyEnum";
 
-interface DataBoardProps {
-    title: string;
-    linkedData: DataItemProps[];
-}
-
-interface DataItemProps {
-    attrKey: string;
-    showName: string;
-    showUnit: string;
-}
-
-const BOARD_PROP_MAP: Record<ModelPartEnum, DataBoardProps> = {
-    [ModelPartEnum.Ambient]: {
-        title: "环境数据",
-        linkedData: [
-            { attrKey: AttrKeyEnum.AmbientHumidity, showName: "环境湿度", showUnit: "%" },
-            { attrKey: AttrKeyEnum.AmbientPressure, showName: "大气压力", showUnit: "Pa" },
-            { attrKey: AttrKeyEnum.AmbientTemp, showName: "环境温度", showUnit: "℃" },
-        ]
-    },
-    [ModelPartEnum.Inlet]: {
-        title: "废气入口数据",
-        linkedData: [
-            { attrKey: AttrKeyEnum.CoatingConc, showName: "进气浓度", showUnit: "mg/m³" },
-            { attrKey: AttrKeyEnum.CoatingFlow, showName: "进气湿度", showUnit: "%" },
-            { attrKey: AttrKeyEnum.CoatingPressure, showName: "涂布气压", showUnit: "Pa" },
-            { attrKey: AttrKeyEnum.CoatingTemp, showName: "进气温度", showUnit: "℃" },
-        ]
-    },
-    [ModelPartEnum.Rotor]: {
-        title: "转轮系统",
-        linkedData: [
-            { attrKey: AttrKeyEnum.RotorInletTemp, showName: "入口温度", showUnit: "℃" },
-            { attrKey: AttrKeyEnum.RotorInletHumid, showName: "入口湿度", showUnit: "%" },
-            { attrKey: AttrKeyEnum.RotorSpeed, showName: "转轮转速", showUnit: "rpm" },
-        ]
-    },
-    [ModelPartEnum.AdsorptionFan]: {
-        title: "吸附风机",
-        linkedData: [
-            { attrKey: AttrKeyEnum.AdsorptionFanPower, showName: "风机功率", showUnit: "kW" },
-        ]
-    },
-    [ModelPartEnum.DesorptionFan]: {
-        title: "解吸风机",
-        linkedData: [
-            { attrKey: AttrKeyEnum.DesorptionTemp, showName: "解吸温度", showUnit: "℃" },
-            { attrKey: AttrKeyEnum.DesorptionFanPower, showName: "风机功率", showUnit: "kW" },
-        ]
-    },
-    [ModelPartEnum.Concentrated]: {
-        title: "浓缩气体通路",
-        linkedData: [
-            { attrKey: AttrKeyEnum.ConcentratedTemp, showName: "浓缩气温", showUnit: "℃" },
-            { attrKey: AttrKeyEnum.ConcentratedFlow, showName: "浓缩气流", showUnit: "m³/h" },
-            { attrKey: AttrKeyEnum.ConcentratedPressure, showName: "浓缩气压", showUnit: "Pa" },
-            { attrKey: AttrKeyEnum.ConcentratedConc, showName: "浓缩浓度", showUnit: "mg/m³" },
-        ]
-    },
-    [ModelPartEnum.CombustionChamber]: {
-        title: "RTO焚烧炉系统",
-        linkedData: [
-            { attrKey: AttrKeyEnum.RTOInFlow, showName: "进气流量", showUnit: "m³/h" },
-            { attrKey: AttrKeyEnum.RTOInPressure, showName: "进气压力", showUnit: "Pa" },
-            { attrKey: AttrKeyEnum.RTOInTemp, showName: "进气温度", showUnit: "℃" },
-            { attrKey: AttrKeyEnum.RTOInConc, showName: "进气浓度", showUnit: "mg/m³" },
-            { attrKey: AttrKeyEnum.CombustionTemp, showName: "焚烧炉温", showUnit: "℃" },
-        ]
-    },
-    [ModelPartEnum.Outlet]: {
-        title: "气体排放口",
-        linkedData: [
-            { attrKey: AttrKeyEnum.RTOOutTemp, showName: "排气温度", showUnit: "℃" },
-            { attrKey: AttrKeyEnum.RTOOutConc, showName: "排气浓度", showUnit: "mg/m³" },
-        ]
-    }
-}
 
 export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
     const { title } = BOARD_PROP_MAP[data] ?? { title: "UNKNOWN" };
@@ -88,7 +14,7 @@ export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
         // 外层容器：相对定位，预留底部箭头的空间
         <div className="relative inline-block w-fit">
             <div className="flex flex-col p-2 px-3 min-w-100 \
-            rounded-sm backdrop-blur-xs shadow-xl bg-theme-1/60">
+            rounded-sm backdrop-blur-xs shadow-xl bg-theme-2/60">
 
                 {/* 标题 */}
                 <div className="text-lg text-text font-bold pb-2">{title}</div>
@@ -103,7 +29,7 @@ export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
 
             {/* 底部指示箭头 */}
             <div
-                className="absolute -bottom-3 left-1/2 bg-theme-1/60 -translate-x-1/2 w-7 h-3 z-[-1]"
+                className="absolute -bottom-3 left-1/2 bg-theme-2/60 -translate-x-1/2 w-7 h-3 z-[-1]"
                 style={{
                     // 定义三角形：(50% 100%) 是下方的尖，(0% 0%) 和 (100% 0%) 是上方两个角
                     clipPath: 'polygon(50% 100%, 0% 0%, 100% 0%)'
@@ -118,10 +44,14 @@ function DataItem({ attrKey, showName, showUnit }: DataItemProps) {
 
     const value = useSensorData((state) => state.getDataByAttrKey(attrKey))?.latestValue;
     const updated = useSensorData((state) => state.getDataByAttrKey(attrKey))?.lastUpdated;
+    const isSelected = useModelViewStateStore((state) => state.selectedAttr === attrKey);
 
     return (
-        <div key={updated} className="w-22 p-1 animate-flash-highlight flex flex-1 flex-col \
-        rounded-sm items-center justify-between">
+        <div key={updated} className={"w-22 p-1 animate-flash-highlight flex flex-1 flex-col \
+        rounded-sm items-center justify-between " +
+            (isSelected ? 'bg-gray-7/20' : '')}
+            onClick={() => useModelViewStateStore.getState().selectAttr(attrKey as AttrKeyEnum)}
+        >
             <span className="text-sm text-text pr-1">{showName}</span>
             <div className="flex items-baseline gap-0.5">
                 <div className="text-xl font-semibold text-text leading-none">
@@ -171,8 +101,12 @@ const chartConfig = {
 } satisfies ChartConfig
 
 export function DataHistoryChart() {
-    // Zustand 接入示例（替换 selector 逻辑）
-    const attrDataHistory = useSensorData((state) => state.getDataByAttrKey(AttrKeyEnum.RTOInFlow)) as AttrDataHistory | undefined
+    const selectedAttr = useModelViewStateStore(useShallow((state) => state.selectedAttr));
+    const attrDataHistory = useSensorData((state) => {
+        if (!selectedAttr) return undefined;
+        return state.getDataByAttrKey(selectedAttr);
+    }) as AttrDataHistory | undefined;
+
     // 转换数据：将 timestamp 映射为相对小时数偏移量，并保留左右两侧少许缓冲点 (Offscreen Buffer)
     const chartData = useMemo(() => {
         const history = attrDataHistory?.history ?? []
@@ -203,6 +137,14 @@ export function DataHistoryChart() {
     const formatXAxisTick = (val: number) => {
         if (val === 0) return "当前"
         return `${val}h`
+    }
+
+    if (!selectedAttr) {
+        return (
+            <div className="flex items-center justify-center h-20 text-gray-7">
+                <span>请点击选择一个数据项以查看历史曲线</span>
+            </div>
+        )
     }
 
     return (

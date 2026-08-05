@@ -4,7 +4,7 @@ import { type ThreeEvent, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useModelViewStateStore } from '../stores/ModelViewState';
 import { createBreathingCoverMaterial, createFresnelMaterial } from './MaterialUtils';
-import { ModelPartEnum } from '../stores/ModelViewState';
+import { ModelPartEnum } from '../models/ModelPartEnum';
 
 const SELECTION_COLOR = "#7290fa";
 const WARNING_COLOR = '#f73d62';
@@ -75,7 +75,6 @@ export function ProdLineBody() {
     }, [activeGroup, scene]);
 
     const handleClick = useCallback((e: ThreeEvent<MouseEvent>) => {
-
 
         const clickedMesh = e.object as THREE.Mesh;
         if (!clickedMesh.isMesh) return;

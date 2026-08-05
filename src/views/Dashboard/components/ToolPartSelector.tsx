@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Dam, Radius, ZodiacAquarius, Fan, Flame, Factory, type LucideIcon } from 'lucide-react';
 import { useModelViewStateStore } from '../stores/ModelViewState';
-import { ModelPartEnum } from '../stores/ModelViewState';
+import { ModelPartEnum } from '../models/ModelPartEnum';
 
 interface ToggleOption {
     id: ModelPartEnum;
