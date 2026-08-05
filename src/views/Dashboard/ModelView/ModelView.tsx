@@ -4,6 +4,7 @@ import { FloatingDataBoard } from './ModelItems'
 import { FloorPlane } from "./FloorPlane"
 import { ProdLineBody } from "./ProdLineBody"
 import { useModelViewStateStore } from '../stores/ModelViewState';
+import * as THREE from 'three';
 export function ModelView() {
     return (
         // 1. 使用 Tailwind 打造全屏 3D 画布容器 (relative + full w/h)
@@ -32,12 +33,18 @@ export function ModelView() {
 
 function FloatingBoardEle() {
     const activeGroup = useModelViewStateStore((state) => state.selectedGroup);
-    if (!activeGroup) return null;
+    const geoAnchor = useModelViewStateStore((state) => {
+        if (!state.geoAnchors || !activeGroup) return null;
+        return state.geoAnchors[activeGroup];
+    });
+
+    if (!activeGroup || !geoAnchor) return null;
+    const targetPosition = geoAnchor.clone().add(new THREE.Vector3(0, 1, 0));
 
     return (
-        <Html
+        <Html className="-translate-x-1/2 -translate-y-full"
             // transform
-            position={[-4, 8, 0]}>
+            position={targetPosition || [0, 8, 0]}>
             <FloatingDataBoard data={activeGroup} />
         </Html>
     )

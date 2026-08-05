@@ -9,6 +9,15 @@ import { ModelPartEnum } from '../models/ModelPartEnum';
 const SELECTION_COLOR = "#7290fa";
 const WARNING_COLOR = '#f73d62';
 
+const MODEL_GROUP_ANCHOR_MAP: Record<string, ModelPartEnum> = {
+    'shell_rotor': ModelPartEnum.Rotor,
+    'shell_desorption_fan': ModelPartEnum.DesorptionFan,
+    'shell_absorption_fan': ModelPartEnum.AdsorptionFan,
+    'shell_conbustion_chamber': ModelPartEnum.CombustionChamber,
+    'concentrated_pipe_cylinder2002': ModelPartEnum.Concentrated,
+    'shell_inlet': ModelPartEnum.Inlet,
+    'outlet_guardrail_torus': ModelPartEnum.Outlet
+}
 
 export function ProdLineBody() {
     const { scene } = useGLTF('/ProdLineMain.glb');
@@ -96,24 +105,37 @@ export function ProdLineBody() {
 }
 
 function initializeModelMaterials(scene: THREE.Group) {
+    const anchors: Partial<Record<ModelPartEnum, THREE.Vector3>> = {};
     scene.traverse((child) => {
         if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
             if (!mesh.userData.isInitialized) {
                 if (!Array.isArray(mesh.material)) {
-                    // 1. 克隆材质，防止同材质部件相互干扰
+                    // 克隆材质，防止同材质部件相互干扰
                     mesh.material = mesh.material.clone();
                     const mat = mesh.material as THREE.MeshStandardMaterial;
 
-                    // 2. 将原始物理属性备份到 userData *备用
+                    // 将原始物理属性备份到 userData *备用
                     mesh.userData.originalColor = mat.color.clone();
                     mesh.userData.originalEmissive = mat.emissive ? mat.emissive.clone() : new THREE.Color(0, 0, 0);
                     mesh.userData.originalEmissiveIntensity = mat.emissiveIntensity || 0;
                 }
                 mesh.userData.isInitialized = true;
             }
+            const matchedKey = Object.keys(MODEL_GROUP_ANCHOR_MAP).find(key => mesh.name.includes(key));
+
+            if (matchedKey) {
+                const partEnum = MODEL_GROUP_ANCHOR_MAP[matchedKey];
+                if (!partEnum) return;
+                // 计算当前 Mesh 在世界坐标系下的真实几何中心点
+                const box = new THREE.Box3().setFromObject(mesh);
+                const centerPosition = new THREE.Vector3();
+                box.getCenter(centerPosition);
+                anchors[partEnum] = centerPosition;
+            }
         }
     });
+    useModelViewStateStore.getState().setGeoAnchors(anchors as Record<ModelPartEnum, THREE.Vector3>);
 }
 
 function getGroupPrefix(meshName: string): ModelPartEnum | null {
@@ -185,35 +207,3 @@ export function setMeshBoundingBox(targetMesh: THREE.Mesh, enable: boolean, colo
 
     targetMesh.add(boxHelper);
 }
-
-// export function setMeshBoundingBox(scene: THREE.Scene, mesh: THREE.Mesh, enable: boolean) {
-//     const HELPER_NAME = `__box_helper_${mesh.uuid}__`;
-//     const existingHelper = scene.getObjectByName(HELPER_NAME);
-
-//     if (!enable) {
-//         if (existingHelper) {
-//             // 1. 从场景中移除该 Object3D
-//             scene.remove(existingHelper);
-
-//             // 2. 如果类型符合，释放其 Geometry 和 Material 显存
-//             if ('geometry' in existingHelper) {
-//                 (existingHelper as THREE.LineSegments).geometry.dispose();
-//             }
-//             if ('material' in existingHelper) {
-//                 const mat = (existingHelper as THREE.LineSegments).material;
-//                 if (Array.isArray(mat)) {
-//                     mat.forEach((m) => m.dispose());
-//                 } else {
-//                     mat.dispose();
-//                 }
-//             }
-//         }
-//         return;
-//     }
-
-//     if (!existingHelper) {
-//         const boxHelper = new THREE.BoxHelper(mesh, 0x00f0ff);
-//         boxHelper.name = HELPER_NAME;
-//         scene.add(boxHelper);
-//     }
-// }

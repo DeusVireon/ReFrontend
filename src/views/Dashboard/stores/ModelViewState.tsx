@@ -2,11 +2,12 @@ import { create } from 'zustand';
 import { AttrKeyEnum } from '../models/AttrKeyEnum';
 import { BOARD_PROP_MAP } from '../models/BoardPropMap';
 import { ModelPartEnum } from '../models/ModelPartEnum';
+import * as THREE from 'three';
 
 export const MODEL_GROUP_PREFIXES = ['rotor_',
     'desorption_fan_',
     'absorption_fan_',
-    'conbustion_chamber_',
+    'combustion_chamber_',
     'concentrated_',
     'inlet_',
     'outlet_'];
@@ -15,15 +16,18 @@ interface ViewStateStore {
     // 当前激活的部件组前缀，null 表示无高亮
     selectedGroup: ModelPartEnum | null;
     selectedAttr: AttrKeyEnum | null;
+    geoAnchors: Record<ModelPartEnum, THREE.Vector3> | null;
 
     selectGroup: (prefix: ModelPartEnum | null) => void;
     selectAttr: (attrKey: AttrKeyEnum | null) => void;
     toggleSelection: (prefix: ModelPartEnum) => void;
+    setGeoAnchors: (anchors: Record<ModelPartEnum, THREE.Vector3>) => void;
 }
 
 export const useModelViewStateStore = create<ViewStateStore>((set) => ({
     selectedGroup: null,
     selectedAttr: null,
+    geoAnchors: null,
 
     selectGroup: (prefix) => set({
         selectedGroup: prefix,
@@ -37,4 +41,5 @@ export const useModelViewStateStore = create<ViewStateStore>((set) => ({
             selectedGroup: state.selectedGroup === prefix ? null : prefix,
             selectedAttr: BOARD_PROP_MAP[prefix as ModelPartEnum]?.linkedData?.at(0)?.attrKey as AttrKeyEnum ?? null,
         })),
+    setGeoAnchors: (anchors) => set({ geoAnchors: anchors }),
 }));
