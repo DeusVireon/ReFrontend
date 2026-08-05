@@ -4,7 +4,7 @@ import { type ThreeEvent, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useModelViewStateStore } from '../stores/ModelViewState';
 import { createBreathingCoverMaterial, createFresnelMaterial } from './MaterialUtils';
-import { ModelPartGroup } from '../stores/ModelViewState';
+import { ModelPartEnum } from '../stores/ModelViewState';
 
 const SELECTION_COLOR = "#7290fa";
 const WARNING_COLOR = '#f73d62';
@@ -117,8 +117,8 @@ function initializeModelMaterials(scene: THREE.Group) {
     });
 }
 
-function getGroupPrefix(meshName: string): ModelPartGroup | null {
-    const prefixes = Object.values(ModelPartGroup) as ModelPartGroup[];
+function getGroupPrefix(meshName: string): ModelPartEnum | null {
+    const prefixes = Object.values(ModelPartEnum) as ModelPartEnum[];
     return prefixes.find(prefix => meshName.startsWith(prefix)) ?? null;
 }
 

@@ -348,9 +348,6 @@ export function CompDataChart() {
                         isAnimationActive={false}
                     />
 
-
-
-
                     <ReferenceLine
                         x={0}
                         stroke="var(--color-accent-light)"

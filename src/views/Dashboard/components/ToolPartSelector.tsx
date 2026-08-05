@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
 import { Dam, Radius, ZodiacAquarius, Fan, Flame, Factory, type LucideIcon } from 'lucide-react';
 import { useModelViewStateStore } from '../stores/ModelViewState';
-import { ModelPartGroup } from '../stores/ModelViewState';
+import { ModelPartEnum } from '../stores/ModelViewState';
 
 interface ToggleOption {
-    id: ModelPartGroup;
+    id: ModelPartEnum;
     label: string;
     icon: LucideIcon;
 }
 
 const options: ToggleOption[] = [
-    { id: ModelPartGroup.Inlet, label: '气体输入', icon: Dam },
-    { id: ModelPartGroup.Rotor, label: '循环转轮', icon: Radius },
-    { id: ModelPartGroup.Concentrated, label: '浓缩气体通路', icon: ZodiacAquarius },
-    { id: ModelPartGroup.DesorptionFan, label: '解吸风机', icon: Fan },
-    { id: ModelPartGroup.CombustionChamber, label: '焚烧炉', icon: Flame },
-    { id: ModelPartGroup.Outlet, label: '气体排放', icon: Factory },
+    { id: ModelPartEnum.Inlet, label: '气体输入', icon: Dam },
+    { id: ModelPartEnum.Rotor, label: '循环转轮', icon: Radius },
+    { id: ModelPartEnum.Concentrated, label: '浓缩气体通路', icon: ZodiacAquarius },
+    { id: ModelPartEnum.DesorptionFan, label: '解吸风机', icon: Fan },
+    { id: ModelPartEnum.CombustionChamber, label: '焚烧炉', icon: Flame },
+    { id: ModelPartEnum.Outlet, label: '气体排放', icon: Factory },
 ];
 
 export function VerticalToggleGroup() {

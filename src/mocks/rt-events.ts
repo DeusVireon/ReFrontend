@@ -23,12 +23,45 @@ export function createMockSensorPayload(): SensorByID {
     }
     const selectedIds = availableIds.slice(0, count);
 
+    const getRandom = (base: number, variance: number, precision = 1) => {
+        const val = base + (Math.random() * 2 - 1) * variance;
+        return Number(val.toFixed(precision));
+    };
+
     // 属性列表池，用于多传感器场景
     const attrPool = [
-        { attrKey: 'temperature', getValue: () => (24.0 + Math.random() * 2).toFixed(1) },
-        { attrKey: 'humidity', getValue: () => (50 + Math.floor(Math.random() * 10)).toString() },
-        { attrKey: 'pressure', getValue: () => (1013 + Math.floor(Math.random() * 20)).toString() },
-        { attrKey: 'co2', getValue: () => (400 + Math.floor(Math.random() * 100)).toString() },
+        // 1. 环境与涂布进气参数
+        { attrKey: 'ambient_temp', getValue: () => getRandom(21.5, 1.5, 1) },
+        { attrKey: 'ambient_humidity', getValue: () => getRandom(65.3, 5.0, 1) },
+        { attrKey: 'ambient_pressure', getValue: () => getRandom(101.3, 0.5, 1) },
+        { attrKey: 'coating_flow', getValue: () => getRandom(8500.5, 250.0, 1) },
+        { attrKey: 'coating_conc', getValue: () => getRandom(95.2, 8.0, 1) },
+        { attrKey: 'coating_temp', getValue: () => getRandom(25.3, 1.2, 1) },
+        { attrKey: 'coating_pressure', getValue: () => getRandom(101.2, 0.4, 1) },
+
+        // 2. 沸石转轮与吸脱附参数
+        { attrKey: 'rotor_speed', getValue: () => getRandom(4.75, 0.15, 2) },
+        { attrKey: 'adsorption_fan_power', getValue: () => getRandom(42.5, 2.0, 1) },
+        { attrKey: 'desorption_fan_power', getValue: () => getRandom(3.2, 0.3, 1) },
+        { attrKey: 'rotor_inlet_temp', getValue: () => getRandom(26.1, 1.2, 1) },
+        { attrKey: 'rotor_inlet_humid', getValue: () => getRandom(64.8, 4.0, 1) },
+        { attrKey: 'desorption_temp', getValue: () => getRandom(205.3, 4.0, 1) },
+
+        // 3. 浓缩风与 RTO 进气参数
+        { attrKey: 'concentrated_flow', getValue: () => getRandom(850.2, 30.0, 1) },
+        { attrKey: 'concentrated_conc', getValue: () => getRandom(420.5, 25.0, 1) },
+        { attrKey: 'concentrated_temp', getValue: () => getRandom(185.2, 5.0, 1) },
+        { attrKey: 'concentrated_pressure', getValue: () => getRandom(101.5, 0.5, 1) },
+        { attrKey: 'rto_in_flow', getValue: () => getRandom(1000.3, 35.0, 1) },
+        { attrKey: 'rto_in_conc', getValue: () => getRandom(415.2, 20.0, 1) },
+        { attrKey: 'rto_in_temp', getValue: () => getRandom(185.1, 5.0, 1) },
+        { attrKey: 'rto_in_pressure', getValue: () => getRandom(101.4, 0.5, 1) },
+
+        // 4. RTO 燃烧与排放端参数
+        { attrKey: 'burner_gas_flow', getValue: () => getRandom(32.5, 2.0, 1) },
+        { attrKey: 'combustion_temp', getValue: () => getRandom(757.8, 8.0, 1) },
+        { attrKey: 'rto_out_conc', getValue: () => getRandom(18.5, 3.0, 1) },
+        { attrKey: 'rto_out_temp', getValue: () => getRandom(62.3, 2.5, 1) },
     ];
 
     const sensors = selectedIds.map((id) => {

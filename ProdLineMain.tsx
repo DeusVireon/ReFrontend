@@ -10,16 +10,20 @@ import { GLTF } from 'three-stdlib'
 
 type GLTFResult = GLTF & {
   nodes: {
-    立方体022: THREE.Mesh
-    立方体022_1: THREE.Mesh
+    base_1: THREE.Mesh
+    base_2: THREE.Mesh
     inlet_filter001: THREE.Mesh
     inlet_filter: THREE.Mesh
-    柱体: THREE.Mesh
-    柱体_1: THREE.Mesh
+    inlet_filter002: THREE.Mesh
+    inlet_filter003: THREE.Mesh
+    inlet_filter004: THREE.Mesh
+    inlet_filter005: THREE.Mesh
+    rotor_1: THREE.Mesh
+    rotor_2: THREE.Mesh
     plc: THREE.Mesh
     rotor_frame_b: THREE.Mesh
     rotor_frame_base: THREE.Mesh
-    roter_frame_cube: THREE.Mesh
+    rotor_frame_cube: THREE.Mesh
     rotor_frame_a: THREE.Mesh
     desorption_fan_cylinder: THREE.Mesh
     desorption_fan_cylinder1: THREE.Mesh
@@ -27,15 +31,15 @@ type GLTFResult = GLTF & {
     desorption_fan_cube2001: THREE.Mesh
     desorption_fan_cube3001: THREE.Mesh
     desorption_fan_cylinder2: THREE.Mesh
-    desroption_fan_cube: THREE.Mesh
-    conbustion_chamber_catalyticOxidizer_cover: THREE.Mesh
-    conbustion_chamber_burning_cube: THREE.Mesh
-    conbustion_chamber_catalyticOxidizer_frame: THREE.Mesh
-    conbustion_chamber_cube1: THREE.Mesh
-    conbustion_chamber_cube2: THREE.Mesh
-    conbustion_chamber_cube3: THREE.Mesh
-    conbustion_chamber_cube4: THREE.Mesh
-    conbustion_chamber_cube5: THREE.Mesh
+    desorption_fan_cube: THREE.Mesh
+    combustion_chamber_catalyticOxidizer_cover: THREE.Mesh
+    combustion_chamber_burning_cube: THREE.Mesh
+    combustion_chamber_catalyticOxidizer_frame: THREE.Mesh
+    combustion_chamber_cube1: THREE.Mesh
+    combustion_chamber_cube2: THREE.Mesh
+    combustion_chamber_cube3: THREE.Mesh
+    combustion_chamber_cube4: THREE.Mesh
+    combustion_chamber_cube5: THREE.Mesh
     concentrated_pipe_cylinder2002: THREE.Mesh
     concentrated_pipe_cylinder2003: THREE.Mesh
     concentrated_pipe_cylinder2004: THREE.Mesh
@@ -45,6 +49,7 @@ type GLTFResult = GLTF & {
     concentrated_pipe_cylinder2007: THREE.Mesh
     concentrated_pipe_cylinder2008: THREE.Mesh
     concentrated_pipe_cylinder2009: THREE.Mesh
+    concentrated_pipe_cylinder2: THREE.Mesh
     absorption_fan_cylinder2: THREE.Mesh
     absorption_fan_cylinder1: THREE.Mesh
     absorption_fan_cube3: THREE.Mesh
@@ -78,13 +83,12 @@ type GLTFResult = GLTF & {
     outlet_guardrail10: THREE.Mesh
     outlet_guardrail11: THREE.Mesh
     outlet_guardrail12: THREE.Mesh
-    outlet_cylinder3001: THREE.Mesh
-    shell5_conbustion_chamber: THREE.Mesh
-    shell1_inlet: THREE.Mesh
-    shell2_connector: THREE.Mesh
-    shell3_rotor: THREE.Mesh
-    shell4_desorption_fan: THREE.Mesh
-    shell6_absorption_fan: THREE.Mesh
+    shell_conbustion_chamber: THREE.Mesh
+    shell_inlet: THREE.Mesh
+    shell_connector: THREE.Mesh
+    shell_rotor: THREE.Mesh
+    shell_desorption_fan: THREE.Mesh
+    shell_absorption_fan: THREE.Mesh
   }
   materials: {
     mat_floor: THREE.MeshStandardMaterial
@@ -113,85 +117,89 @@ export function Model(props: JSX.IntrinsicElements['group']) {
   const { nodes, materials } = useGLTF('/ProdLineMain.glb') as GLTFResult
   return (
     <group {...props} dispose={null}>
-      <group position={[-7.654, -3.936, 1.264]}>
-        <mesh geometry={nodes.立方体022.geometry} material={materials.mat_floor} />
-        <mesh geometry={nodes.立方体022_1.geometry} material={materials.mat_floor_light} />
+      <group position={[-7.654, 0.022, 0.001]}>
+        <mesh geometry={nodes.base_1.geometry} material={materials.mat_floor} />
+        <mesh geometry={nodes.base_2.geometry} material={materials.mat_floor_light} />
       </group>
-      <mesh geometry={nodes.inlet_filter001.geometry} material={materials.mat_inlet} position={[3.607, 0, 0]} />
-      <mesh geometry={nodes.inlet_filter.geometry} material={materials.mat_inlet} position={[3.607, 0, 0]} />
-      <group position={[-3.202, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
-        <mesh geometry={nodes.柱体.geometry} material={materials.mat_rotor_main} />
-        <mesh geometry={nodes.柱体_1.geometry} material={materials.mat_rotor_main_b} />
+      <mesh geometry={nodes.inlet_filter001.geometry} material={materials.mat_inlet} position={[3.607, 3.959, -1.263]} />
+      <mesh geometry={nodes.inlet_filter.geometry} material={materials.mat_inlet} position={[3.607, 3.959, -1.263]} />
+      <mesh geometry={nodes.inlet_filter002.geometry} material={materials.mat_inlet} position={[5.691, 3.959, -1.263]} />
+      <mesh geometry={nodes.inlet_filter003.geometry} material={materials.mat_inlet} position={[5.691, 3.959, -1.263]} />
+      <mesh geometry={nodes.inlet_filter004.geometry} material={materials.mat_inlet} position={[7.775, 3.959, -1.263]} />
+      <mesh geometry={nodes.inlet_filter005.geometry} material={materials.mat_inlet} position={[7.775, 3.959, -1.263]} />
+      <group position={[-3.202, 3.959, -1.263]} rotation={[0, 0, -Math.PI / 2]}>
+        <mesh geometry={nodes.rotor_1.geometry} material={materials.mat_rotor_main} />
+        <mesh geometry={nodes.rotor_2.geometry} material={materials.mat_rotor_main_b} />
       </group>
-      <mesh geometry={nodes.plc.geometry} material={materials.mat_basic_metal} position={[-5.707, -2.868, -3.672]} />
-      <mesh geometry={nodes.rotor_frame_b.geometry} material={materials.mat_rotor_frame} position={[-3.178, 3.924, 0]} />
-      <mesh geometry={nodes.rotor_frame_base.geometry} material={materials.mat_rotor_frame} position={[-2.988, -3.816, 0]} />
-      <mesh geometry={nodes.roter_frame_cube.geometry} material={materials.mat_rotor_frame_b} position={[-4.128, 2.987, -0.005]} rotation={[0, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.rotor_frame_a.geometry} material={materials.mat_rotor_frame} position={[-2.951, 0.201, 0.001]} scale={[0.5, 0.1, 0.1]} />
-      <mesh geometry={nodes.desorption_fan_cylinder.geometry} material={materials.mat_desorption_fan_frame} position={[-4.59, 2.11, 0]} rotation={[0, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.desorption_fan_cylinder1.geometry} material={materials.mat_desorption_fan} position={[-5.161, 2.11, 0]} rotation={[0, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.desorption_fan_cube1.geometry} material={materials.mat_desorption_fan_frame} position={[-5.629, 0.942, 0]} />
-      <mesh geometry={nodes.desorption_fan_cube2001.geometry} material={materials.mat_desorption_darker} position={[-4.845, 0, 0]} />
-      <mesh geometry={nodes.desorption_fan_cube3001.geometry} material={materials.mat_desorption_fan_frame} position={[-4.583, 1.043, -0.001]} />
-      <mesh geometry={nodes.desorption_fan_cylinder2.geometry} material={materials.mat_desorption_fan} position={[-6.02, 2.11, 0]} rotation={[0, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.desroption_fan_cube.geometry} material={nodes.desroption_fan_cube.material} position={[-4.892, -1.974, -0.003]} />
-      <mesh geometry={nodes.conbustion_chamber_catalyticOxidizer_cover.geometry} material={materials.mat_basic_metal} position={[-11.317, -0.375, 0.87]} />
-      <mesh geometry={nodes.conbustion_chamber_burning_cube.geometry} material={materials.mat_burning} position={[-11.45, -1.488, 0.57]} />
-      <mesh geometry={nodes.conbustion_chamber_catalyticOxidizer_frame.geometry} material={materials.mat_stove} position={[-11.456, -1.441, 0.565]} />
-      <mesh geometry={nodes.conbustion_chamber_cube1.geometry} material={nodes.conbustion_chamber_cube1.material} position={[-10.227, -3.151, -0.646]} />
-      <mesh geometry={nodes.conbustion_chamber_cube2.geometry} material={nodes.conbustion_chamber_cube2.material} position={[-12.644, -3.151, -0.726]} />
-      <mesh geometry={nodes.conbustion_chamber_cube3.geometry} material={nodes.conbustion_chamber_cube3.material} position={[-12.644, -3.151, 1.776]} />
-      <mesh geometry={nodes.conbustion_chamber_cube4.geometry} material={nodes.conbustion_chamber_cube4.material} position={[-10.256, -3.151, 1.776]} />
-      <mesh geometry={nodes.conbustion_chamber_cube5.geometry} material={nodes.conbustion_chamber_cube5.material} position={[-11.438, -3.151, 0.382]} />
-      <mesh geometry={nodes.concentrated_pipe_cylinder2002.geometry} material={materials.mat_transparent_pipe} position={[-8.532, 0.863, 0.006]} rotation={[0, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.concentrated_pipe_cylinder2003.geometry} material={materials.mat_transparent_pipe} position={[-8.765, -0.944, 0.006]} />
-      <mesh geometry={nodes.concentrated_pipe_cylinder2004.geometry} material={materials.mat_transparent_pipe} position={[-10.561, -1.022, 0.006]} rotation={[0, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.concentrated_pipe_cylinder2001.geometry} material={materials.mat_transparent_pipe} position={[-7.338, -2.963, 0.012]} rotation={[0, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.concentrated_pipe_cylinder2005.geometry} material={materials.mat_transparent_pipe} position={[-7.599, -2.963, -2.505]} rotation={[Math.PI / 2, -Math.PI / 2, 0]} />
-      <mesh geometry={nodes.concentrated_pipe_cylinder2006.geometry} material={materials.mat_transparent_pipe} position={[-17.389, -1.04, -0.998]} rotation={[0, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.concentrated_pipe_cylinder2007.geometry} material={materials.mat_transparent_pipe} position={[-14.455, -2.963, -2.77]} rotation={[0, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.concentrated_pipe_cylinder2008.geometry} material={materials.mat_transparent_pipe} position={[-14.755, -2.963, -1.255]} rotation={[-Math.PI / 2, Math.PI / 2, 0]} />
-      <mesh geometry={nodes.concentrated_pipe_cylinder2009.geometry} material={materials.mat_transparent_pipe} position={[-14.853, -1.282, -0.998]} rotation={[Math.PI, Math.PI / 2, 0]} />
-      <mesh geometry={nodes.absorption_fan_cylinder2.geometry} material={materials.absorption_fan_frame} position={[-18.055, -1.195, -1.01]} rotation={[0, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.absorption_fan_cylinder1.geometry} material={materials.absorption_fan} position={[-17.218, -1.233, -1.01]} rotation={[0, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.absorption_fan_cube3.geometry} material={materials.mat_floor} position={[-17.203, -3.767, -1.01]} />
-      <mesh geometry={nodes.absorption_fan_cube1.geometry} material={materials.absorption_fan_frame} position={[-17.228, -3.265, -1.01]} scale={[1.2, 1, 1.5]} />
-      <mesh geometry={nodes.absorption_fan_cube2.geometry} material={materials.absorption_fan_frame} position={[-18.677, -2.704, -1.01]} rotation={[0, 0, -Math.PI / 2]} scale={[1.6, 1, 0.4]} />
-      <mesh geometry={nodes.outlet_cylinder.geometry} material={materials.mat_basic_metal} position={[-13.971, 2.724, 3.623]} />
-      <mesh geometry={nodes.outlet_torus.geometry} material={materials.mat_basic_metal} position={[-13.972, 9.414, 3.616]} />
-      <mesh geometry={nodes.outlet_cylinder2.geometry} material={materials.mat_transparent_pipe} position={[-12.749, 1.068, 2.145]} />
-      <mesh geometry={nodes.outlet_sphere1.geometry} material={materials.mat_transparent_pipe} position={[-12.735, 1.481, 2.16]} />
-      <mesh geometry={nodes.outlet_cylinder1.geometry} material={materials.mat_transparent_pipe} position={[-13.516, 1.488, 3.083]} rotation={[-Math.PI, -0.855, Math.PI / 2]} />
-      <mesh geometry={nodes.outlet_cylinder4.geometry} material={materials.mat_transparent_pipe} position={[-17.177, 0.96, 3.68]} />
-      <mesh geometry={nodes.outlet_cylinder3.geometry} material={materials.mat_transparent_pipe} position={[-15.795, 3.047, 3.681]} rotation={[Math.PI / 2, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.outlet_sphere2.geometry} material={materials.mat_transparent_pipe} position={[-17.174, 3.084, 3.668]} />
-      <mesh geometry={nodes.outlet_cylinder5.geometry} material={materials.mat_transparent_pipe} position={[-17.171, -1.211, 4.942]} rotation={[Math.PI / 2, -Math.PI / 2, 0]} />
-      <mesh geometry={nodes.outlet_sphere3.geometry} material={materials.mat_transparent_pipe} position={[-17.174, -1.133, 3.668]} />
-      <mesh geometry={nodes.outlet_torus001.geometry} material={materials.mat_basic_metal} position={[-13.972, 8.884, 3.616]} />
-      <mesh geometry={nodes.outlet_torus002.geometry} material={materials.mat_basic_metal} position={[-13.972, 8.593, 3.616]} />
-      <mesh geometry={nodes.outlet.geometry} material={materials.mat_basic_metal_dark} position={[-11.471, -0.168, 4.812]} />
-      <mesh geometry={nodes.outlet_torus003.geometry} material={materials.mat_basic_metal_dark} position={[-11.483, 2.726, 4.834]} />
-      <mesh geometry={nodes.outlet_torus004.geometry} material={materials.mat_basic_metal_dark} position={[-11.467, 2.212, 4.834]} />
-      <mesh geometry={nodes.outlet_guardrail_torus.geometry} material={nodes.outlet_guardrail_torus.material} position={[-11.492, 3.699, 4.856]} />
-      <mesh geometry={nodes.outlet_guardrail1.geometry} material={nodes.outlet_guardrail1.material} position={[-11.396, 3.439, 3.493]} />
-      <mesh geometry={nodes.outlet_guardrail2.geometry} material={nodes.outlet_guardrail2.material} position={[-10.564, 3.439, 3.8]} />
-      <mesh geometry={nodes.outlet_guardrail3.geometry} material={nodes.outlet_guardrail3.material} position={[-10.128, 3.439, 4.475]} />
-      <mesh geometry={nodes.outlet_guardrail4.geometry} material={nodes.outlet_guardrail4.material} position={[-10.128, 3.439, 5.218]} />
-      <mesh geometry={nodes.outlet_guardrail5.geometry} material={nodes.outlet_guardrail5.material} position={[-10.387, 3.439, 5.716]} />
-      <mesh geometry={nodes.outlet_guardrail6.geometry} material={nodes.outlet_guardrail6.material} position={[-10.898, 3.439, 6.111]} />
-      <mesh geometry={nodes.outlet_guardrail7.geometry} material={nodes.outlet_guardrail7.material} position={[-11.505, 3.439, 6.227]} />
-      <mesh geometry={nodes.outlet_guardrail8.geometry} material={nodes.outlet_guardrail8.material} position={[-12.387, 3.439, 5.927]} />
-      <mesh geometry={nodes.outlet_guardrail9.geometry} material={nodes.outlet_guardrail9.material} position={[-12.776, 3.439, 5.388]} />
-      <mesh geometry={nodes.outlet_guardrail10.geometry} material={nodes.outlet_guardrail10.material} position={[-12.828, 3.439, 4.577]} />
-      <mesh geometry={nodes.outlet_guardrail11.geometry} material={nodes.outlet_guardrail11.material} position={[-12.569, 3.439, 3.99]} />
-      <mesh geometry={nodes.outlet_guardrail12.geometry} material={nodes.outlet_guardrail12.material} position={[-12.017, 3.439, 3.588]} />
-      <mesh geometry={nodes.outlet_cylinder3001.geometry} material={materials.mat_transparent_pipe} position={[-0.245, 0.01, 0.022]} rotation={[Math.PI / 2, 0, -Math.PI / 2]} />
-      <mesh geometry={nodes.shell5_conbustion_chamber.geometry} material={materials.mat_transparent} position={[-12.344, 0.573, 1.601]} />
-      <mesh geometry={nodes.shell1_inlet.geometry} material={materials.mat_transparent} position={[0.8, 0.543, 0]} />
-      <mesh geometry={nodes.shell2_connector.geometry} material={materials.mat_transparent} position={[-1.126, -0.032, -0.031]} />
-      <mesh geometry={nodes.shell3_rotor.geometry} material={materials.mat_transparent} position={[-5.4, 0, 0]} />
-      <mesh geometry={nodes.shell4_desorption_fan.geometry} material={materials.mat_transparent} position={[-8.109, 0, 0]} />
-      <mesh geometry={nodes.shell6_absorption_fan.geometry} material={materials.mat_transparent} position={[-17.247, -0.896, -1.031]} />
+      <mesh geometry={nodes.plc.geometry} material={materials.mat_basic_metal} position={[-5.707, 1.091, -4.935]} />
+      <mesh geometry={nodes.rotor_frame_b.geometry} material={materials.mat_rotor_frame} position={[-3.178, 7.882, -1.263]} />
+      <mesh geometry={nodes.rotor_frame_base.geometry} material={materials.mat_rotor_frame} position={[-2.988, 0.143, -1.263]} />
+      <mesh geometry={nodes.rotor_frame_cube.geometry} material={materials.mat_rotor_frame_b} position={[-4.128, 6.945, -1.268]} rotation={[0, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.rotor_frame_a.geometry} material={materials.mat_rotor_frame} position={[-2.951, 4.16, -1.262]} scale={[0.5, 0.1, 0.1]} />
+      <mesh geometry={nodes.desorption_fan_cylinder.geometry} material={materials.mat_desorption_fan_frame} position={[-4.59, 6.069, -1.263]} rotation={[0, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.desorption_fan_cylinder1.geometry} material={materials.mat_desorption_fan} position={[-5.161, 6.069, -1.263]} rotation={[0, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.desorption_fan_cube1.geometry} material={materials.mat_desorption_fan_frame} position={[-5.629, 4.901, -1.263]} />
+      <mesh geometry={nodes.desorption_fan_cube2001.geometry} material={materials.mat_desorption_darker} position={[-4.845, 3.959, -1.263]} />
+      <mesh geometry={nodes.desorption_fan_cube3001.geometry} material={materials.mat_desorption_fan_frame} position={[-4.583, 5.002, -1.264]} />
+      <mesh geometry={nodes.desorption_fan_cylinder2.geometry} material={materials.mat_desorption_fan} position={[-6.02, 6.069, -1.263]} rotation={[0, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.desorption_fan_cube.geometry} material={nodes.desorption_fan_cube.material} position={[-4.892, 1.985, -1.266]} />
+      <mesh geometry={nodes.combustion_chamber_catalyticOxidizer_cover.geometry} material={materials.mat_basic_metal} position={[-11.317, 3.584, -0.393]} />
+      <mesh geometry={nodes.combustion_chamber_burning_cube.geometry} material={materials.mat_burning} position={[-11.45, 2.47, -0.693]} />
+      <mesh geometry={nodes.combustion_chamber_catalyticOxidizer_frame.geometry} material={materials.mat_stove} position={[-11.456, 2.518, -0.698]} />
+      <mesh geometry={nodes.combustion_chamber_cube1.geometry} material={nodes.combustion_chamber_cube1.material} position={[-10.227, 0.807, -1.909]} />
+      <mesh geometry={nodes.combustion_chamber_cube2.geometry} material={nodes.combustion_chamber_cube2.material} position={[-12.644, 0.807, -1.989]} />
+      <mesh geometry={nodes.combustion_chamber_cube3.geometry} material={nodes.combustion_chamber_cube3.material} position={[-12.644, 0.807, 0.513]} />
+      <mesh geometry={nodes.combustion_chamber_cube4.geometry} material={nodes.combustion_chamber_cube4.material} position={[-10.256, 0.807, 0.513]} />
+      <mesh geometry={nodes.combustion_chamber_cube5.geometry} material={nodes.combustion_chamber_cube5.material} position={[-11.438, 0.807, -0.881]} />
+      <mesh geometry={nodes.concentrated_pipe_cylinder2002.geometry} material={materials.mat_transparent_pipe} position={[-8.532, 4.822, -1.257]} rotation={[0, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.concentrated_pipe_cylinder2003.geometry} material={materials.mat_transparent_pipe} position={[-8.765, 3.014, -1.257]} />
+      <mesh geometry={nodes.concentrated_pipe_cylinder2004.geometry} material={materials.mat_transparent_pipe} position={[-10.561, 2.937, -1.257]} rotation={[0, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.concentrated_pipe_cylinder2001.geometry} material={materials.mat_transparent_pipe} position={[-7.338, 0.995, -1.251]} rotation={[0, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.concentrated_pipe_cylinder2005.geometry} material={materials.mat_transparent_pipe} position={[-7.599, 0.995, -3.768]} rotation={[Math.PI / 2, -Math.PI / 2, 0]} />
+      <mesh geometry={nodes.concentrated_pipe_cylinder2006.geometry} material={materials.mat_transparent_pipe} position={[-17.389, 2.919, -2.261]} rotation={[0, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.concentrated_pipe_cylinder2007.geometry} material={materials.mat_transparent_pipe} position={[-14.455, 0.995, -4.033]} rotation={[0, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.concentrated_pipe_cylinder2008.geometry} material={materials.mat_transparent_pipe} position={[-14.755, 0.995, -2.518]} rotation={[-Math.PI / 2, Math.PI / 2, 0]} />
+      <mesh geometry={nodes.concentrated_pipe_cylinder2009.geometry} material={materials.mat_transparent_pipe} position={[-14.853, 2.676, -2.261]} rotation={[Math.PI, Math.PI / 2, 0]} />
+      <mesh geometry={nodes.concentrated_pipe_cylinder2.geometry} material={materials.mat_transparent_pipe} position={[-0.245, 3.969, -1.241]} rotation={[Math.PI / 2, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.absorption_fan_cylinder2.geometry} material={materials.absorption_fan_frame} position={[-18.055, 2.764, -2.273]} rotation={[0, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.absorption_fan_cylinder1.geometry} material={materials.absorption_fan} position={[-17.218, 2.726, -2.273]} rotation={[0, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.absorption_fan_cube3.geometry} material={materials.mat_floor} position={[-17.203, 0.192, -2.273]} />
+      <mesh geometry={nodes.absorption_fan_cube1.geometry} material={materials.absorption_fan_frame} position={[-17.228, 0.694, -2.273]} scale={[1.2, 1, 1.5]} />
+      <mesh geometry={nodes.absorption_fan_cube2.geometry} material={materials.absorption_fan_frame} position={[-18.677, 1.255, -2.273]} rotation={[0, 0, -Math.PI / 2]} scale={[1.6, 1, 0.4]} />
+      <mesh geometry={nodes.outlet_cylinder.geometry} material={materials.mat_basic_metal} position={[-13.971, 6.683, 2.36]} />
+      <mesh geometry={nodes.outlet_torus.geometry} material={materials.mat_basic_metal} position={[-13.972, 13.372, 2.353]} />
+      <mesh geometry={nodes.outlet_cylinder2.geometry} material={materials.mat_transparent_pipe} position={[-12.749, 5.026, 0.882]} />
+      <mesh geometry={nodes.outlet_sphere1.geometry} material={materials.mat_transparent_pipe} position={[-12.735, 5.439, 0.897]} />
+      <mesh geometry={nodes.outlet_cylinder1.geometry} material={materials.mat_transparent_pipe} position={[-13.516, 5.447, 1.82]} rotation={[-Math.PI, -0.855, Math.PI / 2]} />
+      <mesh geometry={nodes.outlet_cylinder4.geometry} material={materials.mat_transparent_pipe} position={[-17.177, 4.918, 2.417]} />
+      <mesh geometry={nodes.outlet_cylinder3.geometry} material={materials.mat_transparent_pipe} position={[-15.795, 7.005, 2.418]} rotation={[Math.PI / 2, 0, -Math.PI / 2]} />
+      <mesh geometry={nodes.outlet_sphere2.geometry} material={materials.mat_transparent_pipe} position={[-17.174, 7.042, 2.405]} />
+      <mesh geometry={nodes.outlet_cylinder5.geometry} material={materials.mat_transparent_pipe} position={[-17.171, 2.747, 3.679]} rotation={[Math.PI / 2, -Math.PI / 2, 0]} />
+      <mesh geometry={nodes.outlet_sphere3.geometry} material={materials.mat_transparent_pipe} position={[-17.174, 2.826, 2.405]} />
+      <mesh geometry={nodes.outlet_torus001.geometry} material={materials.mat_basic_metal} position={[-13.972, 12.842, 2.353]} />
+      <mesh geometry={nodes.outlet_torus002.geometry} material={materials.mat_basic_metal} position={[-13.972, 12.552, 2.353]} />
+      <mesh geometry={nodes.outlet.geometry} material={materials.mat_basic_metal_dark} position={[-11.471, 3.79, 3.549]} />
+      <mesh geometry={nodes.outlet_torus003.geometry} material={materials.mat_basic_metal_dark} position={[-11.483, 6.685, 3.571]} />
+      <mesh geometry={nodes.outlet_torus004.geometry} material={materials.mat_basic_metal_dark} position={[-11.467, 6.171, 3.571]} />
+      <mesh geometry={nodes.outlet_guardrail_torus.geometry} material={nodes.outlet_guardrail_torus.material} position={[-11.492, 7.658, 3.593]} />
+      <mesh geometry={nodes.outlet_guardrail1.geometry} material={nodes.outlet_guardrail1.material} position={[-11.396, 7.397, 2.23]} />
+      <mesh geometry={nodes.outlet_guardrail2.geometry} material={nodes.outlet_guardrail2.material} position={[-10.564, 7.397, 2.536]} />
+      <mesh geometry={nodes.outlet_guardrail3.geometry} material={nodes.outlet_guardrail3.material} position={[-10.128, 7.397, 3.212]} />
+      <mesh geometry={nodes.outlet_guardrail4.geometry} material={nodes.outlet_guardrail4.material} position={[-10.128, 7.397, 3.955]} />
+      <mesh geometry={nodes.outlet_guardrail5.geometry} material={nodes.outlet_guardrail5.material} position={[-10.387, 7.397, 4.453]} />
+      <mesh geometry={nodes.outlet_guardrail6.geometry} material={nodes.outlet_guardrail6.material} position={[-10.898, 7.397, 4.848]} />
+      <mesh geometry={nodes.outlet_guardrail7.geometry} material={nodes.outlet_guardrail7.material} position={[-11.505, 7.397, 4.964]} />
+      <mesh geometry={nodes.outlet_guardrail8.geometry} material={nodes.outlet_guardrail8.material} position={[-12.387, 7.397, 4.664]} />
+      <mesh geometry={nodes.outlet_guardrail9.geometry} material={nodes.outlet_guardrail9.material} position={[-12.776, 7.397, 4.125]} />
+      <mesh geometry={nodes.outlet_guardrail10.geometry} material={nodes.outlet_guardrail10.material} position={[-12.828, 7.397, 3.314]} />
+      <mesh geometry={nodes.outlet_guardrail11.geometry} material={nodes.outlet_guardrail11.material} position={[-12.569, 7.397, 2.727]} />
+      <mesh geometry={nodes.outlet_guardrail12.geometry} material={nodes.outlet_guardrail12.material} position={[-12.017, 7.397, 2.325]} />
+      <mesh geometry={nodes.shell_conbustion_chamber.geometry} material={materials.mat_transparent} position={[-12.344, 4.531, 0.338]} />
+      <mesh geometry={nodes.shell_inlet.geometry} material={materials.mat_transparent} position={[1.528, 4.501, -1.263]} />
+      <mesh geometry={nodes.shell_connector.geometry} material={materials.mat_transparent} position={[-1.005, 3.927, -1.295]} />
+      <mesh geometry={nodes.shell_rotor.geometry} material={materials.mat_transparent} position={[-5.4, 3.959, -1.263]} />
+      <mesh geometry={nodes.shell_desorption_fan.geometry} material={materials.mat_transparent} position={[-8.109, 3.959, -1.263]} />
+      <mesh geometry={nodes.shell_absorption_fan.geometry} material={materials.mat_transparent} position={[-17.247, 3.062, -2.294]} />
     </group>
   )
 }

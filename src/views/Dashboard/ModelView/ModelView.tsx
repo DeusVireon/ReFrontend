@@ -1,8 +1,9 @@
 import { Canvas } from "@react-three/fiber"
 import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei'
-import { FloatingTag } from './ModelItems'
+import { FloatingDataBoard } from './ModelItems'
 import { FloorPlane } from "./FloorPlane"
 import { ProdLineBody } from "./ProdLineBody"
+import { ModelPartEnum, useModelViewStateStore } from '../stores/ModelViewState';
 export function ModelView() {
     return (
         // 1. 使用 Tailwind 打造全屏 3D 画布容器 (relative + full w/h)
@@ -11,11 +12,7 @@ export function ModelView() {
             <Canvas shadows>
                 <ProdLineBody />
                 {/* <FloorPlane /> */}
-                <Html
-                    transform
-                    position={[-4, 0, 0]}>
-                    <FloatingTag />
-                </Html>
+                <FloatingBoardEle />
                 <axesHelper />
                 <gridHelper />
                 <ambientLight intensity={3.6} color="#ffffff" />
@@ -30,5 +27,18 @@ export function ModelView() {
                 <OrbitControls />
             </Canvas>
         </div>
+    )
+}
+
+function FloatingBoardEle() {
+    const activeGroup = useModelViewStateStore((state) => state.selectedGroup);
+    if (!activeGroup) return null;
+
+    return (
+        <Html
+            // transform
+            position={[-4, 8, 0]}>
+            <FloatingDataBoard data={activeGroup} />
+        </Html>
     )
 }
