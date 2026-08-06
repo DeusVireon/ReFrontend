@@ -195,7 +195,7 @@ export function createFresnelMaterial(options: FresnelMaterialProps = {}) {
 }
 
 // ==========================================
-// 3. 呼吸菲涅尔边缘发光材质 (Breathing Fresnel Material)
+// 呼吸菲涅尔边缘发光材质 (Breathing Fresnel Material)
 // ==========================================
 
 export interface BreathingFresnelMaterialProps {
@@ -284,16 +284,29 @@ export function createBreathingFresnelMaterial(options: BreathingFresnelMaterial
   });
 }
 
+export interface FlowGasMaterialProps {
+  /** 气体颜色，默认 '#00f0ff' */
+  color?: string | number;
+  /** 气体流动速度，默认 1.5 */
+  speed?: number;
+  /** 气体纹理密度，默认 5.0 */
+  density?: number;
+}
 
-
-export const GasShaderMaterial = {
-  uniforms: {
-    uTime: { value: 0 },
-    uColor: { value: new THREE.Color('#00f0ff') },
-    uSpeed: { value: 1.5 },
-    uDensity: { value: 5.0 }, // 气体纹理密度
-  },
-  vertexShader: `
+export function createFlowGasMaterial(options: FlowGasMaterialProps = {}) {
+  const {
+    color = '#00f0ff',
+    speed = 0.5,
+    density = 2.0,
+  } = options;
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uColor: { value: new THREE.Color(color) },
+      uSpeed: { value: speed },   // 气体流动速度
+      uDensity: { value: density }, // 气体纹理密度
+    },
+    vertexShader: `
     varying vec2 vUv;
     varying vec3 vNormal;
     varying vec3 vViewPosition;
@@ -306,7 +319,7 @@ export const GasShaderMaterial = {
       gl_Position = projectionMatrix * mvPosition;
     }
   `,
-  fragmentShader: `
+    fragmentShader: `
     uniform float uTime;
     uniform vec3 uColor;
     uniform float uSpeed;
@@ -369,8 +382,142 @@ export const GasShaderMaterial = {
 
       gl_FragColor = vec4(uColor, finalAlpha);
     }
-  `
-};
+  `,
+    transparent: true,
+    blending: THREE.AdditiveBlending, // 关键：加色混合，实现辉光叠加效果
+    depthWrite: false,                // 关闭深度写入，防止遮挡内部细节
+    side: THREE.DoubleSide,            // 支持薄片/非闭合工业模型
+  })
+}
+
+export interface FluidGasMaterialProps {
+  colorCore?: string | number;
+  colorEdge?: string | number;
+  speed?: number;
+  turbulence?: number;
+  coreDensity?: number;
+  edgeSoftness?: number;
+  opacity?: number;
+}
+
+export function createFluidGasMaterial(options: FluidGasMaterialProps = {}) {
+  const {
+    colorCore = '#ff5511',
+    colorEdge = '#ff0000',
+    speed = 0.5,
+    turbulence = 5,
+    coreDensity = 2,
+    edgeSoftness = 3.0,
+    opacity = 0.75,
+  } = options;
+  return new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 },
+      uColorCore: { value: new THREE.Color(colorCore) }, // 气芯高亮色（橙红）
+      uColorEdge: { value: new THREE.Color(colorEdge) }, // 外围浓烟色（深红/暗红）
+      uSpeed: { value: speed },                             // 流动速度
+      uTurbulence: { value: turbulence },                        // 紊流密度
+      uCoreDensity: { value: coreDensity },                       // 气芯密实度 (解决稀薄问题：1.0 - 3.0)
+      uEdgeSoftness: { value: edgeSoftness },                      // 边缘软化指数 (解决穿模问题：1.5 - 4.0)
+      uOpacity: { value: opacity },                          // 整体透明度
+    },
+    vertexShader: `
+    varying vec2 vUv;
+    varying vec3 vNormal;
+    varying vec3 vViewPosition;
+
+    void main() {
+      vUv = uv;
+      vNormal = normalize(normalMatrix * normal);
+      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+      vViewPosition = -mvPosition.xyz;
+      gl_Position = projectionMatrix * mvPosition;
+    }
+  `,
+    fragmentShader: `
+    uniform float uTime;
+    uniform vec3 uColorCore;
+    uniform vec3 uColorEdge;
+    uniform float uSpeed;
+    uniform float uTurbulence;
+    uniform float uCoreDensity;
+    uniform float uEdgeSoftness;
+    uniform float uOpacity;
+
+    varying vec2 vUv;
+    varying vec3 vNormal;
+    varying vec3 vViewPosition;
+
+    // 经典 2D Simplex 噪声
+    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+    vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
+    vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
+
+    float snoise(vec2 v) {
+      const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                         -0.577350269189626, 0.024390243902439);
+      vec2 i  = floor(v + dot(v, C.yy) );
+      vec2 x0 = v -   i + dot(i, C.xx);
+      vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+      vec4 x12 = x0.xyxy + C.xxzz;
+      x12.xy -= i1;
+      i = mod289(i);
+      vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
+      vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+      m = m*m; m = m*m;
+      vec3 x = 2.0 * fract(p * C.www) - 1.0;
+      vec3 h = abs(x) - 0.5;
+      vec3 ox = floor(x + 0.5);
+      vec3 a0 = x - ox;
+      m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
+      vec3 g;
+      g.x  = a0.x  * x0.x  + h.x  * x0.y;
+      g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+      return 130.0 * dot(m, g);
+    }
+
+    void main() {
+      // 1. 基础坐标与时间偏移
+      float t = uTime * uSpeed;
+      vec2 st = vec2(vUv.x * uTurbulence - t, vUv.y * 2.0);
+
+      // 2. 域扭曲 (Domain Warping)：制造流体交织感
+      float q = snoise(st);
+      float r = snoise(st + vec2(q * 0.8, t * 0.5));
+
+      // 3. 管道纵向中心线权重 (V 轴中心为 1，两侧边缘为 0)
+      float centerWeight = sin(vUv.y * 3.1415926);
+
+      // 4. 计算密实度 (Core Density)：将噪声与中心权重结合，使用 smoothstep/pow 加固核心
+      float rawGas = (r * 0.5 + 0.5) * centerWeight;
+      float denseGas = pow(rawGas, 1.0 / uCoreDensity); 
+
+      // 5. 颜色渐变：气芯 (High Density) 到 边缘 (Low Density)
+      vec3 finalColor = mix(uColorEdge, uColorCore, smoothstep(0.2, 0.8, denseGas));
+
+      // 6. 边缘平滑羽化 (Soft Fade)：彻底解决 3D 几何边缘的硬切/穿模问题
+      float edgeAlpha = pow(centerWeight, uEdgeSoftness);
+
+      // 7. 视角菲涅尔边缘柔化
+      vec3 normal = normalize(vNormal);
+      vec3 viewDir = normalize(vViewPosition);
+      float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 1.5);
+
+      float finalAlpha = denseGas * edgeAlpha * (0.6 + 0.4 * fresnel) * uOpacity;
+
+      gl_FragColor = vec4(finalColor, finalAlpha);
+    }
+  `,
+    transparent: true,
+    blending: THREE.AdditiveBlending, // 关键：加色混合，实现辉光叠加效果
+    depthWrite: false,                // 关闭深度写入，防止遮挡内部细节
+    side: THREE.DoubleSide,            // 支持薄片/非闭合工业模型
+  });
+}
+
+// ==========================================
+// 备用 Shader 材质
+// ==========================================
 
 export const LaserPulseShader = {
   uniforms: {
@@ -573,107 +720,6 @@ export const ToonVaporShader = {
       float alpha = step(0.25, steppedNoise * edgeFade);
 
       gl_FragColor = vec4(finalColor, alpha * 0.85);
-    }
-  `
-};
-
-
-export const DenseFluidGasShader = {
-  uniforms: {
-    uTime: { value: 0 },
-    uColorCore: { value: new THREE.Color('#ff5511') }, // 气芯高亮色（橙红）
-    uColorEdge: { value: new THREE.Color('#770011') }, // 外围浓烟色（深红/暗红）
-    uSpeed: { value: 0.5 },                             // 流动速度
-    uTurbulence: { value: 5 },                        // 紊流密度
-    uCoreDensity: { value: 2 },                       // 气芯密实度 (解决稀薄问题：1.0 - 3.0)
-    uEdgeSoftness: { value: 3.0 },                      // 边缘软化指数 (解决穿模问题：1.5 - 4.0)
-    uOpacity: { value: 0.75 },                          // 整体透明度
-  },
-  vertexShader: `
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    varying vec3 vViewPosition;
-
-    void main() {
-      vUv = uv;
-      vNormal = normalize(normalMatrix * normal);
-      vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-      vViewPosition = -mvPosition.xyz;
-      gl_Position = projectionMatrix * mvPosition;
-    }
-  `,
-  fragmentShader: `
-    uniform float uTime;
-    uniform vec3 uColorCore;
-    uniform vec3 uColorEdge;
-    uniform float uSpeed;
-    uniform float uTurbulence;
-    uniform float uCoreDensity;
-    uniform float uEdgeSoftness;
-    uniform float uOpacity;
-
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    varying vec3 vViewPosition;
-
-    // 经典 2D Simplex 噪声
-    vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-    vec2 mod289(vec2 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-    vec3 permute(vec3 x) { return mod289(((x*34.0)+1.0)*x); }
-
-    float snoise(vec2 v) {
-      const vec4 C = vec4(0.211324865405187, 0.366025403784439,
-                         -0.577350269189626, 0.024390243902439);
-      vec2 i  = floor(v + dot(v, C.yy) );
-      vec2 x0 = v -   i + dot(i, C.xx);
-      vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
-      vec4 x12 = x0.xyxy + C.xxzz;
-      x12.xy -= i1;
-      i = mod289(i);
-      vec3 p = permute( permute( i.y + vec3(0.0, i1.y, 1.0 )) + i.x + vec3(0.0, i1.x, 1.0 ));
-      vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
-      m = m*m; m = m*m;
-      vec3 x = 2.0 * fract(p * C.www) - 1.0;
-      vec3 h = abs(x) - 0.5;
-      vec3 ox = floor(x + 0.5);
-      vec3 a0 = x - ox;
-      m *= 1.79284291400159 - 0.85373472095314 * ( a0*a0 + h*h );
-      vec3 g;
-      g.x  = a0.x  * x0.x  + h.x  * x0.y;
-      g.yz = a0.yz * x12.xz + h.yz * x12.yw;
-      return 130.0 * dot(m, g);
-    }
-
-    void main() {
-      // 1. 基础坐标与时间偏移
-      float t = uTime * uSpeed;
-      vec2 st = vec2(vUv.x * uTurbulence - t, vUv.y * 2.0);
-
-      // 2. 域扭曲 (Domain Warping)：制造流体交织感
-      float q = snoise(st);
-      float r = snoise(st + vec2(q * 0.8, t * 0.5));
-
-      // 3. 管道纵向中心线权重 (V 轴中心为 1，两侧边缘为 0)
-      float centerWeight = sin(vUv.y * 3.1415926);
-
-      // 4. 计算密实度 (Core Density)：将噪声与中心权重结合，使用 smoothstep/pow 加固核心
-      float rawGas = (r * 0.5 + 0.5) * centerWeight;
-      float denseGas = pow(rawGas, 1.0 / uCoreDensity); 
-
-      // 5. 颜色渐变：气芯 (High Density) 到 边缘 (Low Density)
-      vec3 finalColor = mix(uColorEdge, uColorCore, smoothstep(0.2, 0.8, denseGas));
-
-      // 6. 边缘平滑羽化 (Soft Fade)：彻底解决 3D 几何边缘的硬切/穿模问题
-      float edgeAlpha = pow(centerWeight, uEdgeSoftness);
-
-      // 7. 视角菲涅尔边缘柔化
-      vec3 normal = normalize(vNormal);
-      vec3 viewDir = normalize(vViewPosition);
-      float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 1.5);
-
-      float finalAlpha = denseGas * edgeAlpha * (0.6 + 0.4 * fresnel) * uOpacity;
-
-      gl_FragColor = vec4(finalColor, finalAlpha);
     }
   `
 };

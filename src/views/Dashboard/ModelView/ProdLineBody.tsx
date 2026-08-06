@@ -106,7 +106,9 @@ export function ProdLineBody() {
 
 function initializeModelMaterials(scene: THREE.Group) {
     const anchors: Partial<Record<ModelPartEnum, THREE.Vector3>> = {};
+    const gasFlowCurves: Partial<Record<string, THREE.Curve<THREE.Vector3>>> = {};
     scene.traverse((child) => {
+        // 处理 Mesh 初始化
         if ((child as THREE.Mesh).isMesh) {
             const mesh = child as THREE.Mesh;
             if (!mesh.userData.isInitialized) {
@@ -122,8 +124,8 @@ function initializeModelMaterials(scene: THREE.Group) {
                 }
                 mesh.userData.isInitialized = true;
             }
+            // 提取位置锚点
             const matchedKey = Object.keys(MODEL_GROUP_ANCHOR_MAP).find(key => mesh.name.includes(key));
-
             if (matchedKey) {
                 const partEnum = MODEL_GROUP_ANCHOR_MAP[matchedKey];
                 if (!partEnum) return;
@@ -134,8 +136,31 @@ function initializeModelMaterials(scene: THREE.Group) {
                 anchors[partEnum] = centerPosition;
             }
         }
+        // 处理 Line 初始化
+        if ((child as THREE.Line).isLine && child.name.startsWith('curve_')) {
+            const line = child as THREE.Line;
+            const positionAttr = line.geometry.attributes.position;
+
+            if (positionAttr && positionAttr.count >= 2) {
+                const points: THREE.Vector3[] = [];
+                // 提取坐标（应用节点本身的变换矩阵）
+                for (let i = 0; i < positionAttr.count; i++) {
+                    const p = new THREE.Vector3().fromBufferAttribute(positionAttr, i);
+                    p.applyMatrix4(line.matrixWorld); // 转为 Scene 根节点下的坐标
+                    points.push(p);
+                }
+                // 折线 CurvePath
+                // const curvePath = new THREE.CurvePath<THREE.Vector3>();
+                // for (let i = 0; i < points.length - 1; i++) {
+                //     curvePath.add(new THREE.LineCurve3(points[i], points[i + 1]));
+                // }
+                const curvePath = new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.05);
+                gasFlowCurves[line.name] = curvePath;
+            }
+        }
     });
     useModelViewStateStore.getState().setGeoAnchors(anchors as Record<ModelPartEnum, THREE.Vector3>);
+    useModelViewStateStore.getState().setGasFlowPath(gasFlowCurves as Record<string, THREE.Curve<THREE.Vector3>>);
 }
 
 function getGroupPrefix(meshName: string): ModelPartEnum | null {

@@ -26,18 +26,7 @@ export function ModelView() {
                     near={0.1}
                     far={1000}
                 />
-                <GasFlowLine
-                    glbPath="/ProdLineMain.glb"
-                    lineName="curve_rotor_absorption_fan"
-                    tubeRadius={0.3}
-                    color="#b5a63e"
-                />
-                <GasFlowLine
-                    glbPath="/ProdLineMain.glb"
-                    lineName="curve_rotor_absorption_fan"
-                    tubeRadius={0.15}
-                    color="#b5a63e"
-                />
+                <GasFlowLine />
                 <OrbitControls />
             </Canvas>
         </div>

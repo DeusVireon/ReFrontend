@@ -17,17 +17,20 @@ interface ViewStateStore {
     selectedGroup: ModelPartEnum | null;
     selectedAttr: AttrKeyEnum | null;
     geoAnchors: Record<ModelPartEnum, THREE.Vector3> | null;
+    gasFlowPath: Record<string, THREE.Curve<THREE.Vector3>> | null;
 
     selectGroup: (prefix: ModelPartEnum | null) => void;
     selectAttr: (attrKey: AttrKeyEnum | null) => void;
     toggleSelection: (prefix: ModelPartEnum) => void;
     setGeoAnchors: (anchors: Record<ModelPartEnum, THREE.Vector3>) => void;
+    setGasFlowPath: (path: Record<string, THREE.Curve<THREE.Vector3>>) => void;
 }
 
 export const useModelViewStateStore = create<ViewStateStore>((set) => ({
     selectedGroup: null,
     selectedAttr: null,
     geoAnchors: null,
+    gasFlowPath: null,
 
     selectGroup: (prefix) => set({
         selectedGroup: prefix,
@@ -42,4 +45,5 @@ export const useModelViewStateStore = create<ViewStateStore>((set) => ({
             selectedAttr: BOARD_PROP_MAP[prefix as ModelPartEnum]?.linkedData?.at(0)?.attrKey as AttrKeyEnum ?? null,
         })),
     setGeoAnchors: (anchors) => set({ geoAnchors: anchors }),
+    setGasFlowPath: (path) => set({ gasFlowPath: path }),
 }));

@@ -2,92 +2,152 @@ import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
-import { GasShaderMaterial } from './MaterialUtils';
+import { createFlowGasMaterial, createFluidGasMaterial } from './MaterialUtils';
+import { useModelViewStateStore } from '../stores/ModelViewState';
 
-// 1. 定义组件 Props 接口
-interface GasFlowLineProps {
-    glbPath: string;
-    lineName: string;
-    tubeRadius?: number;
-    color?: string;
+enum GasShaderColor {
+    RawFlow = '#a39e6a',
+    RawFluidCore = '#c3c09b',
+    RawFluidEdge = '#a5883e',
+    ConFlow = '#c58548',
+    ConFluidCore = '#e9be99',
+    ConFluidEdge = '#e9a44f',
+    CleanFlow = '#6881aa',
+    CleanFluidCore = '#bed6fc',
+    CleanFluidEdge = '#84b2fd',
 }
 
-export function GasFlowLine({
-    glbPath,
-    lineName,
-    tubeRadius = 0.2,
-    color = '#00ffff',
-}: GasFlowLineProps) {
-    // 2. 类型断言解决 useGLTF 联合类型问题
-    const { scene } = useGLTF(glbPath) as any;
+interface GasFlowLineProps {
+    flowColor?: GasShaderColor;
+    fluidCoreColor?: GasShaderColor;
+    fluidEdgeColor?: GasShaderColor;
+    radius?: number;
+    speed?: number;
+    turbulence?: number;
+    density?: number;
+}
 
-    // 3. 为 useRef 指定 ShaderMaterial 泛型和初始值 null
-    const materialRef = useRef<THREE.ShaderMaterial>(null);
+// name -> GasFlowLineProps
+const GAS_PIPE_MAP: Record<string, GasFlowLineProps> = {
+    "curve_inlet_rotor": {
+        flowColor: GasShaderColor.RawFlow,
+        fluidCoreColor: GasShaderColor.RawFluidCore,
+        fluidEdgeColor: GasShaderColor.RawFluidEdge,
+    },
+    "curve_rotor_combustion_chamber": {
+        flowColor: GasShaderColor.ConFlow,
+        fluidCoreColor: GasShaderColor.ConFluidCore,
+        fluidEdgeColor: GasShaderColor.ConFluidEdge,
+    },
+    "curve_rotor_absorption_fan": {
+        flowColor: GasShaderColor.CleanFlow,
+        fluidCoreColor: GasShaderColor.CleanFluidCore,
+        fluidEdgeColor: GasShaderColor.CleanFluidEdge,
+    },
+    "curve_absorption_fan_outlet": {
+        flowColor: GasShaderColor.CleanFlow,
+        fluidCoreColor: GasShaderColor.CleanFluidCore,
+        fluidEdgeColor: GasShaderColor.CleanFluidEdge,
+    },
+    "curve_combustion_chamber_outlet": {
+        flowColor: GasShaderColor.CleanFlow,
+        fluidCoreColor: GasShaderColor.CleanFluidCore,
+        fluidEdgeColor: GasShaderColor.CleanFluidEdge,
+    },
+}
 
-    // 4. 解析曲线
-    const curve = useMemo(() => {
-        // 显式声明 targetLine 类型，防止 TS 将其推导为 never
-        let targetLine: THREE.Line | THREE.Mesh | null = null;
+function GasFlowItem({
+    curve,
+    config,
+}: {
+    curve: THREE.Curve<THREE.Vector3>;
+    config: GasFlowLineProps;
+}) {
+    const {
+        flowColor = GasShaderColor.RawFlow,
+        fluidCoreColor = GasShaderColor.RawFluidCore,
+        fluidEdgeColor = GasShaderColor.RawFluidEdge,
+        density = 0.2,
+        turbulence = 0.05,
+        radius = 0.3,
+        speed = 0.2,
+    } = config;
 
-        scene.traverse((child: THREE.Object3D) => {
-            if (child.name === lineName) {
-                targetLine = child as THREE.Line | THREE.Mesh;
-            }
-        });
+    const curveLength = curve.getLength();
 
-        if (!targetLine || !targetLine.geometry) {
-            console.warn(`Line with name "${lineName}" not found in GLB.`);
-            return null;
-        }
-
-        const positionAttribute = targetLine.geometry.attributes.position;
-        if (!positionAttribute) return null;
-
-        const points: THREE.Vector3[] = [];
-
-        // 应用世界变换矩阵
-        targetLine.updateMatrixWorld(true);
-        const matrixWorld = targetLine.matrixWorld;
-
-        for (let i = 0; i < positionAttribute.count; i++) {
-            const p = new THREE.Vector3().fromBufferAttribute(positionAttribute, i);
-            p.applyMatrix4(matrixWorld);
-            points.push(p);
-        }
-
-        return new THREE.CatmullRomCurve3(points, false, 'catmullrom', 0.1);
-    }, [scene, lineName]);
-
-    const uniforms = useMemo(
-        () => THREE.UniformsUtils.clone(GasShaderMaterial.uniforms),
-        []
+    // 根据当前配置生成专属材质
+    const flowGasMat = useMemo(
+        () => createFlowGasMaterial({
+            color: flowColor,
+            density: density * curveLength,
+        }),
+        [flowColor]
     );
 
+    const fluidGasMat = useMemo(
+        () => {
+            console.log(curveLength);
+            return createFluidGasMaterial({
+                colorCore: fluidCoreColor,
+                colorEdge: fluidEdgeColor,
+                turbulence: turbulence * curveLength,
+                speed: speed
+            })
+        },
+        [fluidCoreColor, fluidEdgeColor, turbulence, speed]
+    );
+
+
+
+    // 独立更新动画帧，支持 speed 缩放
     useFrame((_, delta) => {
-        if (materialRef.current && materialRef.current.uniforms?.uTime) {
-            materialRef.current.uniforms.uTime.value += delta;
+        if (flowGasMat.uniforms?.uTime) {
+            flowGasMat.uniforms.uTime.value += delta;
+        }
+        if (fluidGasMat.uniforms?.uTime) {
+            fluidGasMat.uniforms.uTime.value += delta;
         }
     });
 
-    if (!curve) return null;
+    const innerRadius = radius * (0.2 / 0.3); // 按原例比例（0.3:0.2）计算内芯半径
 
     return (
-        <mesh>
-            <tubeGeometry args={[curve, 128, tubeRadius, 16, false]} />
-            <shaderMaterial
-                ref={materialRef}
-                args={[
-                    {
-                        ...GasShaderMaterial,
-                        uniforms,
-                        transparent: true,
-                        depthWrite: false,
-                        blending: THREE.AdditiveBlending,
-                        side: THREE.DoubleSide,
-                    },
-                ]}
-                uniforms-uColor-value={new THREE.Color(color)}
-            />
-        </mesh>
+        <group>
+            <mesh material={flowGasMat}>
+                <tubeGeometry args={[curve, 128, radius, 16, false]} />
+            </mesh>
+            <mesh material={fluidGasMat}>
+                <tubeGeometry args={[curve, 128, innerRadius, 16, false]} />
+            </mesh>
+        </group>
+    );
+}
+
+// 多段气体遍历渲染组件
+export function GasFlowLine() {
+    const gasFlowPath = useModelViewStateStore((state) => state.gasFlowPath);
+
+    if (!gasFlowPath) return null;
+
+    // 筛选 store 中存在且在 GAS_PIPE_MAP 中有配置的管道
+    const activePipes = Object.entries(gasFlowPath).filter(
+        ([name, curve]) => Boolean(curve) && name in GAS_PIPE_MAP
+    );
+
+    return (
+        <group>
+            {activePipes.map(([name, curve]) => {
+                if (!GAS_PIPE_MAP[name]) {
+                    return null;
+                }
+                return (
+                    <GasFlowItem
+                        key={name}
+                        curve={curve}
+                        config={GAS_PIPE_MAP[name]}
+                    />
+                )
+            })}
+        </group>
     );
 }
