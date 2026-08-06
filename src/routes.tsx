@@ -14,6 +14,13 @@ export const router = createBrowserRouter([
                 },
             },
             {
+                path: "analyze",
+                lazy: async () => {
+                    const { DataAnalyze } = await import("./views/DataAnalyze/DataAnalyze");
+                    return { Component: DataAnalyze };
+                },
+            },
+            {
                 path: "*",
                 lazy: async () => {
                     const { NotFoundView } = await import("./views/ErrorPage/NotFound");

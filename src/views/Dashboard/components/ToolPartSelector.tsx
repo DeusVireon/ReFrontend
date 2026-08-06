@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import {
     Dam, Radius, ZodiacAquarius,
     Fan, Flame, Factory,
