@@ -4,6 +4,7 @@ import { FloatingDataBoard } from './ModelItems'
 import { FloorPlane } from "./FloorPlane"
 import { ProdLineBody } from "./ProdLineBody"
 import { useModelViewStateStore } from '../stores/ModelViewState';
+import { GasFlowLine } from './GasFlow';
 import * as THREE from 'three';
 export function ModelView() {
     return (
@@ -24,6 +25,18 @@ export function ModelView() {
                     fov={75}
                     near={0.1}
                     far={1000}
+                />
+                <GasFlowLine
+                    glbPath="/ProdLineMain.glb"
+                    lineName="curve_rotor_absorption_fan"
+                    tubeRadius={0.3}
+                    color="#b5a63e"
+                />
+                <GasFlowLine
+                    glbPath="/ProdLineMain.glb"
+                    lineName="curve_rotor_absorption_fan"
+                    tubeRadius={0.15}
+                    color="#b5a63e"
                 />
                 <OrbitControls />
             </Canvas>

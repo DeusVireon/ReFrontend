@@ -200,6 +200,12 @@ export function Model(props: JSX.IntrinsicElements['group']) {
       <mesh geometry={nodes.shell_rotor.geometry} material={materials.mat_transparent} position={[-5.4, 3.959, -1.263]} />
       <mesh geometry={nodes.shell_desorption_fan.geometry} material={materials.mat_transparent} position={[-8.109, 3.959, -1.263]} />
       <mesh geometry={nodes.shell_absorption_fan.geometry} material={materials.mat_transparent} position={[-17.247, 3.062, -2.294]} />
+      <lineSegments geometry={nodes.curve_inlet_rotor.geometry} material={nodes.curve_inlet_rotor.material} position={[-0.324, 3.962, -1.266]} />
+      <lineSegments geometry={nodes.curve_rotor_absorption_fan.geometry} material={nodes.curve_rotor_absorption_fan.material} position={[-11.533, 1.536, -2.455]} />
+      <lineSegments geometry={nodes.curve_rotor_combustion_chamber.geometry} material={nodes.curve_rotor_combustion_chamber.material} position={[-8.593, 3.853, -1.263]} />
+      <lineSegments geometry={nodes.curve_absorption_fan_outlet.geometry} material={nodes.curve_absorption_fan_outlet.material} position={[-16.329, 4.854, 1.745]} />
+      <lineSegments geometry={nodes.curve_combustion_chamber_outlet.geometry} material={nodes.curve_combustion_chamber_outlet.material} position={[-13.17, 4.752, 1.432]} rotation={[0, 0.908, 0]} />
+      <lineSegments geometry={nodes.curve_outlet.geometry} material={nodes.curve_outlet.material} position={[-14.007, 8.077, 2.423]} rotation={[0, 0, -Math.PI / 2]} />
     </group>
   )
 }
