@@ -1,11 +1,12 @@
 import { Canvas } from "@react-three/fiber"
-import { OrbitControls, PerspectiveCamera, Html } from '@react-three/drei'
+import { CameraControls, PerspectiveCamera, Html } from '@react-three/drei'
 import { FloatingDataBoard } from './ModelItems'
 import { FloorPlane } from "./FloorPlane"
 import { ProdLineBody } from "./ProdLineBody"
 import { useModelViewStateStore } from '../stores/ModelViewState';
 import { GasFlowLine } from './GasFlow';
 import * as THREE from 'three';
+import { CameraController } from './CameraController';
 export function ModelView() {
     return (
         // 1. 使用 Tailwind 打造全屏 3D 画布容器 (relative + full w/h)
@@ -27,7 +28,7 @@ export function ModelView() {
                     far={1000}
                 />
                 <GasFlowLine />
-                <OrbitControls />
+                <CameraController />
             </Canvas>
         </div>
     )

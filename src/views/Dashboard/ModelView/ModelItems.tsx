@@ -13,7 +13,7 @@ export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
     return (
         // 外层容器：相对定位，预留底部箭头的空间
         <div className="relative inline-block w-fit">
-            <div className="flex flex-col p-2 px-3 min-w-100 \
+            <div className="flex flex-col p-2 px-3 min-w-110 \
             rounded-sm backdrop-blur-xs shadow-xl bg-theme-2/60">
 
                 {/* 标题 */}
@@ -47,7 +47,7 @@ function DataItem({ attrKey, showName, showUnit }: DataItemProps) {
     const isSelected = useModelViewStateStore((state) => state.selectedAttr === attrKey);
 
     return (
-        <div key={updated} className={"w-22 p-1 animate-flash-highlight flex flex-1 flex-col \
+        <div key={updated} className={"w-25 p-1 animate-flash-highlight flex flex-1 flex-col \
         rounded-sm items-center justify-between " +
             (isSelected ? 'bg-gray-7/20' : '')}
             onClick={() => useModelViewStateStore.getState().selectAttr(attrKey as AttrKeyEnum)}
