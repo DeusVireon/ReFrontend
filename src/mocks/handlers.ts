@@ -48,7 +48,7 @@ export const handlers = [
                 event: 'system.log',
                 data: JSON.stringify(createMockLogDataPayload()),
             })
-        }, 10000)
+        }, 2000)
 
         const overallStatusIntervalId = setInterval(() => {
             client.send({

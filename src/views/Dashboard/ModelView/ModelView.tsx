@@ -10,7 +10,7 @@ import { CameraController } from './CameraController';
 export function ModelView() {
     return (
         // 1. 使用 Tailwind 打造全屏 3D 画布容器 (relative + full w/h)
-        <div className="absolute top-0 left-0 w-screen h-screen bg-theme-6 overflow-hidden">
+        <div className="absolute top-0 left-0 w-screen h-screen bg-theme-7/75 overflow-hidden">
             {/* 2. 3D 画布 */}
             <Canvas shadows>
                 <ProdLineBody />
@@ -18,8 +18,8 @@ export function ModelView() {
                 <FloatingBoardEle />
                 <axesHelper />
                 <gridHelper />
-                <ambientLight intensity={3.6} color="#ffffff" />
-                <directionalLight position={[0, 5, 20]} intensity={5} color={"#a0a6dd"} />
+                <ambientLight intensity={4} color="#ffffff" />
+                <directionalLight position={[20, 10, 20]} intensity={6} color={"#a0a6dd"} />
                 <PerspectiveCamera
                     position={[0, 20, 0]}
                     makeDefault

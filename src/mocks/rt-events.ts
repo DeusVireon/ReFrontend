@@ -201,7 +201,13 @@ export interface LogData {
 
 // 常量池
 const LOG_NAMES = ['系统', '推理', '回溯分析', '数据库'];
-const LOG_CONTENTS = ['执行完成'];
+const LOG_CONTENTS = [
+    '执行完成',
+    '数据更新成功',
+    '推理结果已生成',
+    '回溯分析完成',
+    '数据库连接已建立',
+    '系统状态正常',];
 
 // 全局递增 ID 计数器
 let currentLogId = 1;
@@ -227,7 +233,7 @@ export function createMockLogDataPayload(): LogData {
     return {
         id,
         name,
-        content: LOG_CONTENTS[0],
+        content: LOG_CONTENTS[Math.floor(Math.random() * LOG_CONTENTS.length)],
         level,
         triggerTime: new Date().toISOString(),
     };

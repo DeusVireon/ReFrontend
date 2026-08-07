@@ -22,13 +22,15 @@ export function DashboardView() {
 function LeftToolZone() {
     return (
         <div>
-            <div className="absolute bottom-[25vh] left-0 pb-6 px-6 \
+            <div className="absolute bottom-[25vh] left-0 pb-4 pl-22 \
                         flex gap-2">
                 <ToolAISug />
-
             </div>
-            <div className="absolute top-1/2 -translate-y-3/4 left-0 px-6 flex">
+            <div className="absolute bottom-[25vh] left-0 pb-4 pl-6 flex">
                 <VerticalToggleGroup />
+            </div>
+            <div className="absolute top-20 left-0 w-1/2 h-[20vh] px-2">
+                <CardLogs />
             </div>
         </div>
 
@@ -54,6 +56,8 @@ function RightCardGroup() {
     return <div className="absolute top-16 right-0 w-[25vw] h-[calc(75vh-4rem-1rem)] pr-6 \
                          grid grid-rows-3 gap-2">
         <div className="row-span-2"><CardAlerts /></div>
-        <CardLogs />
+        <SideCard title="回溯分析">
+            <div></div>
+        </SideCard>
     </div >
 }

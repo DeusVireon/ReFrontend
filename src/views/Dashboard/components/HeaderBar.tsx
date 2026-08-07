@@ -1,23 +1,46 @@
 import { cn } from "@/lib/utils"
 import { CircleCheck, TriangleAlert, OctagonAlert, ChevronRight, Settings } from "lucide-react"
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useOverallStatus } from "../stores/OverallStatus";
 export function HeaderBar() {
     const overallStatus = useOverallStatus((state) => state.overallStatus);
     return (
-        <div className="absolute top-0 left-0 w-full h-16 \
+        <div>
+            <div className="absolute top-0 left-0 w-full h-16 \
         bg-linear-to-b from-theme-1/75 via-theme-1/20 via-75% to-theme-1/0 \
-        text-text \
-        flex justify-between">
-            <div className="flex py-2.5 pl-6"><TimeArea /></div>
-            <div className="flex py-3 pr-6 gap-4">
-                <StatusBadge name="监测" description={overallStatus.bizPrompt} status={overallStatus.bizStatus} />
-                <StatusBadge name="系统" description={overallStatus.sysPrompt} status={overallStatus.sysStatus} />
-                <SettingsButton />
-            </div>
+        text-text flex justify-between">
+                <div className="flex py-2.5 pl-90"><TimeArea /></div>
+                <div className="flex py-3 pr-6 gap-4">
+                    <StatusBadge name="监测" description={overallStatus.bizPrompt} status={overallStatus.bizStatus} />
+                    <StatusBadge name="系统" description={overallStatus.sysPrompt} status={overallStatus.sysStatus} />
+                    <SettingsButton />
+                </div>
 
+            </div>
+            <div className="flex w-fit text-text"><TitleArea /></div>
         </div>
     );
+}
+
+function TitleArea() {
+    return (
+        <div className="flex items-center px-4 pb-2 pr-12 rounded-br-full gap-4 bg-theme-2/40 \
+        mask-b-from-70% mask-b-to-100% \
+        mask-r-from-80% mask-r-to-100%">
+            <img src="/system-logo.png"
+                alt="System Logo"
+                className="size-20 " />
+            <div className="">
+                <div className="flex">
+                    <div className="italic text-4xl font-bold text-accent">Deus</div>
+                    <div className="italic text-4xl font-bold">Vireon</div>
+                </div>
+                <div className="-mt-1">
+                    化工园区数字监控看板
+                </div>
+            </div>
+        </div>
+    )
 }
 
 function TimeArea() {
@@ -49,7 +72,7 @@ function TimeArea() {
             <div className="text-4xl font-bold tracking-widest">
                 {timeString}
             </div>
-            <div className="bg-accent/50 z-10 w-full h-3 mt-0.5" />
+            <div className="bg-accent/50 z-10 w-full h-2 mt-0.5" />
         </div>
     );
 }

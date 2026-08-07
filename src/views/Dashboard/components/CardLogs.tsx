@@ -4,17 +4,15 @@ import { ScrollArea } from "./ScrollArea"
 import { formatShowTime } from "./utils"
 import { useShallow } from 'zustand/react/shallow';
 import { useLogData } from "../stores/LogData"
-import { memo } from "react"
+import { memo, useState, useEffect } from "react"
 export function CardLogs() {
     const logs = useLogData(useShallow((state) => state.idList));
     return (
-        <SideCard title="系统日志" className="pb-3">
-            <ScrollArea>
-                {logs.map((id) => (
-                    <LogItemMemo key={id} id={id} />
-                ))}
-            </ScrollArea>
-        </SideCard>
+        <LogArea>
+            {logs.map((id) => (
+                <LogItemMemo key={id} id={id} />
+            ))}
+        </LogArea>
     )
 }
 
@@ -22,30 +20,52 @@ const LogItemMemo = memo(LogItem)
 
 function LogItem(id: { id: number }) {
     const log = useLogData(useShallow((state) => state.logByID[id.id]));
+    const removeLog = useLogData(useShallow((state) => state.removeLog));
+    const [isFading, setIsFading] = useState(false);
 
     if (!log) {
         return null;
     }
 
+    useEffect(() => {
+        // 触发渐退样式 (opacity -> 0)
+        const fadeTimer = setTimeout(() => {
+            setIsFading(true);
+        }, 4000);
+
+        // 移除组件
+        const removeTimer = setTimeout(() => {
+            removeLog(log.id);
+        }, 4500);
+
+        return () => {
+            clearTimeout(fadeTimer);
+            clearTimeout(removeTimer);
+        };
+    }, [log.id, removeLog]);
+
     return (
         <div className={cn(
-            "flex rounded-xs w-full items-center text-sm \
-                border border-gray-3/30 animate-expand-right relative"
+            "flex rounded-xs w-fit items-center text-sm \
+                border border-gray-3/30 animate-expand-right relative \
+                min-w-70 pr-8  mask-r-from-80% mask-r-to-100% \
+                transition-all duration-500 ease-in-out transform "
             , {
-                "bg-gray-4/30": log.level === 0,
-                "bg-accent/30": log.level === 1,
-                "bg-attention-dark/30": log.level === 2,
-                "bg-negative-dark/30": log.level === 3,
+                "bg-gray-4/50": log.level === 0,
+                "bg-theme-3/50": log.level === 1,
+                "bg-attention-dark/50": log.level === 2,
+                "bg-negative-dark/50": log.level === 3,
+                'opacity-0 overflow-hidden': isFading,
             })}>
             <div className={cn("flex items-center h-full px-2 font-bold", {
-                "bg-gray-4/30": log.level === 0,
-                "bg-accent/30": log.level === 1,
-                "bg-attention-dark/30": log.level === 2,
-                "bg-negative-dark/30": log.level === 3,
+                "bg-gray-4/50": log.level === 0,
+                "bg-theme-3/50": log.level === 1,
+                "bg-attention-dark/50": log.level === 2,
+                "bg-negative-dark/50": log.level === 3,
             })}>
                 {log.name}
             </div>
-            <div className="flex-1 px-2 py-0.5">
+            <div className="flex-1 px-2 py-1">
                 {log.content}
             </div>
             <div className="opacity-0 hover:opacity-100 transition-opacity \
@@ -56,5 +76,19 @@ function LogItem(id: { id: number }) {
                 {formatShowTime(log.triggerTime)}
             </div>
         </div>
+    )
+}
+
+function LogArea({ children }: { children: React.ReactNode }) {
+    return (
+        <div className="w-full h-full overflow-hidden \
+             text-text
+             mask-b-from-80% mask-b-to-100% \
+             mask-r-from-90% mask-r-to-100%">
+            <div className="flex flex-col py-1.5 gap-0.5 w-full h-full">
+                {children}
+            </div >
+        </div>
+
     )
 }

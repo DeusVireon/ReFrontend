@@ -14,6 +14,7 @@ interface LogDataStore {
     logByID: Record<number, LogData>
 
     addLog: (payload: LogData) => void;
+    removeLog: (id: number) => void;
 }
 
 export const useLogData = create<LogDataStore>((set) => ({
@@ -47,6 +48,16 @@ export const useLogData = create<LogDataStore>((set) => ({
             return {
                 logByID: nextAlertByID,
                 idList: nextIDList,
+            };
+        });
+    },
+    removeLog: (id: number) => {
+        set((state) => {
+            const nextAlertByID = { ...state.logByID };
+            delete nextAlertByID[id]
+            return {
+                logByID: nextAlertByID,
+                idList: state.idList.filter((logID) => logID !== id),
             };
         });
     }
