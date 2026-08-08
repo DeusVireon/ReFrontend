@@ -1,0 +1,80 @@
+import { type CellValue, type FrameRecord, type ParsedCsvResult, type SpecialConfig } from './types';
+
+function parseCsvLine(line: string): string[] {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(current.trim());
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    result.push(current.trim());
+    return result;
+}
+
+function parseCellValue(raw: string): CellValue {
+    if (raw === '') {
+        return null;
+    }
+    const lower = raw.toLowerCase();
+    if (lower === 'true') {
+        return true;
+    }
+    if (lower === 'false') {
+        return false;
+    }
+    const num = Number(raw);
+    if (!isNaN(num)) {
+        return num;
+    }
+    return raw;
+}
+
+export function parseCsvContent(content: string): ParsedCsvResult {
+    const lines = content.split(/\r?\n/);
+    const records: FrameRecord[] = [];
+    const config: SpecialConfig = {};
+
+    for (const rawLine of lines) {
+        const trimmedLine = rawLine.trim();
+
+        // 跳过空行和注释行
+        if (!trimmedLine || trimmedLine.startsWith('//')) {
+            continue;
+        }
+
+        // 解析特殊配置指令行
+        if (trimmedLine.startsWith('*')) {
+            const configBody = trimmedLine.slice(1).trim();
+            const spaceIndex = configBody.indexOf(' ');
+            if (spaceIndex !== -1) {
+                const key = configBody.slice(0, spaceIndex).trim();
+                const value = configBody.slice(spaceIndex + 1).trim();
+                config[key] = value;
+            } else if (configBody) {
+                config[configBody] = 'true';
+            }
+            continue;
+        }
+
+        // 解析常规数据行
+        const cols = parseCsvLine(trimmedLine);
+        const offsetMs = Number(cols[0]);
+
+        if (!isNaN(offsetMs)) {
+            const cells = cols.slice(1).map(parseCellValue);
+            records.push({ offsetMs, cells });
+        }
+    }
+
+    records.sort((a, b) => a.offsetMs - b.offsetMs);
+    return { config, records };
+}

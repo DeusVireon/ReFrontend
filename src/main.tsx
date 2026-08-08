@@ -1,29 +1,27 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './app'
-
-const root = document.getElementById("root")
-
-if (!root) {
-    throw new Error("Root Element Missing")
-}
+// src/main.tsx
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 
 async function enableMocking() {
     if (import.meta.env.MODE !== 'development') {
-        return
+        return;
     }
 
-    const { worker } = await import('./mocks/browser')
+    const { worker } = await import('./mocks/browser');
 
-    // `worker.start()` returns a Promise that resolves
-    // once the Service Worker is up and ready to intercept requests.
-    return worker.start()
+    return worker.start({
+        onUnhandledRequest: 'bypass',
+        quiet: false,
+    });
 }
 
-enableMocking().then(() => {
-    createRoot(root).render(
-        <StrictMode>
+enableMocking().then(async () => {
+    // 在 MSW 完全就绪后，再动态加载 App！
+    const { default: App } = await import('./app');
+
+    ReactDOM.createRoot(document.getElementById('root')!).render(
+        <React.StrictMode>
             <App />
-        </StrictMode>
-    )
-})
+        </React.StrictMode>
+    );
+});

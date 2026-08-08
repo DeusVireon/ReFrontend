@@ -86,7 +86,6 @@ function GasFlowItem({
 
     const fluidGasMat = useMemo(
         () => {
-            console.log(curveLength);
             return createFluidGasMaterial({
                 colorCore: fluidCoreColor,
                 colorEdge: fluidEdgeColor,

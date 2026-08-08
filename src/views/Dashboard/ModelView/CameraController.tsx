@@ -18,13 +18,11 @@ export function CameraController() {
         const modelVisualOffsetX = -5
         const controls = cameraControlsRef.current
         let camX = modelVisualOffsetX
-        let camY = 8;
+        let camY = 7;
         let camZ = -14;
         let tarX = modelVisualOffsetX
         let tarY = 4;
         let tarZ = 0;
-
-        console.log(curCamControlMode, geoAnchor);
 
         if (!controls) return
 
@@ -38,7 +36,7 @@ export function CameraController() {
             curCamControlMode === CamControlMode.Carousel)
             && geoAnchor) {
             camX = geoAnchor.x / 3 + modelVisualOffsetX;
-            camY = 8;
+            camY = 7;
             camZ = -14;
             tarX = geoAnchor.x;
             tarY = geoAnchor.y;
@@ -57,7 +55,6 @@ export function CameraController() {
         } else if (delta < -Math.PI) {
             controls.azimuthAngle -= Math.PI * 2;
         }
-        console.log('Moving camera to', camX, camY, camZ, 'and looking at', tarX, tarY, tarZ);
         controls.setLookAt(
             camX, camY, camZ,
             tarX, tarY, tarZ,

@@ -10,7 +10,7 @@ import { CameraController } from './CameraController';
 export function ModelView() {
     return (
         // 1. 使用 Tailwind 打造全屏 3D 画布容器 (relative + full w/h)
-        <div className="absolute top-0 left-0 w-screen h-screen bg-theme-7/75 overflow-hidden">
+        <div className="absolute top-0 left-0 w-screen h-screen overflow-hidden">
             {/* 2. 3D 画布 */}
             <Canvas shadows>
                 <ProdLineBody />

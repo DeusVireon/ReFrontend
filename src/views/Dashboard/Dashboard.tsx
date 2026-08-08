@@ -8,6 +8,7 @@ import { CardLogs } from "./components/CardLogs"
 import { CardAlerts } from "./components/CardAlerts"
 import { ToolAISug } from "./components/ToolAISug"
 import { VerticalToggleGroup } from './components/ToolPartSelector';
+import { CardDCA } from "./components/CardDCA"
 
 export function DashboardView() {
     return <div className="relative h-screen w-screen bg-theme-5">
@@ -54,10 +55,10 @@ function BottomCardGroup() {
 
 function RightCardGroup() {
     return <div className="absolute top-16 right-0 w-[25vw] h-[calc(75vh-4rem-1rem)] pr-6 \
-                         grid grid-rows-3 gap-2">
-        <div className="row-span-2"><CardAlerts /></div>
-        <SideCard title="回溯分析">
-            <div></div>
-        </SideCard>
-    </div >
+                         grid grid-rows-5 gap-2">
+        <div className="row-span-3"><CardAlerts /></div>
+        <div className="row-span-2">
+            <CardDCA />
+        </div>
+    </div>
 }
