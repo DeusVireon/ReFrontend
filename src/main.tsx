@@ -16,7 +16,7 @@ async function enableMocking() {
 }
 
 enableMocking().then(async () => {
-    // 在 MSW 完全就绪后，再动态加载 App！
+    // 在 MSW 完全就绪后，再动态加载 App
     const { default: App } = await import('./app');
 
     ReactDOM.createRoot(document.getElementById('root')!).render(

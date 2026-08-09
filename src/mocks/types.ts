@@ -1,10 +1,13 @@
-export const CSV_COLUMNS = {
-    BACKEND_STATUS: 0,
-    HISTORY_ANALYZER_STATUS: 1,
-    PREDICTOR_STATUS: 2,
-    BACKEND_TEXT: 3,
-    HISTORY_ANALYZER_TEXT: 4,
-    PREDICTOR_TEXT: 5,
+
+export const COL_INDEX = {
+    SensorDataFrom: 0,
+    SensorDataStatusFrom: 25,
+    BackendStatus: 50,
+    HistoryAnalyzerStatus: 51,
+    PredictorStatus: 52,
+    BackendText: 53,
+    HistoryAnalyzerText: 54,
+    PredictorText: 55,
 } as const;
 
 export type CellValue = string | number | boolean | null;

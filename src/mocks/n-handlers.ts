@@ -1,13 +1,10 @@
 import { http, sse, HttpResponse } from 'msw';
-import { systemStatusEvent, type AppSseEvents } from './event-config';
-import { TimeEngine } from './data-engine';
-
-const mockEngine = new TimeEngine();
+import { registeredEvents, type AppSseEvents } from './event-config';
+import { DataEngine } from './data-engine';
+const mockEngine = new DataEngine();
 
 export const handlers = [
-    // SSE 流式推流接口
     sse<AppSseEvents>('/api/event', async ({ client, request }) => {
-        console.log('SSE client connected:', request.url);
         await mockEngine.ensureLoaded();
 
         const url = new URL(request.url);
@@ -17,47 +14,52 @@ export const handlers = [
 
         const currentElapsed = mockEngine.getElapsedMs();
 
-        // 推送 T~T-N 滑动窗口内的历史记录
+        // 推送历史窗口数据
         mockEngine
-            .getWindowedRecords(windowMs, currentElapsed)
-            .forEach((record) => systemStatusEvent.emit(client, record.cells));
+            .getWindowedRecords(5000, currentElapsed)
+            .forEach((record) => {
+                registeredEvents.forEach((sseEvent) => sseEvent.emit(client, record.cells));
+            });
 
-        // 调度未来时间点的数据推流
-        const activeTimers = mockEngine.getFutureRecords(currentElapsed).map((record) => {
-            const delay = record.offsetMs - currentElapsed;
-            return window.setTimeout(() => {
-                systemStatusEvent.emit(client, record.cells);
-            }, delay);
-        });
+        // 游标 + 单定时器链式调度
+        const futureRecords = mockEngine.getFutureRecords(currentElapsed);
+        let timerId: number | null = null;
+        let cursor = 0; // 当前待处理的数据游标
 
-        // 连接中断清理未执行的定时器
+        function scheduleNext() {
+            const nowElapsed = mockEngine.getElapsedMs();
+
+            // 消费所有“已到期”的数据帧
+            while (cursor < futureRecords.length) {
+                const currentRecord = futureRecords[cursor];
+
+                // 非空校验 + 时间未到判断：完美收窄类型并优雅中断循环
+                if (!currentRecord || currentRecord.offsetMs > nowElapsed) {
+                    break;
+                }
+
+                registeredEvents.forEach((sseEvent) => sseEvent.emit(client, currentRecord.cells));
+                cursor++;
+            }
+
+            // 获取下一条即将到期的记录
+            const nextRecord = futureRecords[cursor];
+
+            // 类型收窄：只有当 nextRecord 确实存在时，才安排下一次 Timer
+            if (nextRecord) {
+                const delay = Math.max(0, nextRecord.offsetMs - mockEngine.getElapsedMs());
+                timerId = window.setTimeout(scheduleNext, delay);
+            }
+        }
+
+        // 启动推流调度链
+        scheduleNext();
+
+        // 连接断开清理：无论数据量多大，只需清理 1 个定时器
         request.signal.addEventListener('abort', () => {
-            activeTimers.forEach((id) => window.clearTimeout(id));
+            if (timerId !== null) {
+                window.clearTimeout(timerId);
+            }
         });
-    }),
-
-    // REST API 访问接口
-    http.get('/api/system-status/latest', async ({ request }) => {
-        await mockEngine.ensureLoaded();
-
-        const url = new URL(request.url);
-        const windowMs = Number(url.searchParams.get('windowMs') ?? '5000');
-
-        const validPayloads = mockEngine
-            .getWindowedRecords(windowMs)
-            .map((record) => systemStatusEvent.parse(record.cells))
-            .filter((payload): payload is NonNullable<typeof payload> => payload !== null);
-
-        return HttpResponse.json({
-            elapsedMs: mockEngine.getElapsedMs(),
-            windowMs,
-            data: validPayloads.slice(-1)[0] ?? null,
-        });
-    }),
-
-    // 重置时间起点
-    http.post('/api/mock/reset', () => {
-        mockEngine.resetTime();
-        return HttpResponse.json({ success: true });
     }),
 ];

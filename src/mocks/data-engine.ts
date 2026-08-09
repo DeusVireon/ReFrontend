@@ -1,13 +1,13 @@
-import { parseCsvContent } from './script-reader';
+import { parseCsvContent } from './script-parser';
 import { type FrameRecord, type ParsedCsvResult } from './types';
 
-export class TimeEngine {
+export class DataEngine {
     private startTime: number = Date.now();
     private parsedData: ParsedCsvResult | null = null;
     private loadingPromise: Promise<ParsedCsvResult> | null = null;
 
     // 在浏览器中异步读取 public 目录下的 CSV 文件
-    public async ensureLoaded(csvPath = '/mockData.csv'): Promise<ParsedCsvResult> {
+    public async ensureLoaded(csvPath = '/mock-data.csv'): Promise<ParsedCsvResult> {
         if (this.parsedData) {
             return this.parsedData;
         }
