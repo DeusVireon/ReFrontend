@@ -2,6 +2,8 @@ import { SideCard } from "./SideCard"
 import { useMemo } from "react"
 import GaugeComponent from 'react-gauge-component'
 import { usePredictResult } from "../stores/PredictResult"
+import { useSensorData } from "../stores/SensorData"
+import { CompDataChartN } from "./SensorDataChart"
 import {
     AreaChart,
     Area,
@@ -39,7 +41,7 @@ export function CardForecast() {
                     </div>
                 </div>
                 <div className="col-span-3 overflow-hidden">
-                    <CompDataChart />
+                    <CompDataChartN />
                 </div>
             </div>
         </SideCard>
@@ -206,6 +208,8 @@ const chartConfig = {
 
 export function CompDataChart() {
     const fullData = useMemo(() => generateChartData(), [])
+
+    useSensorData((state) => state.getDataByAttrKey("rto_out_conc"))?.history
 
     // 拆分为各自连续无 null 的子数组，保障 type="monotone" 平滑插值生效
     const leftData = useMemo(

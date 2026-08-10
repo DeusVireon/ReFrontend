@@ -188,6 +188,7 @@ export const predUpdateEvent = createSseEvent({
             const inputDataQuantityRaw = cells[COL_INDEX.PredDataFrom + 1];
             const predStepsRaw = cells[COL_INDEX.PredDataFrom + 2];
 
+
             if (!predStepsRaw) {
                 return null;
             }
@@ -196,6 +197,7 @@ export const predUpdateEvent = createSseEvent({
             const inputDataQuantity = Number(inputDataQuantityRaw);
 
             // 解析单 cell 中的 JSON 字符串
+            console.log(predStepsRaw)
             const rawSteps = typeof predStepsRaw === 'string'
                 ? JSON.parse(predStepsRaw)
                 : predStepsRaw;
