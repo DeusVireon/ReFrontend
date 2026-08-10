@@ -9,20 +9,26 @@ export type AppSseEvents = ExtractEventMap<typeof registeredEvents>;
 export const systemStatusEvent = createSseEvent({
     event: 'system.status',
     parse: (cells) => {
-        return {
-            BackendStatus: cells[COL_INDEX.BackendStatus] as number | null,
-            HistoryAnalyzerStatus: cells[COL_INDEX.HistoryAnalyzerStatus] as number | null,
-            PredictorStatus: cells[COL_INDEX.PredictorStatus] as number | null,
-            BackendText: cells[COL_INDEX.BackendText] as string | null,
-            HistoryAnalyzerText: cells[COL_INDEX.HistoryAnalyzerText] as string | null,
-            PredictorText: cells[COL_INDEX.PredictorText] as string | null,
+        const raw = {
+            BackendStatus: cells[COL_INDEX.SystemStatusFrom] as number | null,
+            HistoryAnalyzerStatus: cells[COL_INDEX.SystemStatusFrom + 1] as number | null,
+            PredictorStatus: cells[COL_INDEX.SystemStatusFrom + 2] as number | null,
+            BackendText: cells[COL_INDEX.SystemStatusFrom + 3] as string | null,
+            HistoryAnalyzerText: cells[COL_INDEX.SystemStatusFrom + 4] as string | null,
+            PredictorText: cells[COL_INDEX.SystemStatusFrom + 5] as string | null,
         };
+
+        const validEntries = Object.entries(raw).filter(
+            ([_, v]) => v !== null && v !== undefined
+        );
+
+        return validEntries.length > 0 ? Object.fromEntries(validEntries) : null;
     },
 });
 
 export interface SensorItem {
     id: string;
-    status: number; // 1: 正常, 0: 异常, -1: 离线
+    status: number;
     attrKey: string;
     lastUpdated: string;
     value: number;
@@ -92,12 +98,141 @@ export const sensorUploadEvent = createSseEvent({
                 value: rawValue,
             });
         }
-
         // 若当前时间点无有效传感器上报，返回 null 阻止推送空事件
         return sensors.length > 0 ? { sensors } : null;
     },
 });
 
+export const overallStatusEvent = createSseEvent({
+    event: 'system.overall',
+    parse: (cells) => {
+        const raw = {
+            sysStatus: cells[COL_INDEX.SystemOverall] as number | null,
+            sysPrompt: cells[COL_INDEX.SystemOverall + 1] as string | null
+                === "<EMPTY>" ? "" : cells[COL_INDEX.SystemOverall + 1] as string | null,
+            bizStatus: cells[COL_INDEX.SystemOverall + 2] as number | null,
+            bizPrompt: cells[COL_INDEX.SystemOverall + 3] as string | null
+                === "<EMPTY>" ? "" : cells[COL_INDEX.SystemOverall + 3] as string | null,
+        };
+
+
+        const validEntries = Object.entries(raw).filter(
+            ([_, v]) => v !== null && v !== undefined
+        );
+
+
+        return validEntries.length > 0 ? Object.fromEntries(validEntries) : null;
+    },
+});
+
+export const systemLogEvent = createSseEvent({
+    event: 'system.log',
+    parse: (cells) => {
+        const raw = {
+            id: cells[COL_INDEX.SystemLog] as number | null,
+            name: cells[COL_INDEX.SystemLog + 1] as string | null,
+            content: cells[COL_INDEX.SystemLog + 2] as string | null,
+            level: cells[COL_INDEX.SystemLog + 3] as number | null,
+            triggerTime: new Date().toISOString()
+        };
+
+        const validEntries = Object.entries(raw).filter(
+            ([_, v]) => v !== null && v !== undefined
+        );
+
+        return validEntries.length > 0 ? Object.fromEntries(validEntries) : null;
+    },
+});
+
+export const alertDataEvent = createSseEvent({
+    event: 'alert.data',
+    parse: (cells) => {
+        const raw = {
+            id: cells[COL_INDEX.AlertDataFrom] as number | null,
+            title: cells[COL_INDEX.AlertDataFrom + 1] as string | null,
+            content: cells[COL_INDEX.AlertDataFrom + 2] as string | null,
+            level: cells[COL_INDEX.AlertDataFrom + 3] as number | null,
+            triggerTime: new Date().toISOString()
+        };
+
+        const validEntries = Object.entries(raw).filter(
+            ([_, v]) => v !== null && v !== undefined
+        );
+
+        return validEntries.length > 0 ? Object.fromEntries(validEntries) : null;
+    },
+});
+
+interface PredictionStep {
+    offsetMs: number;
+    value: number;
+    lower90: number;
+    upper90: number;
+    q10: number;
+    q50: number;
+    q90: number;
+}
+
+interface PredictResult {
+    AnchorTime: string;
+    MaxExceedProb: number;
+    InputDataQuantity: number;
+    PredSteps: PredictionStep[];
+}
+
+export const predUpdateEvent = createSseEvent({
+    event: 'predict.update',
+    parse: (cells: unknown[]): PredictResult | null => {
+        try {
+            const maxExceedProbRaw = cells[COL_INDEX.PredDataFrom];
+            const inputDataQuantityRaw = cells[COL_INDEX.PredDataFrom + 1];
+            const predStepsRaw = cells[COL_INDEX.PredDataFrom + 2];
+
+            if (!predStepsRaw) {
+                return null;
+            }
+
+            const maxExceedProb = Number(maxExceedProbRaw);
+            const inputDataQuantity = Number(inputDataQuantityRaw);
+
+            // 解析单 cell 中的 JSON 字符串
+            const rawSteps = typeof predStepsRaw === 'string'
+                ? JSON.parse(predStepsRaw)
+                : predStepsRaw;
+
+            if (!Array.isArray(rawSteps)) {
+                return null;
+            }
+
+            // 4. 校验并提取 PredSteps 数组中的每一个项
+            const predSteps: PredictionStep[] = rawSteps.map((step: Record<string, unknown>) => {
+                const offsetMs = Number(step?.offsetMs);
+                const value = Number(step?.value);
+                const lower90 = Number(step?.lower90);
+                const upper90 = Number(step?.upper90);
+                const q10 = Number(step?.q10);
+                const q50 = Number(step?.q50);
+                const q90 = Number(step?.q90);
+
+                return { offsetMs, value, lower90, upper90, q10, q50, q90 };
+            });
+
+            return {
+                AnchorTime: new Date().toISOString(),
+                MaxExceedProb: maxExceedProb,
+                InputDataQuantity: inputDataQuantity,
+                PredSteps: predSteps,
+            };
+        } catch {
+            return null;
+        }
+    }
+})
+
 export const registeredEvents = [
     systemStatusEvent,
-    sensorUploadEvent] as const;
+    sensorUploadEvent,
+    overallStatusEvent,
+    systemLogEvent,
+    alertDataEvent,
+    predUpdateEvent] as const;

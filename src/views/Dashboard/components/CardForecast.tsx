@@ -1,6 +1,7 @@
 import { SideCard } from "./SideCard"
 import { useMemo } from "react"
 import GaugeComponent from 'react-gauge-component'
+import { usePredictResult } from "../stores/PredictResult"
 import {
     AreaChart,
     Area,
@@ -17,6 +18,9 @@ import {
     ChartTooltipContent,
 } from "@/components/ui/chart"
 export function CardForecast() {
+    const predictResult = usePredictResult((state) => state.predictResult)
+    const maxExceedProb = predictResult?.MaxExceedProb ?? -1
+    const inputDataQuantity = predictResult?.InputDataQuantity ?? -1
     return (
         <SideCard title="预测" floatingTitle={true}>
             <div className="grid grid-cols-5 gap-2 text-sm">
@@ -30,8 +34,8 @@ export function CardForecast() {
                         </div>
                     </div>
                     <div className="row-span-3 flex">
-                        <MaxRiskGauge value={32.5} />
-                        <DataQualityGauge value={95.2} />
+                        <MaxRiskGauge value={maxExceedProb} />
+                        <DataQualityGauge value={inputDataQuantity} />
                     </div>
                 </div>
                 <div className="col-span-3 overflow-hidden">
@@ -115,7 +119,15 @@ function GaugeChart({ value, subArcProp, extraTicks, title }: { value: number, s
                 arc={{
                     width: 0.2,
                     padding: 0.035,
-                    subArcs: subArcProp,
+                    subArcs: [
+                        {
+                            limit: -1,
+                            color: "var(--color-gray-7)",
+                            showTick: true,
+                            tooltip: { text: "No Data" }
+                        },
+                        ...subArcProp,
+                    ],
                     subArcsStrokeWidth: 0,
                     gradient: false,
                     padEndpoints: false,
@@ -132,7 +144,13 @@ function GaugeChart({ value, subArcProp, extraTicks, title }: { value: number, s
                 }}
                 labels={{
                     valueLabel: {
-                        formatTextValue: e => e,
+                        formatTextValue: e => {
+                            const num = Number(e)
+                            if (num < 0 || isNaN(num)) {
+                                return "暂无"
+                            }
+                            return `${num.toFixed(1)}`
+                        },
                         matchColorWithArc: true,
                         style: { fontWeight: "bold", fontSize: "48px" },
                         offsetY: -10

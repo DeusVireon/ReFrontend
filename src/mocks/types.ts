@@ -2,12 +2,11 @@
 export const COL_INDEX = {
     SensorDataFrom: 0,
     SensorDataStatusFrom: 25,
-    BackendStatus: 50,
-    HistoryAnalyzerStatus: 51,
-    PredictorStatus: 52,
-    BackendText: 53,
-    HistoryAnalyzerText: 54,
-    PredictorText: 55,
+    SystemStatusFrom: 50,
+    SystemOverall: 56,
+    SystemLog: 60,
+    AlertDataFrom: 64,
+    PredDataFrom: 68,
 } as const;
 
 export type CellValue = string | number | boolean | null;
