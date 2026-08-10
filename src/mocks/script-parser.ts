@@ -7,8 +7,20 @@ function parseCsvLine(line: string): string[] {
 
     for (let i = 0; i < line.length; i++) {
         const char = line[i];
+
         if (char === '"') {
-            inQuotes = !inQuotes;
+            // RFC 4180 标准：在引号内遇到连续两个双引号 ""，表示字段内部转义的双引号 "
+            if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+                current += '"';
+                i++; // 跳过下一个双引号
+            } else {
+                // 切换最外层包围引号的状态（外层引号不追加到 current）
+                inQuotes = !inQuotes;
+            }
+        } else if (char === '\\' && inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+            // 兼容支持：处理反斜杠转义的情况 (\" -> ")
+            current += '"';
+            i++;
         } else if (char === ',' && !inQuotes) {
             result.push(current.trim());
             current = '';
