@@ -63,23 +63,27 @@ export function parseCsvContent(content: string): ParsedCsvResult {
             continue;
         }
 
-        // 解析特殊配置指令行
-        if (trimmedLine.startsWith('*')) {
-            const configBody = trimmedLine.slice(1).trim();
-            const spaceIndex = configBody.indexOf(' ');
-            if (spaceIndex !== -1) {
-                const key = configBody.slice(0, spaceIndex).trim();
-                const value = configBody.slice(spaceIndex + 1).trim();
-                config[key] = value;
-            } else if (configBody) {
-                config[configBody] = 'true';
+        // 先进行 CSV 列解析，确保按逗号正确拆分单元格
+        const cols = parseCsvLine(trimmedLine);
+        if (cols.length === 0) {
+            continue;
+        }
+
+        const firstCell = cols[0]?.trim();
+
+        // 解析特殊配置指令行：单元格 0 为 '*'，单元格 1 为 key，单元格 2 为 value
+        if (firstCell === '*') {
+            const key = cols[1]?.trim();
+            if (key) {
+                const val = cols[2]?.trim();
+                // 仅提取第 3 个单元格，忽略后续多余的列，当第三单元格为空时降级为 'true'
+                config[key] = val && val !== '' ? val : 'true';
             }
             continue;
         }
 
         // 解析常规数据行
-        const cols = parseCsvLine(trimmedLine);
-        const offsetMs = Number(cols[0]);
+        const offsetMs = Number(firstCell);
 
         if (!isNaN(offsetMs)) {
             const cells = cols.slice(1).map(parseCellValue);

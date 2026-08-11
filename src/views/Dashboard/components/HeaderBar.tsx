@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils"
 import { CircleCheck, TriangleAlert, OctagonAlert, ChevronRight, Settings } from "lucide-react"
 import { useState, useEffect } from 'react';
 import { useOverallStatus } from "../stores/OverallStatus";
+import { useRefClock } from "@/stores/ReferenceClock";
 export function HeaderBar() {
     const overallStatus = useOverallStatus((state) => state.overallStatus);
     return (
@@ -48,11 +49,11 @@ function TimeArea() {
 
     useEffect(() => {
         // 首次加载获取初始时间
-        setTime(new Date());
+        setTime(useRefClock.getState().getDateObj());
 
         // 每秒更新一次状态
         const timer = setInterval(() => {
-            setTime(new Date());
+            setTime(useRefClock.getState().getDateObj());
         }, 1000);
 
         // 组件卸载时清理定时器，防止内存泄漏

@@ -1,4 +1,5 @@
 import { COL_INDEX, createSseEvent } from './types';
+import { useRefClock } from '@/stores/ReferenceClock';
 
 type ExtractEventMap<T extends readonly { event: string }[]> = {
     [K in T[number]['event']]: string;
@@ -76,7 +77,7 @@ export const SENSOR_SCHEMA = [
 export const sensorUploadEvent = createSseEvent({
     event: 'sensor.update',
     parse: (cells): SensorByIDPayload | null => {
-        const lastUpdated = new Date().toISOString();
+        const lastUpdated = useRefClock.getState().getISOString();
         const sensors: SensorItem[] = [];
 
         for (const sensorDef of SENSOR_SCHEMA) {
@@ -197,7 +198,6 @@ export const predUpdateEvent = createSseEvent({
             const inputDataQuantity = Number(inputDataQuantityRaw);
 
             // 解析单 cell 中的 JSON 字符串
-            console.log(predStepsRaw)
             const rawSteps = typeof predStepsRaw === 'string'
                 ? JSON.parse(predStepsRaw)
                 : predStepsRaw;

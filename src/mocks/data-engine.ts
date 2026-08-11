@@ -1,36 +1,33 @@
 import { parseCsvContent } from './script-parser';
 import { type FrameRecord, type ParsedCsvResult } from './types';
+import { useRefClock } from '@/stores/ReferenceClock';
 
 export class DataEngine {
     private startTime: number = Date.now();
-    private parsedData: ParsedCsvResult | null = null;
-    private loadingPromise: Promise<ParsedCsvResult> | null = null;
+    private parsedData: ParsedCsvResult = { config: {}, records: [] };
+    private defaultWindowMs: number = 5000;
 
-    // 在浏览器中异步读取 public 目录下的 CSV 文件
-    public async ensureLoaded(csvPath = '/mock-data.csv'): Promise<ParsedCsvResult> {
-        if (this.parsedData) {
-            return this.parsedData;
+    /**
+     * 引擎显式初始化：在 Mock 服务启动前调用，一次性完成配置与 CSV 数据加载
+     */
+    public async init(csvPath = '/mock-data.csv'): Promise<void> {
+        const res = await fetch(csvPath);
+        if (!res.ok) {
+            throw new Error(`[TimeEngine] 配置文件读取失败 (${csvPath}): ${res.statusText}`);
+        }
+        const csvText = await res.text();
+        this.parsedData = parseCsvContent(csvText);
+
+        // 配置加载完成后，立即初始化引擎全局状态
+        const configWindow = this.parsedData.config['DEFAULT_WINDOW_MS'];
+        if (configWindow) {
+            this.defaultWindowMs = Number(configWindow);
         }
 
-        if (!this.loadingPromise) {
-            this.loadingPromise = fetch(csvPath)
-                .then((res) => {
-                    if (!res.ok) {
-                        throw new Error(`无法读取 Mock 配置文件 (${csvPath}): ${res.statusText}`);
-                    }
-                    return res.text();
-                })
-                .then((csvText) => {
-                    this.parsedData = parseCsvContent(csvText);
-                    return this.parsedData;
-                })
-                .catch((err) => {
-                    this.loadingPromise = null;
-                    throw err;
-                });
-        }
+        const mockTimeScale = Number(this.parsedData.config['MOCK_TIME_SCALE']) ?? 1.0;
+        useRefClock.getState().setAnchor(mockTimeScale);
 
-        return this.loadingPromise;
+        this.startTime = Date.now();
     }
 
     public resetTime(): void {
@@ -41,16 +38,14 @@ export class DataEngine {
         return Date.now() - this.startTime;
     }
 
-    public getConfig(key: string): string | undefined {
-        return this.parsedData?.config[key];
+    public getDefaultWindowMs(): number {
+        return this.defaultWindowMs;
     }
 
-    public getWindowedRecords(windowMs: number, customElapsedMs?: number): FrameRecord[] {
-        if (!this.parsedData) {
-            return [];
-        }
+    public getWindowedRecords(windowMs?: number, customElapsedMs?: number): FrameRecord[] {
+        const effectiveWindow = windowMs ?? this.defaultWindowMs;
         const elapsed = customElapsedMs ?? this.getElapsedMs();
-        const windowStart = elapsed - windowMs;
+        const windowStart = elapsed - effectiveWindow;
 
         return this.parsedData.records.filter(
             (record) => record.offsetMs >= windowStart && record.offsetMs <= elapsed
@@ -58,10 +53,9 @@ export class DataEngine {
     }
 
     public getFutureRecords(customElapsedMs?: number): FrameRecord[] {
-        if (!this.parsedData) {
-            return [];
-        }
         const elapsed = customElapsedMs ?? this.getElapsedMs();
         return this.parsedData.records.filter((record) => record.offsetMs > elapsed);
     }
 }
+
+export const mockDataEngine = new DataEngine();

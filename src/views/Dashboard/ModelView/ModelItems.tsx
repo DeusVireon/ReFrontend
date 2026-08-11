@@ -4,6 +4,7 @@ import { useSensorData, type AttrDataHistory } from '../stores/SensorData';
 import { BOARD_PROP_MAP, type DataItemProps } from '../models/BoardPropMap';
 import { ModelPartEnum } from '../models/ModelPartEnum';
 import { AttrKeyEnum } from "../models/AttrKeyEnum";
+import { useRefClock } from '@/stores/ReferenceClock';
 
 
 export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
@@ -112,14 +113,14 @@ export function DataHistoryChart() {
         const history = attrDataHistory?.history ?? []
         if (history.length === 0) return []
 
-        const nowMs = Date.now()
+        const nowMs = useRefClock.getState().getTime();
         // 增加 0.5h 的缓冲，避免边界切线断裂，搭配 allowDataOverflow 进行裁剪
         const bufferHours = 0.5
 
         return history
             .map((pt) => {
                 const timeMs = new Date(pt.timestamp).getTime()
-                const offsetHours = (timeMs - nowMs) / (1000 * 30) //(1000 * 60 * 60)
+                const offsetHours = (timeMs - nowMs) / (1000 * 60 * 60)
                 return {
                     x: offsetHours,
                     value: pt.value,

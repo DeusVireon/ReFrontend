@@ -12,6 +12,7 @@ import {
 import { useSensorData } from "../stores/SensorData"
 import { usePredictResult } from "../stores/PredictResult"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
+import { useRefClock } from "@/stores/ReferenceClock"
 
 // 格式化 X 轴 Tick：0 保持为 "0"，正数带 +h，负数带 h
 const formatXAxisTick = (x: number) => {
@@ -33,15 +34,14 @@ function LeftHistoryArea() {
 
     const leftData = useMemo(() => {
         if (!historyData || historyData.length === 0) return []
-        const nowMs = Date.now()
-
+        const nowMs = useRefClock.getState().getTime()
         return historyData
             .map((item) => {
                 const timeMs = new Date(item.timestamp).getTime()
                 if (isNaN(timeMs)) return null
 
                 // 计算以小时为单位的相对时间偏移量（x = 0 表示当前时间）
-                const xHours = (timeMs - nowMs) / (1000 * 30) // (1000 * 60 * 60)
+                const xHours = (timeMs - nowMs) / (1000 * 60 * 60)
                 return {
                     timestamp: item.timestamp, // 唯一标识，用于动画匹配
                     x: xHours,

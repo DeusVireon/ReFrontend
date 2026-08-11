@@ -1,33 +1,28 @@
 import { http, sse, HttpResponse } from 'msw';
 import { registeredEvents, type AppSseEvents } from './event-config';
-import { DataEngine } from './data-engine';
-const mockEngine = new DataEngine();
+import { mockDataEngine } from './data-engine';
 
 export const handlers = [
     sse<AppSseEvents>('/api/event', async ({ client, request }) => {
-        await mockEngine.ensureLoaded();
-
         const url = new URL(request.url);
         const windowParam = url.searchParams.get('windowMs');
-        const configWindow = mockEngine.getConfig('DEFAULT_WINDOW_MS');
-        const windowMs = windowParam ? Number(windowParam) : Number(configWindow ?? 5000);
-
-        const currentElapsed = mockEngine.getElapsedMs();
+        const windowMs = windowParam ? Number(windowParam) : mockDataEngine.getDefaultWindowMs();
+        const currentElapsed = mockDataEngine.getElapsedMs();
 
         // 推送历史窗口数据
-        mockEngine
-            .getWindowedRecords(5000, currentElapsed)
+        mockDataEngine
+            .getWindowedRecords(windowMs, currentElapsed)
             .forEach((record) => {
                 registeredEvents.forEach((sseEvent) => sseEvent.emit(client, record.cells));
             });
 
         // 游标 + 单定时器链式调度
-        const futureRecords = mockEngine.getFutureRecords(currentElapsed);
+        const futureRecords = mockDataEngine.getFutureRecords(currentElapsed);
         let timerId: number | null = null;
         let cursor = 0; // 当前待处理的数据游标
 
         function scheduleNext() {
-            const nowElapsed = mockEngine.getElapsedMs();
+            const nowElapsed = mockDataEngine.getElapsedMs();
 
             // 消费所有“已到期”的数据帧
             while (cursor < futureRecords.length) {
@@ -47,7 +42,7 @@ export const handlers = [
 
             // 类型收窄：只有当 nextRecord 确实存在时，才安排下一次 Timer
             if (nextRecord) {
-                const delay = Math.max(0, nextRecord.offsetMs - mockEngine.getElapsedMs());
+                const delay = Math.max(0, nextRecord.offsetMs - mockDataEngine.getElapsedMs());
                 timerId = window.setTimeout(scheduleNext, delay);
             }
         }
