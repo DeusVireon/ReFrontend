@@ -4,6 +4,7 @@ import {
     createMockSensorPayload, createMockSystemStatusPayload,
     createMockAlertDataPayload, createMockLogDataPayload, createMockOverallStatusPayload
 } from './rt-events'
+import { createMockAnalyzePayload } from './analyze-data'
 import { sse } from 'msw'
 
 type SSEEventMap = {
@@ -15,6 +16,11 @@ type SSEEventMap = {
 }
 
 export const handlers = [
+    // DataAnalyze面板的打开方式，当前因为dashbord里并没有响应的组件连通，后续可以连通
+    http.get('/api/analyze', () => {
+        return HttpResponse.json(createMockAnalyzePayload())
+    }),
+
     sse<SSEEventMap>('/api/event', ({ client, request }) => {
 
         client.send({
