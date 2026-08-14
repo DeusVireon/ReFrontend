@@ -70,6 +70,8 @@
     --color-white: var(--color-white);
     --animate-expand-right: expandRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     --animate-flash-highlight: flashHighlight 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    --animate-slide-down-fade: slideDownFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    --animate-countdown-bar: countdownBar var(--duration, 5s) cubic-bezier(0.25, 0.45, 0.3, 0.95) forwards;
 
 
     /* shadcn/ui color palette */
@@ -127,5 +129,27 @@
     to {
         filter: brightness(1);
         /* 平滑恢复至原状态 */
+    }
+}
+
+@keyframes slideDownFade {
+    0% {
+        opacity: 0;
+        transform: translateY(-40px) scale(0.96);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes countdownBar {
+    0% {
+        transform: scaleX(1);
+    }
+
+    100% {
+        transform: scaleX(0);
     }
 }

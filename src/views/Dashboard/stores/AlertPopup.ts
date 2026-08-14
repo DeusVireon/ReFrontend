@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { RTEventMgrInst } from '@/services/RealTimeEvent';
 
 interface AlertPopupData {
+    triggerTime: number
     type: string
     title: string
     level: number

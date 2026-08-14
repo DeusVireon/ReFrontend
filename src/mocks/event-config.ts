@@ -232,7 +232,7 @@ export const predUpdateEvent = createSseEvent({
 })
 
 interface AlertPopupData {
-    type: string
+    triggerTime: number
     title: string
     level: number
     levelText: string
@@ -263,6 +263,7 @@ export const alertPopupEvent = createSseEvent({
         }
 
         return {
+            triggerTime: new Date().getTime(),
             type: raw.type,
             title: raw.title,
             level: raw.level ?? 0,

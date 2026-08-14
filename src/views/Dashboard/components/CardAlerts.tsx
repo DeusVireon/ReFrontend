@@ -5,7 +5,7 @@ import { formatShowTime } from "./utils"
 import { useShallow } from 'zustand/react/shallow';
 import { useAlertData } from "../stores/AlertData"
 import { memo } from "react"
-import { AlertPopupDialog } from "./DialogTest"
+import { AlertPopupDialog } from "./AlertPopupDialog"
 
 export function CardAlerts() {
 
