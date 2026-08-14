@@ -6,7 +6,8 @@ export const COL_INDEX = {
     SystemOverall: 56,
     SystemLog: 60,
     AlertDataFrom: 64,
-    PredDataFrom: 68,
+    AlertPopupFrom: 68,
+    PredDataFrom: 77,
 } as const;
 
 export type CellValue = string | number | boolean | null;

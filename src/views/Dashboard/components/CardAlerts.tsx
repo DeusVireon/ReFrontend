@@ -5,6 +5,7 @@ import { formatShowTime } from "./utils"
 import { useShallow } from 'zustand/react/shallow';
 import { useAlertData } from "../stores/AlertData"
 import { memo } from "react"
+import { AlertPopupDialog } from "./DialogTest"
 
 export function CardAlerts() {
 
@@ -16,6 +17,7 @@ export function CardAlerts() {
                 {alerts.map((id) => (
                     <AlertItemMemo key={id} id={id} />
                 ))}
+                <AlertPopupDialog />
             </ScrollArea>
         </SideCard>
     )

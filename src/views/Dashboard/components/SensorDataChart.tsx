@@ -23,6 +23,7 @@ const formatXAxisTick = (x: number) => {
 
 // 对应左 3h、右 6h 范围刻度
 const X_AXIS_TICKS = [-3, -2, -1, 0, 1, 2, 3, 4, 5, 6]
+const X_FORECAST_TICKS = [0, 1, 2, 3, 4, 5, 6]
 
 /**
  * 1. 左侧历史数据图层（独立订阅 SensorData）
@@ -247,6 +248,116 @@ export function CompDataChartN() {
                         strokeOpacity={0.5}
                         strokeWidth={2}
                     />
+                    {/* Y=80 阈值线 */}
+                    <ReferenceLine
+                        y={80}
+                        stroke="var(--color-attention)"
+                        strokeOpacity={0.5}
+                        strokeWidth={2}
+                        ifOverflow="discard"
+                    />
+                </AreaChart>
+            </ChartContainer>
+        </div>
+    )
+}
+
+export function ForecastChart() {
+    return (
+        <div className="h-full w-full">
+            <ChartContainer config={chartConfig} className="h-full w-full aspect-auto">
+                <AreaChart margin={{ top: 10, right: 5, left: 0, bottom: 0 }}>
+                    <CartesianGrid
+                        vertical={false}
+                        stroke="var(--color-gray-7)"
+                        strokeDasharray="4"
+                        strokeOpacity={0.4}
+                    />
+                    <CartesianGrid
+                        horizontal={false}
+                        stroke="var(--color-gray-7)"
+                        strokeDasharray="6"
+                        strokeOpacity={0.08}
+                    />
+
+                    {/* 渐变与背景区域定义 */}
+                    <defs>
+                        <linearGradient id="warningToNegativeGrad" x1="0" y1="1" x2="0" y2="0">
+                            <stop offset="0%" stopColor="var(--color-attention)" />
+                            <stop offset="100%" stopColor="var(--color-negative)" />
+                        </linearGradient>
+                    </defs>
+
+                    {/* 参考报警区间 */}
+                    <ReferenceArea
+                        y1={80}
+                        y2={120}
+                        fill="url(#warningToNegativeGrad)"
+                        fillOpacity={0.08}
+                        stroke="none"
+                        ifOverflow="hidden"
+                    />
+                    <ReferenceArea
+                        y1={120}
+                        y2={10000}
+                        fill="var(--color-negative)"
+                        fillOpacity={0.08}
+                        stroke="none"
+                        ifOverflow="hidden"
+                    />
+
+                    {/* X 轴配置：范围调整为 [0, 6]（仅保留右侧 6h 预测） */}
+                    <XAxis
+                        dataKey="x"
+                        height={20}
+                        type="number"
+                        domain={[0, 6]} // 调整起点为 0
+                        ticks={X_FORECAST_TICKS}
+                        tickFormatter={formatXAxisTick}
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={4}
+                        allowDataOverflow
+                    />
+
+                    {/* Y 轴配置 */}
+                    <YAxis
+                        type="number"
+                        width={35}
+                        domain={["auto", "auto"]}
+                        tickLine={false}
+                        axisLine={false}
+                        tickMargin={4}
+                    />
+
+                    {/* Tooltip 配置 */}
+                    <ChartTooltip
+                        content={
+                            <ChartTooltipContent
+                                labelFormatter={(_, payload) => {
+                                    const rawTime = payload?.[0]?.payload?.x
+                                    if (rawTime !== undefined && rawTime !== null) {
+                                        return `相对时间: ${formatXAxisTick(Number(rawTime))}`
+                                    }
+                                    return ""
+                                }}
+                                formatter={(value) => {
+                                    const formatNum = (v: string | number) => {
+                                        const num = Number(v)
+                                        return isNaN(num) ? v : num.toFixed(2)
+                                    }
+
+                                    if (Array.isArray(value)) {
+                                        return value.map(formatNum).join(" ~ ")
+                                    }
+                                    return formatNum(Number(value))
+                                }}
+                            />
+                        }
+                    />
+
+                    {/* 仅挂载右侧预测数据图层 */}
+                    <RightPredictArea />
                     {/* Y=80 阈值线 */}
                     <ReferenceLine
                         y={80}

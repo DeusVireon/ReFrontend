@@ -70,6 +70,39 @@
     --color-white: var(--color-white);
     --animate-expand-right: expandRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     --animate-flash-highlight: flashHighlight 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+
+    /* shadcn/ui color palette */
+    --color-background: var(--color-theme-2);
+    --color-foreground: var(--color-text);
+    --color-card: var(--color-theme-2);
+    --color-card-foreground: var(--color-text);
+    --color-popover: var(--color-theme-2);
+    --color-popover-foreground: var(--color-text);
+    --color-primary: var(--color-accent);
+    --color-primary-foreground: var(--color-theme-1);
+    --color-secondary: var(--color-theme-3);
+    --color-secondary-foreground: var(--color-text);
+    --color-muted: var(--color-theme-2);
+    --color-muted-foreground: var(--color-gray-7);
+    --color-accent-foreground: var(--color-text);
+    --color-destructive: var(--color-negative);
+    --color-border: var(--color-theme-3);
+    --color-input: var(--color-theme-3);
+    --color-ring: var(--color-accent);
+    --color-chart-1: var(--color-accent);
+    --color-chart-2: var(--color-accent-cyan);
+    --color-chart-3: var(--color-accent-purple);
+    --color-chart-4: var(--color-positive);
+    --color-chart-5: var(--color-attention);
+    --color-sidebar: var(--color-theme-1);
+    --color-sidebar-foreground: var(--color-text);
+    --color-sidebar-primary: var(--color-accent);
+    --color-sidebar-primary-foreground: var(--color-theme-1);
+    --color-sidebar-accent: var(--color-theme-2);
+    --color-sidebar-accent-foreground: var(--color-text);
+    --color-sidebar-border: var(--color-theme-3);
+    --color-sidebar-ring: var(--color-accent);
 }
 
 

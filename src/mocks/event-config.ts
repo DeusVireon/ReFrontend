@@ -231,10 +231,56 @@ export const predUpdateEvent = createSseEvent({
     }
 })
 
+interface AlertPopupData {
+    type: string
+    title: string
+    level: number
+    levelText: string
+    keyValueColor: number
+    keyValueTitle: string
+    keyValueContent: string
+    contentType: string
+    content: string
+}
+
+export const alertPopupEvent = createSseEvent({
+    event: 'alert.popup',
+    parse: (cells) => {
+        const raw = {
+            type: cells[COL_INDEX.AlertPopupFrom] as string | null,
+            title: cells[COL_INDEX.AlertPopupFrom + 1] as string | null,
+            level: cells[COL_INDEX.AlertPopupFrom + 2] as number | null,
+            levelText: cells[COL_INDEX.AlertPopupFrom + 3] as string | null,
+            keyValueColor: cells[COL_INDEX.AlertPopupFrom + 4] as number | null,
+            keyValueTitle: cells[COL_INDEX.AlertPopupFrom + 5] as string | null,
+            keyValueContent: cells[COL_INDEX.AlertPopupFrom + 6] as string | null,
+            contentType: cells[COL_INDEX.AlertPopupFrom + 7] as string | null,
+            content: cells[COL_INDEX.AlertPopupFrom + 8] as string | null
+        };
+
+        if (!raw.type || !raw.title) {
+            return null;
+        }
+
+        return {
+            type: raw.type,
+            title: raw.title,
+            level: raw.level ?? 0,
+            levelText: raw.levelText ?? '',
+            keyValueColor: raw.keyValueColor ?? 0,
+            keyValueTitle: raw.keyValueTitle ?? '',
+            keyValueContent: raw.keyValueContent ?? '',
+            contentType: raw.contentType ?? '',
+            content: raw.content ?? ''
+        };
+    }
+});
+
 export const registeredEvents = [
     systemStatusEvent,
     sensorUploadEvent,
     overallStatusEvent,
     systemLogEvent,
     alertDataEvent,
+    alertPopupEvent,
     predUpdateEvent] as const;
