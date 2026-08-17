@@ -277,6 +277,50 @@ export const alertPopupEvent = createSseEvent({
     }
 });
 
+interface AISugMessage {
+    id: number
+    type: string
+    content: string
+    timestamp: string
+}
+
+export const aiMessage = createSseEvent({
+    event: 'ai.message',
+    parse: (cells) => {
+        const raw = {
+            id: cells[COL_INDEX.AIMessageFrom] as number | null,
+            type: cells[COL_INDEX.AIMessageFrom + 1] as string | null,
+            content: cells[COL_INDEX.AIMessageFrom + 2] as string | null,
+            timestamp: new Date().toISOString()
+        };
+        if (!raw.id)
+            return null;
+        return {
+            id: raw.id,
+            type: raw.type ?? '',
+            content: raw.content ?? '',
+            timestamp: raw.timestamp
+        };
+    },
+});
+
+export const aiIndicator = createSseEvent({
+    event: 'ai.indicator',
+    parse: (cells) => {
+        const indicator = cells[COL_INDEX.AIToolFrom] as number | null;
+        return indicator !== null ? { indicator } : null;
+    },
+});
+
+export const aiTip = createSseEvent({
+    event: 'ai.tip',
+    parse: (cells) => {
+        const showTip = cells[COL_INDEX.AIToolFrom + 1] as string | null;
+        return showTip !== null ? { showTip: showTip } : null;
+    },
+});
+
+
 export const registeredEvents = [
     systemStatusEvent,
     sensorUploadEvent,
@@ -284,4 +328,8 @@ export const registeredEvents = [
     systemLogEvent,
     alertDataEvent,
     alertPopupEvent,
-    predUpdateEvent] as const;
+    predUpdateEvent,
+    aiMessage,
+    aiIndicator,
+    aiTip
+] as const;

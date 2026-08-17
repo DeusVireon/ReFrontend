@@ -8,6 +8,8 @@ export const COL_INDEX = {
     AlertDataFrom: 64,
     AlertPopupFrom: 68,
     PredDataFrom: 77,
+    AIMessageFrom: 80,
+    AIToolFrom: 83
 } as const;
 
 export type CellValue = string | number | boolean | null;

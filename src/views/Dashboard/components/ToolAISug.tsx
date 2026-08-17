@@ -3,11 +3,12 @@ import { MarkerIcon } from "@/components/ui/marker"
 import { Input } from "@/components/ui/input"
 import { useAISugMessage } from "../stores/AISugMessage";
 import { useShallow } from 'zustand/react/shallow';
-import { DatabaseSearch, ArrowUpIcon } from "lucide-react";
+import { DatabaseSearch, ArrowUpIcon, Brain } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Bubble, BubbleContent } from "@/components/ui/bubble";
 import { Marker, MarkerContent } from "@/components/ui/marker";
+import { useSound } from 'use-sound';
 
 export function ToolAISug() {
 
@@ -22,25 +23,43 @@ export function ToolAISug() {
 }
 
 function ToolAISugBtn({ onClick }: { onClick: () => void }) {
+
+    const [messageArrive] = useSound('/sounds/AIMessage.mp3');
+    const [lastIndicator, setLastIndicator] = useState(0);
+
+    const indicator = useAISugMessage(useShallow((state) => state.indicator));
+    const showTip = useAISugMessage(useShallow((state) => state.showTip));
+    console.log("ToolAISugBtn indicator:", indicator, "showTip:", showTip);
+
+    if (indicator !== lastIndicator) {
+        if (indicator !== 0) {
+            messageArrive();
+        }
+        setLastIndicator(indicator);
+    }
+
     return (
         <div className="relative flex flex-row items-center">
             <Button variant="ghost" className="bg-theme-2/50 size-12 rounded-md" onClick={onClick}>
                 <Bot className="size-lg" />
-                <span className="absolute ml-7 mb-7 size-2.5 animate-ping rounded-full bg-accent opacity-75"></span>
-                <span className="absolute ml-7 mb-7 size-2.5 rounded-full bg-accent"></span>
-            </Button>
-            <div className="flex items-center animate-expand-right">
-                <div
-                    className=" -left-3 top-1/2 w-3 h-6 bg-theme-2/75 translate-x-px"
-                    style={{
-                        clipPath: 'polygon(0% 50%, 100% 0%, 100% 100%)'
-                    }}
-                />
-                <div className="flex px-2 py-1.5 rounded-md bg-theme-2/75 animate-pulse-brightness">
-                    <Info className="p-0.5 mr-1" />智能体有新的建议
-                </div>
-            </div>
+                {indicator === 1 && <span className="absolute ml-7 mb-7 size-2.5 animate-ping rounded-full bg-accent opacity-75"></span>}
+                {indicator === 1 && <span className="absolute ml-7 mb-7 size-2.5 rounded-full bg-accent"></span>}
 
+
+            </Button>
+            {showTip &&
+                <div className="flex items-center animate-expand-right">
+                    <div
+                        className=" -left-3 top-1/2 w-3 h-6 bg-theme-2/75 translate-x-px"
+                        style={{
+                            clipPath: 'polygon(0% 50%, 100% 0%, 100% 100%)'
+                        }}
+                    />
+                    <div className="flex px-2 py-1.5 rounded-md bg-theme-2/75 animate-pulse-brightness">
+                        <Info className="p-0.5 mr-1" />{showTip}
+                    </div>
+                </div>
+            }
         </div>
     )
 }
@@ -57,7 +76,7 @@ function MessageBubble({ id }: { id: number }) {
 
     if (message.type === "assistant") {
         return (
-            <Bubble variant="outline">
+            <Bubble variant="outline" className="animate-flash-highlight">
                 <BubbleContent >
                     {message.content}
                 </BubbleContent>
@@ -71,9 +90,18 @@ function MessageBubble({ id }: { id: number }) {
                 </BubbleContent>
             </Bubble>
         )
+    } else if (message.type === "reasoning") {
+        return (
+            <Marker className="bg-theme-2/50 ml-1 pl-2 pr-4 py-1 rounded-sm w-fit h-fit min-h-8 items-center animate-pulse-brightness">
+                <MarkerIcon>
+                    <Brain />
+                </MarkerIcon>
+                <MarkerContent>{message.content}</MarkerContent>
+            </Marker>
+        )
     } else if (message.type === "tool-query") {
         return (
-            <Marker className="bg-theme-2/50 pl-2 pr-4 py-1 rounded-sm w-fit">
+            <Marker className="bg-theme-2/50 ml-1 pl-2 pr-4 py-1 rounded-sm w-fit min-h-8 items-center animate-flash-highlight">
                 <MarkerIcon>
                     <DatabaseSearch />
                 </MarkerIcon>
@@ -95,7 +123,7 @@ function ToolAISubChat({ onChatClose }: { onChatClose?: () => void }) {
     const sendMsg = () => {
         updateInput("")
         setSendBtnDisabled(true)
-        const saveMsg = useAISugMessage.getState().addMessage;
+        const saveMsg = useAISugMessage.getState().setMessage;
         const newMsg = {
             id: Date.now(),
             type: "user",

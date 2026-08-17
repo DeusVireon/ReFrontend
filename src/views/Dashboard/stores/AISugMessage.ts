@@ -8,28 +8,55 @@ interface AISugMessage {
     timestamp: string
 }
 
+interface AISugIndicator {
+    indicator: number
+}
+
+interface AISugTip {
+    showTip: string
+}
+
 interface AISugMessageStore {
     idList: number[]
     messageByID: Record<number, AISugMessage>
+    indicator: number
+    showTip: string
 
-    addMessage: (payload: AISugMessage) => void;
+    setMessage: (payload: AISugMessage) => void;
+    setIndicator: (value: number) => void;
+    setShowTip: (value: string) => void;
 }
 
 export const useAISugMessage = create<AISugMessageStore>((set) => ({
     idList: [],
     messageByID: {},
-    addMessage: (payload: AISugMessage) => {
+    indicator: 0,
+    showTip: "",
+    setMessage: (payload: AISugMessage) => {
         if (!payload || !payload.id) return;
-        set((state) => ({
-            idList: [...state.idList, payload.id],
-            messageByID: {
-                ...state.messageByID,
-                [payload.id]: payload
-            }
-        }));
-    }
+        set((state) => {
+            const hasId = state.idList.includes(payload.id);
+            return {
+                idList: hasId ? state.idList : [...state.idList, payload.id],
+                messageByID: {
+                    ...state.messageByID,
+                    [payload.id]: payload
+                }
+            };
+        });
+    },
+    setIndicator: (value: number) => set({ indicator: value }),
+    setShowTip: (value: string) => set({ showTip: value }),
 }));
 
 RTEventMgrInst.handle<AISugMessage>("ai.message", (payload: AISugMessage) => {
-    useAISugMessage.getState().addMessage(payload);
+    useAISugMessage.getState().setMessage(payload);
+});
+
+RTEventMgrInst.handle<AISugIndicator>("ai.indicator", (payload: AISugIndicator) => {
+    useAISugMessage.getState().setIndicator(payload.indicator);
+});
+
+RTEventMgrInst.handle<AISugTip>("ai.tip", (payload: AISugTip) => {
+    useAISugMessage.getState().setShowTip(payload.showTip);
 });

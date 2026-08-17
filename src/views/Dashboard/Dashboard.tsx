@@ -23,15 +23,15 @@ export function DashboardView() {
 function LeftToolZone() {
     return (
         <div>
+            <div className="absolute top-20 left-0 w-1/2 h-[20vh] px-2">
+                <CardLogs />
+            </div>
             <div className="absolute bottom-[25vh] max-h-[70vh] left-22 pb-4 \
                         flex gap-2">
                 <ToolAISug />
             </div>
             <div className="absolute bottom-[25vh] left-0 pb-4 pl-6 flex">
                 <VerticalToggleGroup />
-            </div>
-            <div className="absolute top-20 left-0 w-1/2 h-[20vh] px-2">
-                <CardLogs />
             </div>
         </div>
 
