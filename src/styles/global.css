@@ -72,7 +72,7 @@
     --animate-flash-highlight: flashHighlight 1.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     --animate-slide-down-fade: slideDownFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     --animate-countdown-bar: countdownBar var(--duration, 5s) cubic-bezier(0.25, 0.45, 0.3, 0.95) forwards;
-
+    --animate-pulse-brightness: pulse-brightness 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 
     /* shadcn/ui color palette */
     --color-background: var(--color-theme-2);
@@ -151,5 +151,17 @@
 
     100% {
         transform: scaleX(0);
+    }
+}
+
+@keyframes pulse-brightness {
+
+    0%,
+    100% {
+        filter: brightness(1.5);
+    }
+
+    50% {
+        filter: brightness(1);
     }
 }

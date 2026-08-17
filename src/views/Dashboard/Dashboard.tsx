@@ -23,7 +23,7 @@ export function DashboardView() {
 function LeftToolZone() {
     return (
         <div>
-            <div className="absolute bottom-[25vh] left-0 pb-4 pl-22 \
+            <div className="absolute bottom-[25vh] max-h-[70vh] left-22 pb-4 \
                         flex gap-2">
                 <ToolAISug />
             </div>
