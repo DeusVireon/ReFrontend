@@ -25,7 +25,7 @@ export function CardAlerts() {
 
 const AlertItemMemo = memo(AlertItem)
 
-function AlertItem({ id }: { id: number }) {
+export function AlertItem({ id }: { id: number }) {
     const alert = useAlertData(useShallow((state) => state.alertByID[id]));
 
     if (!alert) {
@@ -67,7 +67,7 @@ function AlertItem({ id }: { id: number }) {
                 "bg-attention": alert.level === 2,
                 "bg-negative": alert.level === 3,
             })}></div>
-            <div className="flex-row w-full px-2 py-1">
+            <div className="flex-row w-full px-2 py-1 text-text">
                 <div className="flex justify-between text-xs text-gray-7">
                     <div>{levelText}</div>
                     <div>{formatShowTime(alert.triggerTime)}</div>

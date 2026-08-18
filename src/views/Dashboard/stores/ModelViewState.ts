@@ -80,3 +80,7 @@ export const useModelViewStateStore = create<ViewStateStore>((set) => ({
         camControlMode: mode,
     }),
 }));
+
+interface AttentionFocusPayload {
+    groupName: string;
+}

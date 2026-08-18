@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { useModelViewStateStore } from '../stores/ModelViewState';
 import { createBreathingCoverMaterial, createFresnelMaterial } from './MaterialUtils';
 import { ModelPartEnum } from '../models/ModelPartEnum';
+import { useAttrStatusStore } from '../stores/AttrStatus';
 
 const SELECTION_COLOR = "#7290fa";
 const WARNING_COLOR = '#f73d62';
@@ -24,8 +25,11 @@ export function ProdLineBody() {
 
     // 订阅 Zustand 状态与 Action
     const activeGroup = useModelViewStateStore((state) => state.selectedGroup);
+    const getGroupStatus = useAttrStatusStore((state) => state.getStatusByGroup);
     const toggleGroupAct = useModelViewStateStore((state) => state.toggleSelection);
     const setActiveGroupAct = useModelViewStateStore((state) => state.selectGroup);
+
+    const groupStatusUpdate = useAttrStatusStore((state) => state.lastUpdated);
 
     // 创建 Shader 材质
     const selectionMat = useMemo(() => {
@@ -79,9 +83,19 @@ export function ProdLineBody() {
                     toggleSelectionHighlight(mesh, selectionMat, false);
                     setMeshBoundingBox(mesh, false);
                 }
+
+                // 判断当前 Mesh 是否属于告警部件组
+                const groupStatus = meshPrefix ? getGroupStatus(meshPrefix) : null;
+                const groupStatusCode = groupStatus?.status ?? false;
+                if (groupStatusCode) {
+                    toggleSelectionHighlight(mesh, warningMat, true);
+                } else {
+                    toggleSelectionHighlight(mesh, warningMat, false);
+                }
+
             }
         });
-    }, [activeGroup, scene]);
+    }, [activeGroup, scene, groupStatusUpdate]);
 
     const handleClick = useCallback((e: ThreeEvent<MouseEvent>) => {
 

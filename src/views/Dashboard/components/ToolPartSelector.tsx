@@ -7,6 +7,9 @@ import {
 import { useModelViewStateStore } from '../stores/ModelViewState';
 import { ModelPartEnum } from '../models/ModelPartEnum';
 import { CamControlMode } from '../stores/ModelViewState';
+import { useAttrStatusStore } from '../stores/AttrStatus';
+import { cn } from '@/lib/utils';
+import { useSound } from 'use-sound'
 
 interface ToggleOption {
     id: ModelPartEnum;
@@ -43,6 +46,9 @@ export function VerticalToggleGroup() {
     const camCtrlBtn = CAM_CONTROL_BTN_CONFIG[camControlMode] ?? { style: "", icon: ScanBox, label: '视角控制模式' };
     const setActiveGroup = useModelViewStateStore((state) => state.selectGroup);
     const setCamControlMode = useModelViewStateStore((state) => state.setCamControlMode);
+    const getAttrStatus = useAttrStatusStore((state) => state.getStatusByGroup);
+
+    const attrUpdate = useAttrStatusStore((state) => state.lastUpdated);
 
     return (
         <div className="relative flex-col inline-flex gap-0.5 p-1 \
@@ -65,18 +71,22 @@ export function VerticalToggleGroup() {
                 const isActive = selectedId === option.id;
                 return (
                     <button
-                        key={option.id}
+                        key={option.id + attrUpdate}
                         onClick={() => setActiveGroup(option.id)}
                         title={option.label}
                         aria-label={option.label}
-                        className={`
+                        className={cn(`
                             relative flex items-center justify-center size-10 rounded-md \
                             transition-all duration-200
-                            ${isActive
-                                ? 'bg-accent/75'
-                                : 'hover:text-white hover:bg-white/10 active:scale-95'
-                            }`}>
+                            `, (isActive
+                            ? 'bg-accent/75'
+                            : 'hover:text-white hover:bg-white/10 active:scale-95'
+                        ))}>
                         <Icon className="size-5 stroke-[2.2]" />
+                        {getAttrStatus(option.id).status === 1 && <span className="absolute top-1 right-1 size-2 animate-ping rounded-full bg-attention opacity-75"></span>}
+                        {getAttrStatus(option.id).status === 1 && <span className="absolute top-1 right-1 size-2 rounded-full bg-attention"></span>}
+                        {getAttrStatus(option.id).status === 2 && <span className="absolute top-1 right-1 size-2.5 animate-ping rounded-full bg-negative opacity-75"></span>}
+                        {getAttrStatus(option.id).status === 2 && <span className="absolute top-1 right-1 size-2.5 rounded-full bg-negative"></span>}
                     </button>
                 );
             })}

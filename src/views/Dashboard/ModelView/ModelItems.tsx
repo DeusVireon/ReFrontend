@@ -6,16 +6,20 @@ import { ModelPartEnum } from '../models/ModelPartEnum';
 import { AttrKeyEnum } from "../models/AttrKeyEnum";
 import { useRefClock } from '@/stores/ReferenceClock';
 import { useAttrStatusStore } from "../stores/AttrStatus";
+import { AlertItem } from "../components/CardAlerts";
 import { cn } from '@/lib/utils';
 
 
 export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
     const { title } = BOARD_PROP_MAP[data] ?? { title: "UNKNOWN" };
     const linkedData = BOARD_PROP_MAP[data]?.linkedData ?? [];
+    const linkedAlerts = useAttrStatusStore((state) => state.getStatusByGroup)(data).linkedAlerts;
 
     return (
         // 外层容器：相对定位，预留底部箭头的空间
-        <div className="relative inline-block w-fit">
+        <div className={cn("relative inline-block w-fit",
+            (linkedAlerts.length > 0 ? 'translate-y-1/3' : '')
+        )}>
             <div className="flex flex-col p-2 px-3 min-w-110 \
             rounded-sm backdrop-blur-xs shadow-xl bg-theme-2/60">
 
@@ -28,6 +32,14 @@ export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
                     ))}
                 </div>
                 <DataHistoryChart />
+                {linkedAlerts.length > 0 && (
+                    <div className="flex flex-col gap-1 px-1 pt-2">
+                        <div className="text-lg text-text font-semibold">关联告警</div>
+                        {linkedAlerts.map((alertId) => (
+                            <AlertItem key={alertId} id={alertId} />
+                        ))}
+                    </div>
+                )}
             </div>
 
             {/* 底部指示箭头 */}
@@ -42,6 +54,9 @@ export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
         </div>
     );
 }
+
+
+
 
 function DataItem({ attrKey, showName, showUnit }: DataItemProps) {
 
