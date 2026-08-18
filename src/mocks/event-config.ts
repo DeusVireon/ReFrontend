@@ -1,5 +1,6 @@
 import { COL_INDEX, createSseEvent } from './types';
 import { useRefClock } from '@/stores/ReferenceClock';
+import { parseDCASnapshot } from '@/views/Dashboard/models/DCA';
 
 type ExtractEventMap<T extends readonly { event: string }[]> = {
     [K in T[number]['event']]: string;
@@ -320,6 +321,23 @@ export const aiTipEvent = createSseEvent({
     },
 });
 
+export const dcaUpdateEvent = createSseEvent({
+    event: 'dca.update',
+    parse: (cells) => {
+        const payloadCell = cells[COL_INDEX.DCAFrom];
+        if (!payloadCell) return null;
+
+        try {
+            const payload = typeof payloadCell === 'string'
+                ? JSON.parse(payloadCell)
+                : payloadCell;
+            return parseDCASnapshot(payload, useRefClock.getState().getISOString());
+        } catch {
+            return null;
+        }
+    },
+});
+
 interface AttrStatus {
     key: string
     status: number
@@ -371,5 +389,6 @@ export const registeredEvents = [
     aiMessageEvent,
     aiIndicatorEvent,
     aiTipEvent,
-    attrStatusEvent
+    attrStatusEvent,
+    dcaUpdateEvent,
 ] as const;
