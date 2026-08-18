@@ -33,11 +33,11 @@ export function DCAStackedBar({
     }
 
     return (
-        <div className={cn("relative", size === "detail" ? "pb-9" : "pb-0")}>
+        <div className={cn("relative", size === "detail" ? "pb-4" : "pb-0")}>
             <div
                 className={cn(
                     "flex w-full overflow-visible rounded-sm bg-gray-4/25 ring-1 ring-white/10",
-                    size === "detail" ? "h-9" : "h-5",
+                    size === "detail" ? "h-6" : "h-3",
                 )}
                 role="group"
                 aria-label="DCA 规则异常分数构成"
@@ -67,7 +67,7 @@ export function DCAStackedBar({
                             <span className="pointer-events-none absolute top-[calc(100%+0.35rem)] left-1/2 z-30 hidden w-max max-w-56 -translate-x-1/2 rounded-sm border border-theme-1/40 bg-theme-1/95 px-2 py-1 text-left text-xs text-text shadow-xl group-hover:block group-focus-visible:block">
                                 <span className="block font-semibold">{rule.name}</span>
                                 <span className="text-gray-7">
-                                    贡献 {rule.score.toFixed(1)} 分 · {percentage.toFixed(1)}%
+                                    +{rule.score.toFixed(1)} 分 · {percentage.toFixed(1)}%
                                 </span>
                             </span>
                         </button>

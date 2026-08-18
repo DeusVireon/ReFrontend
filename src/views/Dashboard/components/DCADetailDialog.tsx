@@ -7,7 +7,7 @@ import {
     XAxis,
     YAxis,
 } from "recharts"
-import { ChevronDown, Clock3, Gauge, Maximize2, ShieldCheck } from "lucide-react"
+import { ChevronDown, Clock3, Gauge, Maximize, ShieldCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
     ChartContainer,
@@ -33,7 +33,7 @@ import {
 import { DCAStackedBar, DCAStatusBadge } from "./DCAStackedBar"
 
 const SCORE_CHART_CONFIG = {
-    score: { label: "异常分数", color: "var(--color-accent-cyan)" },
+    score: { label: "DCA 反常度得分", color: "var(--color-accent-cyan)" },
 } satisfies ChartConfig
 
 const RULE_CHART_CONFIG = {
@@ -66,35 +66,35 @@ export function DCADetailDialog({
         <Dialog>
             <DialogTrigger
                 disabled={!snapshot}
-                render={
-                    <Button
-                        variant="ghost"
-                        size="xs"
-                        className="text-gray-7 hover:text-text"
-                        aria-label="查看 DCA 监控详情"
-                    />
-                }
+            // render={
+            //     <Button
+            //         variant="ghost"
+            //         size="xs"
+            //         className="text-gray-7 hover:text-text"
+            //         aria-label="查看 DCA 监控详情"
+            //     />
+            // }
             >
                 {children ?? (
-                    <>
-                        <Maximize2 />
-                        <span className="hidden 2xl:inline">查看详情</span>
-                    </>
+                    <div className="flex p-1.5 px-2 gap-1 items-center rounded-sm text-xs bg-theme-2/10 hover:bg-theme-2/25 text-text">
+                        <Maximize className="size-3.5" />
+                        <span className="2xl:inline">查看详情</span>
+                    </div>
                 )}
             </DialogTrigger>
-            <DialogContent className="h-[82vh] w-[calc(100vw-2rem)] max-w-[1280px] gap-0 overflow-hidden border-theme-1/35 bg-theme-2/92 p-0 text-text shadow-2xl sm:w-[78vw] sm:max-w-[78vw]">
-                <DialogHeader className="border-b border-theme-1/30 px-5 py-4 pr-12">
-                    <DialogTitle className="text-xl font-semibold">DCA 动态耦合分析</DialogTitle>
-                    <DialogDescription>
-                        评估当前工况与历史规律的一致性，并标注预测结果的适用边界。
-                    </DialogDescription>
+            <DialogContent className="h-[75vh] w-[calc(100vw-2rem)] max-w-7xl gap-0 overflow-hidden border-theme-1/35 bg-theme-2/80 p-0 text-text shadow-2xl sm:w-[78vw] sm:max-w-[78vw]">
+                <DialogHeader className="border-b border-theme-1/30 px-6 py-4 pr-12 gap-0">
+                    <div className="text-xl font-semibold">DCA 动态耦合分析</div>
+                    <div className="text-sm text-gray-7">
+                        DCA 动态耦合分析可辅助评估当前工况与历史规律的一致性并发现潜在问题
+                    </div>
                 </DialogHeader>
 
                 {snapshot ? (
-                    <div className="h-full overflow-y-auto px-5 py-4">
-                        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(360px,0.85fr)]">
+                    <div className="h-full overflow-y-auto px-6 py-4">
+                        <div className="grid gap-4 lg:grid-cols-[minmax(0,1.0fr)_minmax(360px,0.85fr)]">
                             <section className="min-w-0">
-                                <SectionTitle title="当前规则得分构成" subtitle="点击色块可定位对应规则" />
+                                <SectionTitle title="当前规则得分构成" subtitle="点击可定位对应规则" />
                                 <DCAStackedBar
                                     rules={snapshot.rules}
                                     selectedRuleId={selectedRuleId}
@@ -103,7 +103,7 @@ export function DCADetailDialog({
                                 />
                                 <div className="mt-1 flex flex-wrap items-center gap-2">
                                     <DCAStatusBadge
-                                        label={`异常分数 ${snapshot.score.toFixed(1)}`}
+                                        label={`DCA 反常度得分 ${snapshot.score.toFixed(1)}`}
                                         level={getDcaScoreLevel(snapshot.score, snapshot.scoreThreshold)}
                                     />
                                     {snapshot.statuses.map((status) => (
@@ -112,15 +112,15 @@ export function DCADetailDialog({
                                 </div>
                                 <div className="mt-3 grid grid-cols-1 gap-2 text-sm sm:grid-cols-3">
                                     <SummaryMetric
-                                        icon={<ShieldCheck />}
-                                        label="预测适用性"
+                                        icon={<Gauge />}
+                                        label="预测适用性评估"
                                         value={DCA_APPLICABILITY_LABELS[snapshot.predictionApplicability]}
                                     />
-                                    <SummaryMetric
+                                    {/* <SummaryMetric
                                         icon={<Gauge />}
                                         label="持续时间"
                                         value={`${snapshot.sustainedMinutes} min`}
-                                    />
+                                    /> */}
                                     <SummaryMetric
                                         icon={<Clock3 />}
                                         label="数据更新时间"
@@ -130,7 +130,7 @@ export function DCADetailDialog({
                             </section>
 
                             <section className="min-w-0">
-                                <SectionTitle title="24 小时异常分数" subtitle={`持续告警线 ${snapshot.scoreThreshold.toFixed(0)} 分`} />
+                                <SectionTitle title="DCA 分数历史" subtitle="" />
                                 <ScoreHistoryChart snapshot={snapshot} />
                             </section>
                         </div>
@@ -197,7 +197,7 @@ function ScoreHistoryChart({ snapshot }: { snapshot: DCASnapshot }) {
     }
 
     return (
-        <ChartContainer config={SCORE_CHART_CONFIG} className="h-45 w-full aspect-auto">
+        <ChartContainer config={SCORE_CHART_CONFIG} className="h-35 w-full aspect-auto">
             <LineChart data={snapshot.scoreHistory} margin={{ top: 8, right: 8, left: -12, bottom: 0 }}>
                 <CartesianGrid vertical={false} strokeDasharray="4" strokeOpacity={0.25} />
                 <XAxis
@@ -258,7 +258,7 @@ function RuleDetailItem({
             <div className="grid gap-4 border-t border-theme-1/25 px-3 py-3 lg:grid-cols-[minmax(280px,0.8fr)_minmax(0,1.2fr)]">
                 <dl className="grid grid-cols-[6.5rem_minmax(0,1fr)] content-start gap-x-3 gap-y-2 text-sm">
                     <dt className="text-gray-7">关联变量</dt>
-                    <dd className="break-words font-mono text-xs">{rule.sensorKeys.join(", ") || "未配置"}</dd>
+                    <dd className="wrap-break-word font-mono text-xs">{rule.sensorKeys.join(", ") || "未配置"}</dd>
                     <dt className="text-gray-7">评估窗口</dt>
                     <dd>{rule.window}</dd>
                     <dt className="text-gray-7">判定条件</dt>
