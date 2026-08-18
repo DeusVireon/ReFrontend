@@ -15,8 +15,10 @@ interface AttrStatusStore {
     lastUpdated: number
 
     setStatus: (payload: AttrStatus) => void;
+    getStatusScore: () => number;
     getStatusByKey: (key: string) => AttrStatus | undefined;
     getStatusByGroup: (group: ModelPartEnum) => AttrStatus;
+
 }
 
 export const useAttrStatusStore = create<AttrStatusStore>((set, get) => ({
@@ -33,6 +35,13 @@ export const useAttrStatusStore = create<AttrStatusStore>((set, get) => ({
                 lastUpdated: Date.now()
             };
         });
+    },
+    getStatusScore: () => {
+        const { statusByKey } = get(); // 或使用 this.statusByKey
+        return Object.values(statusByKey).reduce(
+            (sum, item) => sum + (item.status || 0),
+            0
+        );
     },
     getStatusByKey: (key: string) => {
         const status = get().statusByKey[key];

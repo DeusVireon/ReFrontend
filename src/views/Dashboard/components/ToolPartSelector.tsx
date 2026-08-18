@@ -10,6 +10,7 @@ import { CamControlMode } from '../stores/ModelViewState';
 import { useAttrStatusStore } from '../stores/AttrStatus';
 import { cn } from '@/lib/utils';
 import { useSound } from 'use-sound'
+import { useState } from 'react';
 
 interface ToggleOption {
     id: ModelPartEnum;
@@ -47,8 +48,21 @@ export function VerticalToggleGroup() {
     const setActiveGroup = useModelViewStateStore((state) => state.selectGroup);
     const setCamControlMode = useModelViewStateStore((state) => state.setCamControlMode);
     const getAttrStatus = useAttrStatusStore((state) => state.getStatusByGroup);
+    const getAttrStatusScore = useAttrStatusStore((state) => state.getStatusScore);
+    const [lastStatusScore, setLastStatusScore] = useState(getAttrStatusScore());
+    const [soundSensorFault] = useSound('/sounds/SensorFault.mp3');
+    const [soundSensorRecover] = useSound('/sounds/SensorRecover.mp3');
 
     const attrUpdate = useAttrStatusStore((state) => state.lastUpdated);
+
+    if (lastStatusScore !== getAttrStatusScore()) {
+        if (getAttrStatusScore() > lastStatusScore) {
+            soundSensorFault();
+        } else {
+            soundSensorRecover();
+        }
+        setLastStatusScore(getAttrStatusScore());
+    }
 
     return (
         <div className="relative flex-col inline-flex gap-0.5 p-1 \
