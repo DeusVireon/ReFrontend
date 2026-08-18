@@ -10,7 +10,8 @@ export const COL_INDEX = {
     AttrStatusFrom: 77,
     PredDataFrom: 80,
     AIMessageFrom: 83,
-    AIToolFrom: 86
+    AIToolFrom: 86,
+    DCAFrom: 88,
 } as const;
 
 export type CellValue = string | number | boolean | null;

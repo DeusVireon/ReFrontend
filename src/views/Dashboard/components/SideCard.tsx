@@ -3,12 +3,13 @@ import { cn } from "@/lib/utils"
 
 interface DashboardCardProps {
     /** 卡片标题 */
-    title?: string
+    title?: ReactNode
     /** 卡片内部千变万化的子组件 */
     children: ReactNode
     /** 允许外部传入 class 微调容器（如 Grid 布局跨行跨列 `col-span-2` 或自定义高度） */
     className?: string
     floatingTitle?: boolean
+    headerAction?: ReactNode
 }
 
 export function SideCard({
@@ -16,6 +17,7 @@ export function SideCard({
     children,
     className,
     floatingTitle = false,
+    headerAction,
 }: DashboardCardProps) {
     return (
         <div className={cn(
@@ -25,10 +27,11 @@ export function SideCard({
         )}>
             {/* 固定的 Title 区 */}
             {title && (
-                <div className={cn("font-semibold text-xl flex",
+                <div className={cn("flex shrink-0 items-center justify-between gap-2 font-semibold text-xl",
                     { "absolute": floatingTitle }
                 )}>
-                    {title}
+                    <span className="min-w-0 truncate">{title}</span>
+                    {headerAction && <span className="shrink-0">{headerAction}</span>}
                 </div>
             )}
             {/* 可变的 Children 区 */}

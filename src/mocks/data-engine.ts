@@ -1,5 +1,5 @@
 import { parseCsvContent } from './script-parser';
-import { type FrameRecord, type ParsedCsvResult } from './types';
+import { COL_INDEX, type CellValue, type FrameRecord, type ParsedCsvResult } from './types';
 import { useRefClock } from '@/stores/ReferenceClock';
 
 export class DataEngine {
@@ -10,7 +10,10 @@ export class DataEngine {
     /**
      * 引擎显式初始化：在 Mock 服务启动前调用，一次性完成配置与 CSV 数据加载
      */
-    public async init(csvPath = '/mock-data.csv'): Promise<void> {
+    public async init(
+        csvPath = '/mock-data.csv',
+        dcaCsvPath = '/mock-dca.example.csv',
+    ): Promise<void> {
         const res = await fetch(csvPath);
         if (!res.ok) {
             throw new Error(`[TimeEngine] 配置文件读取失败 (${csvPath}): ${res.statusText}`);
@@ -18,13 +21,32 @@ export class DataEngine {
         const csvText = await res.text();
         this.parsedData = parseCsvContent(csvText);
 
+        const dcaResponse = await fetch(dcaCsvPath);
+        if (dcaResponse.ok) {
+            const dcaData = parseCsvContent(await dcaResponse.text());
+            const dcaRecords = dcaData.records.flatMap((record) => {
+                const payload = record.cells[0];
+                if (payload === null || payload === undefined) return [];
+
+                const cells = Array<CellValue>(COL_INDEX.DCAFrom + 1).fill(null);
+                cells[COL_INDEX.DCAFrom] = payload;
+                return [{ offsetMs: record.offsetMs, cells }];
+            });
+
+            this.parsedData.records = [...this.parsedData.records, ...dcaRecords]
+                .sort((a, b) => a.offsetMs - b.offsetMs);
+        }
+
         // 配置加载完成后，立即初始化引擎全局状态
         const configWindow = this.parsedData.config['DEFAULT_WINDOW_MS'];
         if (configWindow) {
             this.defaultWindowMs = Number(configWindow);
         }
 
-        const mockTimeScale = Number(this.parsedData.config['MOCK_TIME_SCALE']) ?? 1.0;
+        const configuredTimeScale = Number(this.parsedData.config['MOCK_TIME_SCALE']);
+        const mockTimeScale = Number.isFinite(configuredTimeScale) && configuredTimeScale > 0
+            ? configuredTimeScale
+            : 1.0;
         useRefClock.getState().setAnchor(mockTimeScale);
 
         this.startTime = Date.now();

@@ -1,98 +1,99 @@
-import { cn } from "@/lib/utils"
+import { ShieldAlert, ShieldCheck } from "lucide-react"
 import { SideCard } from "./SideCard"
-import { ScrollArea } from "./ScrollArea"
-import { formatShowTime } from "./utils"
-import { useShallow } from 'zustand/react/shallow';
-import { useLogData } from "../stores/LogData"
-import { ClockArrowLeft } from "lucide-react"
-import { memo } from "react"
+import { DCAStackedBar, DCAStatusBadge } from "./DCAStackedBar"
+import { DCADetailDialog } from "./DCADetailDialog"
+import { useDCAData } from "../stores/DCAData"
+import {
+    DCA_APPLICABILITY_LABELS,
+    getDcaScoreLevel,
+    type DCAPredictionApplicability,
+} from "../models/DCA"
+
 export function CardDCA() {
-    const logs = useLogData(useShallow((state) => state.idList));
+    const snapshot = useDCAData((state) => state.snapshot)
+
     return (
-        <SideCard title="DCA 监控" className="pb-3">
-            <ScrollArea>
-                <div className="flex flex-wrap gap-1 items-center">
-                    <div className="font-bold text-lg">状态：</div>
-                    <DCAStatusItem name="慢车" color="#6684fb" />
-                    <DCAStatusItem name="维护" color="#6684fb" />
-                    <DCAStatusItem name="半停机" color="#a10033" />
-                    {/* <DCAStatusItem name="系统慢车" color="#0000aa" />
-                    <DCAStatusItem name="系统慢车" color="#0000aa" />
-                    <DCAStatusItem name="系统慢车" color="#0000aa" /> */}
+        <SideCard
+            title="DCA 监控"
+            className="pb-3"
+            headerAction={<DCADetailDialog snapshot={snapshot} />}
+        >
+            {snapshot ? (
+                <div className="flex h-full min-h-0 flex-col gap-1.5 pt-0.5 text-sm">
+                    <div className="flex items-end justify-between gap-3">
+                        <div>
+                            <div className="text-xs text-gray-7">当前异常分数</div>
+                            <div className="flex items-baseline gap-1">
+                                <span className="font-mono text-2xl font-semibold leading-none tabular-nums 2xl:text-3xl">
+                                    {snapshot.score.toFixed(1)}
+                                </span>
+                                <span className="text-xs text-gray-7">/ 100</span>
+                            </div>
+                        </div>
+                        <ApplicabilityLabel applicability={snapshot.predictionApplicability} />
+                    </div>
+
+                    <div>
+                        <div className="mb-1 flex items-center justify-between text-xs text-gray-7">
+                            <span>规则得分构成</span>
+                            <span>告警线 {snapshot.scoreThreshold.toFixed(0)}</span>
+                        </div>
+                        <DCAStackedBar
+                            rules={snapshot.rules}
+                        />
+                    </div>
+
+                    <div className="mt-auto min-h-0 border-t border-theme-1/30 pt-1.5">
+                        <div className="mb-1 flex items-center justify-between text-xs text-gray-7">
+                            <span>当前状态</span>
+                            <span>持续 {snapshot.sustainedMinutes} min</span>
+                        </div>
+                        <div className="flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none]">
+                            {snapshot.statuses.length > 0 ? snapshot.statuses.map((status) => (
+                                <DCAStatusBadge key={status.id} label={status.label} level={status.level} />
+                            )) : (
+                                <DCAStatusBadge
+                                    label="未识别到工况状态"
+                                    level={getDcaScoreLevel(snapshot.score, snapshot.scoreThreshold)}
+                                />
+                            )}
+                        </div>
+                    </div>
                 </div>
-                <div className="py-1"><div className="h-px w-full bg-gray-7/50" /></div>
-                <DCAInfoItem typeName="自回归" info="峰值偏移 +13.4%" />
-                <DCAInfoItem typeName="自回归" info="正常" />
-                <DCAInfoItem typeName="相关性" info="正常" />
-                <DCAInfoItem typeName="相关性" info="正常" />
-                <DCAInfoItem typeName="相关性" info="正常" />
-            </ScrollArea>
+            ) : (
+                <DCAEmptyState />
+            )}
         </SideCard>
     )
 }
 
-function DCAStatusItem({ name, color }: { name: string, color: string }) {
+function ApplicabilityLabel({
+    applicability,
+}: {
+    applicability: DCAPredictionApplicability
+}) {
+    const Icon = applicability === "reliable" ? ShieldCheck : ShieldAlert
+    const colorClass = applicability === "reliable"
+        ? "text-positive"
+        : applicability === "limited"
+            ? "text-attention"
+            : "text-negative"
+
     return (
-        <div className="h-fit w-fit px-2 rounded-xs border"
-            style={{
-                backgroundColor: `${color}80`,
-                borderColor: `${color}bf`,
-            }}>
-            {name}
+        <div className={`flex max-w-44 items-center gap-1.5 text-right text-xs ${colorClass}`}>
+            <Icon className="size-4 shrink-0" />
+            <span>{DCA_APPLICABILITY_LABELS[applicability]}</span>
         </div>
     )
 }
 
-function DCAInfoItem({ typeName, info }: { typeName: string, info: string }) {
+function DCAEmptyState() {
     return (
-        <div className=" \
-                rounded-xs px-1 py-0.5 items-center leading-normal">
-            <span className="inline-flex px-1.5 w-fit mr-1.5 \
-                rounded-full border text-sm bg-accent-purple/50 border-accent-purple/75">
-                {typeName}
-            </span>
-            <span className="">{info}</span>
+        <div className="flex h-full flex-col items-center justify-center gap-2 text-center text-sm text-gray-7">
+            <div className="h-1.5 w-28 overflow-hidden rounded-full bg-gray-4/30">
+                <div className="h-full w-1/2 animate-pulse rounded-full bg-accent/70" />
+            </div>
+            <span>等待 DCA 实时分析数据</span>
         </div>
     )
 }
-
-// const LogItemMemo = memo(LogItem)
-
-// function LogItem(id: { id: number }) {
-//     const log = useLogData(useShallow((state) => state.logByID[id.id]));
-
-//     if (!log) {
-//         return null;
-//     }
-
-//     return (
-//         <div className={cn(
-//             "flex rounded-xs w-full items-center text-sm \
-//                 border border-gray-3/30 animate-expand-right relative"
-//             , {
-//                 "bg-gray-4/30": log.level === 0,
-//                 "bg-accent/30": log.level === 1,
-//                 "bg-attention-dark/30": log.level === 2,
-//                 "bg-negative-dark/30": log.level === 3,
-//             })}>
-//             <div className={cn("flex items-center h-full px-2 font-bold", {
-//                 "bg-gray-4/30": log.level === 0,
-//                 "bg-accent/30": log.level === 1,
-//                 "bg-attention-dark/30": log.level === 2,
-//                 "bg-negative-dark/30": log.level === 3,
-//             })}>
-//                 {log.name}
-//             </div>
-//             <div className="flex-1 px-2 py-0.5">
-//                 {log.content}
-//             </div>
-//             <div className="opacity-0 hover:opacity-100 transition-opacity \
-//              absolute right-0 h-full w-full \
-//             flex justify-end items-center text-text bg-gray-4/50 \
-//             mask-l-from-20% mask-l-to-40%
-//             ">
-//                 {formatShowTime(log.triggerTime)}
-//             </div>
-//         </div>
-//     )
-// }
