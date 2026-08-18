@@ -74,7 +74,9 @@ function createIndustrialFloorTextures(anisotropy: number): FloorTextureSet {
             const rotatedX = (localX + direction * localY) * Math.SQRT1_2;
             const rotatedY = (localY - direction * localX) * Math.SQRT1_2;
             const lozengeDistance = Math.abs(rotatedX) / 13 + Math.abs(rotatedY) / 2.7;
-            const tread = 1 - smoothStep(0.72, 1, lozengeDistance);
+            // const tread = 1 - smoothStep(0.72, 1, lozengeDistance);
+            const tread = 0 // 关闭防滑纹效果
+
 
             // Four shallow fasteners make the repeated tile read as a manufactured panel.
             const fastenerDistance = Math.min(
@@ -92,11 +94,11 @@ function createIndustrialFloorTextures(anisotropy: number): FloorTextureSet {
             heightField[index] = height;
 
             const wear = tread * 13 + fastener * 8;
-            const base = 59 + grain * 12 + brushed * 3 + lowFrequency * 2;
+            const base = 140 + grain * 12 + brushed * 3 + lowFrequency * 2; // 基础亮度
             const seamDarkening = seam * 31;
-            albedoData[pixel] = THREE.MathUtils.clamp(base + wear - seamDarkening + 3, 0, 255);
-            albedoData[pixel + 1] = THREE.MathUtils.clamp(base + wear - seamDarkening + 7, 0, 255);
-            albedoData[pixel + 2] = THREE.MathUtils.clamp(base + wear - seamDarkening + 10, 0, 255);
+            albedoData[pixel] = THREE.MathUtils.clamp(base + wear - seamDarkening + 10, 0, 255); // R
+            albedoData[pixel + 1] = THREE.MathUtils.clamp(base + wear - seamDarkening + 5, 0, 255); // G
+            albedoData[pixel + 2] = THREE.MathUtils.clamp(base + wear - seamDarkening + 20, 0, 255); // B
             albedoData[pixel + 3] = 255;
 
             const heightValue = THREE.MathUtils.clamp(128 + height * 112, 0, 255);
@@ -174,7 +176,7 @@ export function FloorPlane() {
     return (
         <>
             <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-                <planeGeometry args={[1024, 1024]} />
+                <planeGeometry args={[1536, 1536]} />
                 <meshStandardMaterial
                     map={textures.albedo}
                     bumpMap={textures.height}
