@@ -284,7 +284,7 @@ interface AISugMessage {
     timestamp: string
 }
 
-export const aiMessage = createSseEvent({
+export const aiMessageEvent = createSseEvent({
     event: 'ai.message',
     parse: (cells) => {
         const raw = {
@@ -304,7 +304,7 @@ export const aiMessage = createSseEvent({
     },
 });
 
-export const aiIndicator = createSseEvent({
+export const aiIndicatorEvent = createSseEvent({
     event: 'ai.indicator',
     parse: (cells) => {
         const indicator = cells[COL_INDEX.AIToolFrom] as number | null;
@@ -312,7 +312,7 @@ export const aiIndicator = createSseEvent({
     },
 });
 
-export const aiTip = createSseEvent({
+export const aiTipEvent = createSseEvent({
     event: 'ai.tip',
     parse: (cells) => {
         const showTip = cells[COL_INDEX.AIToolFrom + 1] as string | null;
@@ -320,6 +320,45 @@ export const aiTip = createSseEvent({
     },
 });
 
+interface AttrStatus {
+    key: string
+    status: number
+    lastUpdated: string
+    linkedAlerts: number[]
+}
+
+export const attrStatusEvent = createSseEvent({
+    event: 'sensor.attrs',
+    parse: (cells): AttrStatus | null => {
+        const key = cells[COL_INDEX.AttrStatusFrom] as string | null;
+
+        // 当 key 为空或不存在时返回 null
+        if (!key) return null;
+
+        const rawStatus = cells[COL_INDEX.AttrStatusFrom + 1];
+        const rawAlerts = cells[COL_INDEX.AttrStatusFrom + 2] as string | null;
+
+        // 安全解析 JSON 数组
+        let linkedAlerts: number[] = [];
+        if (rawAlerts) {
+            try {
+                const parsed = JSON.parse(rawAlerts);
+                if (Array.isArray(parsed)) {
+                    linkedAlerts = parsed.map(Number);
+                }
+            } catch {
+                linkedAlerts = [];
+            }
+        }
+
+        return {
+            key,
+            status: Number(rawStatus ?? 0),
+            lastUpdated: new Date().toISOString(),
+            linkedAlerts,
+        };
+    },
+});
 
 export const registeredEvents = [
     systemStatusEvent,
@@ -329,7 +368,8 @@ export const registeredEvents = [
     alertDataEvent,
     alertPopupEvent,
     predUpdateEvent,
-    aiMessage,
-    aiIndicator,
-    aiTip
+    aiMessageEvent,
+    aiIndicatorEvent,
+    aiTipEvent,
+    attrStatusEvent
 ] as const;

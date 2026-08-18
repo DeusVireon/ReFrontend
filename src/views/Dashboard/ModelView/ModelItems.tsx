@@ -5,6 +5,8 @@ import { BOARD_PROP_MAP, type DataItemProps } from '../models/BoardPropMap';
 import { ModelPartEnum } from '../models/ModelPartEnum';
 import { AttrKeyEnum } from "../models/AttrKeyEnum";
 import { useRefClock } from '@/stores/ReferenceClock';
+import { useAttrStatusStore } from "../stores/AttrStatus";
+import { cn } from '@/lib/utils';
 
 
 export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
@@ -44,13 +46,18 @@ export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
 function DataItem({ attrKey, showName, showUnit }: DataItemProps) {
 
     const value = useSensorData((state) => state.getDataByAttrKey(attrKey))?.latestValue;
+    const status = useAttrStatusStore((state) => state.statusByKey[attrKey])?.status;
     const updated = useSensorData((state) => state.getDataByAttrKey(attrKey))?.lastUpdated;
     const isSelected = useModelViewStateStore((state) => state.selectedAttr === attrKey);
 
     return (
-        <div key={updated} className={"w-25 p-1 animate-flash-highlight flex flex-1 flex-col \
-        rounded-sm items-center justify-between " +
-            (isSelected ? 'bg-gray-7/20' : '')}
+        <div key={updated} className={cn("w-25 p-1 animate-flash-highlight flex flex-1 flex-col \
+        rounded-sm items-center justify-between bg-gray-7/5",
+            (isSelected ? 'bg-gray-7/30 border-2 border-theme-7' : ''),
+            (status === 1 ? 'bg-attention/10' : ''),
+            (status === 2 ? 'bg-negative/10' : ''),
+            (status === 1 && isSelected ? 'bg-attention/40 border-attention/50' : ''),
+            (status === 2 && isSelected ? 'bg-negative/40 border-negative/50' : ''))}
             onClick={() => useModelViewStateStore.getState().selectAttr(attrKey as AttrKeyEnum)}
         >
             <span className="text-sm text-text pr-1">{showName}</span>
@@ -60,6 +67,10 @@ function DataItem({ attrKey, showName, showUnit }: DataItemProps) {
                 </div>
                 <span className="text-xs text-text">{showUnit}</span>
             </div>
+            {status === 1 && <span className="absolute top-1 right-1 size-2.5 animate-ping rounded-full bg-attention opacity-75"></span>}
+            {status === 1 && <span className="absolute top-1 right-1 size-2.5 rounded-full bg-attention"></span>}
+            {status === 2 && <span className="absolute top-1 right-1 size-2.5 animate-ping rounded-full bg-negative opacity-75"></span>}
+            {status === 2 && <span className="absolute top-1 right-1 size-2.5 rounded-full bg-negative"></span>}
         </div>
     )
 }

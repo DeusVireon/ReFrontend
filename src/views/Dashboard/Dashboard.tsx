@@ -11,7 +11,7 @@ import { VerticalToggleGroup } from './components/ToolPartSelector';
 import { CardDCA } from "./components/CardDCA"
 
 export function DashboardView() {
-    return <div className="relative h-screen w-screen bg-theme-5">
+    return <div className="relative h-screen w-screen bg-theme-7">
         <div className="isolate"><ModelView /></div>
         <BottomCardGroup />
         <RightCardGroup />

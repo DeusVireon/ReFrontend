@@ -15,7 +15,7 @@ export function FloorPlane() {
         const ctx = canvas.getContext('2d')!;
 
         // 亚金属底色
-        ctx.fillStyle = '#464970';
+        ctx.fillStyle = '#5a5da3';
         ctx.fillRect(0, 0, textureSize, textureSize);
 
         // 外围正方形分割线 (亮蓝灰细线)

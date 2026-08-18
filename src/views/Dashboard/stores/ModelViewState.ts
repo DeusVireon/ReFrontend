@@ -21,7 +21,6 @@ export enum CamControlMode {
 }
 
 interface ViewStateStore {
-    // 当前激活的部件组前缀，null 表示无高亮
     camControlMode: CamControlMode;
     selectedGroup: ModelPartEnum | null;
     selectedAttr: AttrKeyEnum | null;

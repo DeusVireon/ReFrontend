@@ -14,7 +14,7 @@ export function ModelView() {
             {/* 2. 3D 画布 */}
             <Canvas shadows>
                 <ProdLineBody />
-                {/* <FloorPlane /> */}
+                <FloorPlane />
                 <FloatingBoardEle />
                 <axesHelper />
                 <gridHelper />

@@ -39,7 +39,7 @@ export function CameraController() {
             camY = 7;
             camZ = -14;
             tarX = geoAnchor.x;
-            tarY = geoAnchor.y;
+            tarY = geoAnchor.y - 1;
             tarZ = geoAnchor.z;
         }
         // 计算终点相对于目标的方位角 (atan2(dx, dz))
