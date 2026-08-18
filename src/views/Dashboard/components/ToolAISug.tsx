@@ -13,11 +13,15 @@ import { useSound } from 'use-sound';
 export function ToolAISug() {
 
     const [isExpanded, setExpanded] = useState(false);
+    const setAISugTip = useAISugMessage((state) => state.setShowTip)
 
     return (
         <div className="relative rounded-md text-text">
             {isExpanded && <ToolAISubChat onChatClose={() => setExpanded(false)} />}
-            {!isExpanded && <ToolAISugBtn onClick={() => setExpanded(true)} />}
+            {!isExpanded && <ToolAISugBtn onClick={() => {
+                setExpanded(true)
+                setAISugTip("")
+            }} />}
         </div>
     )
 }

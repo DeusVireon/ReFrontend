@@ -6,6 +6,7 @@ import { useShallow } from 'zustand/react/shallow';
 import { useAlertData } from "../stores/AlertData"
 import { memo } from "react"
 import { AlertPopupDialog } from "./AlertPopupDialog"
+import { useEffect, useState } from "react";
 
 export function CardAlerts() {
 
@@ -27,6 +28,7 @@ const AlertItemMemo = memo(AlertItem)
 
 export function AlertItem({ id }: { id: number }) {
     const alert = useAlertData(useShallow((state) => state.alertByID[id]));
+    const isCanceled = alert?.level === 0;
 
     if (!alert) {
         return null;
@@ -36,16 +38,16 @@ export function AlertItem({ id }: { id: number }) {
 
     switch (alert.level) {
         case 0:
-            levelText = "INFO"
+            levelText = "CANCELED 已消警"
             break
         case 1:
-            levelText = "IMPORTANT"
+            levelText = "IMPORTANT / 重要"
             break
         case 2:
-            levelText = "WARNING"
+            levelText = "WARNING / 警告"
             break
         case 3:
-            levelText = "CRITICAL"
+            levelText = "CRITICAL / 关键"
             break
         default:
             levelText = "UNDEFINED LEVEL"
@@ -70,10 +72,12 @@ export function AlertItem({ id }: { id: number }) {
             <div className="flex-row w-full px-2 py-1 text-text">
                 <div className="flex justify-between text-xs text-gray-7">
                     <div>{levelText}</div>
-                    <div>{formatShowTime(alert.triggerTime)}</div>
+                    <AlertTime triggerTime={alert.triggerTime} />
                 </div>
                 <div className="flex">
-                    <div className="font-semibold">{alert.title}</div>
+                    <div className={cn("font-semibold", { "line-through": isCanceled })}>
+                        {alert.title}
+                    </div>
                 </div>
                 <div className="flex">
                     <div className="text-sm">{alert.content}</div>
@@ -83,3 +87,17 @@ export function AlertItem({ id }: { id: number }) {
     )
 }
 
+function AlertTime({ triggerTime }: { triggerTime: string }) {
+    const [, setTick] = useState(0);
+
+    useEffect(() => {
+        // 每秒触发一次内部状态更新
+        const timer = setInterval(() => {
+            setTick((prev) => prev + 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    return <div>{formatShowTime(triggerTime)}</div>;
+}
