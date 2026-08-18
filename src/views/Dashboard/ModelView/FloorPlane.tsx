@@ -64,20 +64,6 @@ function createIndustrialFloorTextures(anisotropy: number): FloorTextureSet {
             const seam = 1 - smoothStep(2, 8, edgeDistance);
             const bevel = smoothStep(6, 13, edgeDistance) * (1 - smoothStep(13, 21, edgeDistance));
 
-            // Alternating raised lozenges reproduce anti-slip checker plate without image assets.
-            const cell = 40;
-            const cellX = Math.floor(x / cell);
-            const cellY = Math.floor(y / cell);
-            const localX = (x % cell) - cell / 2;
-            const localY = (y % cell) - cell / 2;
-            const direction = (cellX + cellY) % 2 === 0 ? 1 : -1;
-            const rotatedX = (localX + direction * localY) * Math.SQRT1_2;
-            const rotatedY = (localY - direction * localX) * Math.SQRT1_2;
-            const lozengeDistance = Math.abs(rotatedX) / 13 + Math.abs(rotatedY) / 2.7;
-            // const tread = 1 - smoothStep(0.72, 1, lozengeDistance);
-            const tread = 0 // 关闭防滑纹效果
-
-
             // Four shallow fasteners make the repeated tile read as a manufactured panel.
             const fastenerDistance = Math.min(
                 Math.hypot(x - 19, y - 19),
@@ -90,15 +76,15 @@ function createIndustrialFloorTextures(anisotropy: number): FloorTextureSet {
             const grain = deterministicNoise(x, y) - 0.5;
             const brushed = Math.sin(y * 1.8) * 0.5 + Math.sin(y * 0.19) * 0.5;
             const lowFrequency = Math.sin(x * 0.035) * Math.sin(y * 0.027);
-            const height = grain * 0.025 + tread * 0.48 + fastener * 0.24 + bevel * 0.08 - seam * 0.7;
+            const height = grain * 0.025 + fastener * 0.24 + bevel * 0.08 - seam * 0.7;
             heightField[index] = height;
 
-            const wear = tread * 13 + fastener * 8;
-            const base = 140 + grain * 12 + brushed * 3 + lowFrequency * 2; // 基础亮度
+            const wear = fastener * 8;
+            const base = 86 + grain * 12 + brushed * 3 + lowFrequency * 2;
             const seamDarkening = seam * 31;
-            albedoData[pixel] = THREE.MathUtils.clamp(base + wear - seamDarkening + 10, 0, 255); // R
-            albedoData[pixel + 1] = THREE.MathUtils.clamp(base + wear - seamDarkening + 5, 0, 255); // G
-            albedoData[pixel + 2] = THREE.MathUtils.clamp(base + wear - seamDarkening + 20, 0, 255); // B
+            albedoData[pixel] = THREE.MathUtils.clamp(base + wear - seamDarkening, 0, 255);
+            albedoData[pixel + 1] = THREE.MathUtils.clamp(base + wear - seamDarkening + 4, 0, 255);
+            albedoData[pixel + 2] = THREE.MathUtils.clamp(base + wear - seamDarkening + 8, 0, 255);
             albedoData[pixel + 3] = 255;
 
             const heightValue = THREE.MathUtils.clamp(128 + height * 112, 0, 255);
@@ -108,7 +94,7 @@ function createIndustrialFloorTextures(anisotropy: number): FloorTextureSet {
             heightData[pixel + 3] = 255;
 
             // Raised areas are polished by traffic; recessed seams retain a rougher finish.
-            const roughness = THREE.MathUtils.clamp(161 + grain * 20 + seam * 46 - tread * 37 - fastener * 20, 0, 255);
+            const roughness = THREE.MathUtils.clamp(171 + grain * 20 + seam * 46 - fastener * 20, 0, 255);
             roughnessData[pixel] = roughness;
             roughnessData[pixel + 1] = roughness;
             roughnessData[pixel + 2] = roughness;
@@ -176,18 +162,18 @@ export function FloorPlane() {
     return (
         <>
             <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-                <planeGeometry args={[1536, 1536]} />
+                <planeGeometry args={[1024, 1024]} />
                 <meshStandardMaterial
                     map={textures.albedo}
                     bumpMap={textures.height}
-                    bumpScale={0.055}
+                    bumpScale={0.045}
                     normalMap={textures.normal}
                     normalScale={FLOOR_NORMAL_SCALE}
-                    roughness={0.62}
+                    roughness={0.68}
                     roughnessMap={textures.roughness}
-                    metalness={0.82}
-                    envMapIntensity={0.72}
-                    color="#aeb4b8"
+                    metalness={0.78}
+                    envMapIntensity={0.82}
+                    color="#a4adb2"
                 />
             </mesh>
             <ContactShadows
