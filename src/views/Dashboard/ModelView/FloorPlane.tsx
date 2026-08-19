@@ -80,11 +80,11 @@ function createIndustrialFloorTextures(anisotropy: number): FloorTextureSet {
             heightField[index] = height;
 
             const wear = fastener * 8;
-            const base = 86 + grain * 12 + brushed * 3 + lowFrequency * 2;
-            const seamDarkening = seam * 31;
+            const base = 166 + grain * 10 + brushed * 4 + lowFrequency * 3;
+            const seamDarkening = seam * 26;
             albedoData[pixel] = THREE.MathUtils.clamp(base + wear - seamDarkening, 0, 255);
-            albedoData[pixel + 1] = THREE.MathUtils.clamp(base + wear - seamDarkening + 4, 0, 255);
-            albedoData[pixel + 2] = THREE.MathUtils.clamp(base + wear - seamDarkening + 8, 0, 255);
+            albedoData[pixel + 1] = THREE.MathUtils.clamp(base + wear - seamDarkening + 3, 0, 255);
+            albedoData[pixel + 2] = THREE.MathUtils.clamp(base + wear - seamDarkening + 6, 0, 255);
             albedoData[pixel + 3] = 255;
 
             const heightValue = THREE.MathUtils.clamp(128 + height * 112, 0, 255);
@@ -94,7 +94,7 @@ function createIndustrialFloorTextures(anisotropy: number): FloorTextureSet {
             heightData[pixel + 3] = 255;
 
             // Raised areas are polished by traffic; recessed seams retain a rougher finish.
-            const roughness = THREE.MathUtils.clamp(171 + grain * 20 + seam * 46 - fastener * 20, 0, 255);
+            const roughness = THREE.MathUtils.clamp(158 + grain * 18 + seam * 45 - fastener * 18, 0, 255);
             roughnessData[pixel] = roughness;
             roughnessData[pixel + 1] = roughness;
             roughnessData[pixel + 2] = roughness;
@@ -169,22 +169,22 @@ export function FloorPlane() {
                     bumpScale={0.045}
                     normalMap={textures.normal}
                     normalScale={FLOOR_NORMAL_SCALE}
-                    roughness={0.68}
+                    roughness={0.62}
                     roughnessMap={textures.roughness}
-                    metalness={0.78}
-                    envMapIntensity={0.82}
-                    color="#a4adb2"
+                    metalness={0.58}
+                    envMapIntensity={0.72}
+                    color="#e5eaed"
                 />
             </mesh>
             <ContactShadows
                 position={[0, 0.018, 0]}
                 scale={72}
-                opacity={0.34}
+                opacity={0.24}
                 blur={2.2}
                 far={14}
                 resolution={512}
                 frames={2}
-                color="#05070a"
+                color="#647587"
             />
         </>
     );

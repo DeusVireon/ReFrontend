@@ -9,9 +9,15 @@ import { CardAlerts } from "./components/CardAlerts"
 import { ToolAISug } from "./components/ToolAISug"
 import { VerticalToggleGroup } from './components/ToolPartSelector';
 import { CardDCA } from "./components/CardDCA"
+import { useEffect } from "react"
 
 export function DashboardView() {
-    return <div className="relative h-screen w-screen bg-theme-7">
+    useEffect(() => {
+        document.documentElement.classList.add("dashboard-light")
+        return () => document.documentElement.classList.remove("dashboard-light")
+    }, [])
+
+    return <div className="dashboard-light relative h-screen w-screen overflow-hidden bg-theme-7 text-text">
         <div className="isolate"><ModelView /></div>
         <BottomCardGroup />
         <RightCardGroup />

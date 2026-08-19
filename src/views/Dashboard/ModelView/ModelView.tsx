@@ -14,7 +14,7 @@ export function ModelView() {
         <div
             className="absolute top-0 left-0 w-screen h-screen overflow-hidden"
             style={{
-                background: 'radial-gradient(ellipse at 50% 68%, #172536 0%, #0b111c 48%, #05070d 100%)',
+                background: 'radial-gradient(ellipse at 50% 62%, #ffffff 0%, #edf3f8 48%, #dce7f0 100%)',
             }}
         >
             {/* 2. 3D 画布 */}
@@ -24,30 +24,30 @@ export function ModelView() {
                 gl={{ antialias: true, powerPreference: 'high-performance' }}
                 onCreated={({ gl }) => {
                     gl.toneMapping = THREE.ACESFilmicToneMapping;
-                    gl.toneMappingExposure = 0.96;
+                    gl.toneMappingExposure = 1.08;
                 }}
             >
-                <fog attach="fog" args={["#0f1722", 24, 72]} />
+                <fog attach="fog" args={["#e5edf4", 30, 82]} />
                 <FactoryFloorOutline />
                 <ProdLineBody />
                 <FloorPlane />
                 <FloatingBoardEle />
-                <hemisphereLight args={["#9bbbd4", "#0b0f16", 0.92]} />
-                <directionalLight position={[18, 16, -10]} intensity={3.1} color="#dceaff" />
-                <pointLight position={[-18, 7, -4]} intensity={11} distance={34} color="#397fba" />
+                <hemisphereLight args={["#ffffff", "#8799a8", 1.7]} />
+                <directionalLight position={[18, 16, -10]} intensity={4.2} color="#fffdf8" />
+                <pointLight position={[-18, 8, -4]} intensity={7} distance={36} color="#7fb6dc" />
                 <Environment resolution={128} frames={1}>
                     <Lightformer
                         form="rect"
-                        intensity={1.8}
-                        color="#dcecff"
+                        intensity={2.2}
+                        color="#ffffff"
                         position={[0, 10, -8]}
                         scale={[20, 5, 1]}
                         target={[0, 3, 0]}
                     />
                     <Lightformer
                         form="rect"
-                        intensity={0.9}
-                        color="#4088b8"
+                        intensity={1.05}
+                        color="#a9d1ea"
                         position={[-12, 5, 4]}
                         scale={[5, 9, 1]}
                         target={[0, 3, 0]}
