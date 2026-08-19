@@ -139,7 +139,7 @@ function ToolAISubChat({ onChatClose }: { onChatClose?: () => void }) {
     return (
         <div className="flex flex-col w-90 h-fit rounded-md bg-theme-2/75 \
         backdrop-blur-sm shadow-2xl overflow-hidden">
-            <div className="flex items-center px-4 py-2 text-lg font-bold border-b border-white ">
+            <div className="flex items-center px-4 py-2 text-lg font-bold border-b border-theme-1/40 ">
                 <Bot className="mr-2" />
                 <div >嵌入式智能体建议</div>
                 <Button variant="ghost" size="icon" className="ml-auto font-bold" onClick={onChatClose}>

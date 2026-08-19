@@ -34,11 +34,11 @@ interface CamControlModeBtnProps {
 }
 
 const CAM_CONTROL_BTN_CONFIG: Record<CamControlMode, CamControlModeBtnProps> = {
-    [CamControlMode.Focus]: { style: "bg-accent/75", icon: ScanBox, label: '控制：聚焦模式' },
-    [CamControlMode.Free]: { style: "bg-accent-purple/75", icon: Rotate3d, label: '控制：自由视角模式' },
-    [CamControlMode.Carousel]: { style: "bg-theme-7/75", icon: RotateCwSquare, label: '控制：自动轮播模式' },
+    [CamControlMode.Focus]: { style: "bg-accent text-white", icon: ScanBox, label: '控制：聚焦模式' },
+    [CamControlMode.Free]: { style: "bg-accent-purple text-white", icon: Rotate3d, label: '控制：自由视角模式' },
+    [CamControlMode.Carousel]: { style: "bg-theme-5 text-white", icon: RotateCwSquare, label: '控制：自动轮播模式' },
     [CamControlMode.FullView]: { style: "", icon: SquareCode, label: '控制：全景视角模式' },
-    [CamControlMode.Attention]: { style: "bg-attention/75", icon: Siren, label: '控制：关注模式' },
+    [CamControlMode.Attention]: { style: "bg-attention text-white", icon: Siren, label: '控制：关注模式' },
 };
 
 export function VerticalToggleGroup() {
@@ -65,8 +65,8 @@ export function VerticalToggleGroup() {
     }
 
     return (
-        <div className="relative flex-col inline-flex gap-0.5 p-1 \
-            rounded-md bg-gray-2/50 text-text backdrop-blur-md shadow-2xl">
+        <div className="dashboard-tool-rail relative flex-col inline-flex gap-0.5 p-1 \
+            rounded-md bg-gray-2/50 text-text backdrop-blur-md">
             {/*控制模式选择器*/}
             <button
                 key={"camera-control-mode"}
@@ -93,8 +93,8 @@ export function VerticalToggleGroup() {
                             relative flex items-center justify-center size-10 rounded-md \
                             transition-all duration-200
                             `, (isActive
-                            ? 'bg-accent/75'
-                            : 'hover:text-white hover:bg-white/10 active:scale-95'
+                            ? 'bg-accent text-white'
+                            : 'hover:text-accent hover:bg-accent/10 active:scale-95'
                         ))}>
                         <Icon className="size-5 stroke-[2.2]" />
                         {getAttrStatus(option.id).status === 1 && <span className="absolute top-1 right-1 size-2 animate-ping rounded-full bg-attention opacity-75"></span>}

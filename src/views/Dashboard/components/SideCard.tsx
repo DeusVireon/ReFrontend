@@ -21,9 +21,9 @@ export function SideCard({
 }: DashboardCardProps) {
     return (
         <div className={cn(
-            "w-full h-full p-4 pt-2.5 rounded-md flex flex-col gap-1.5 overflow-hidden \
-            border-[1.5px] border-theme-1/20 bg-theme-2/50 text-text backdrop-blur-sm \
-            ring-1 ring-theme-9/15 shadow-2xl",
+            "dashboard-surface w-full h-full p-4 pt-2.5 rounded-md flex flex-col gap-1.5 overflow-hidden \
+            border-[1.5px] border-theme-1/20 bg-theme-2/50 text-text backdrop-blur-md \
+            ring-1 ring-theme-9/15",
             className
         )}>
             {/* 固定的 Title 区 */}

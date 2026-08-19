@@ -52,10 +52,10 @@ function WallBase({
         <mesh position={position} receiveShadow>
             <boxGeometry args={size} />
             <meshStandardMaterial
-                color="#263946"
-                metalness={0.62}
-                roughness={0.58}
-                envMapIntensity={0.52}
+                color="#aab9c5"
+                metalness={0.48}
+                roughness={0.62}
+                envMapIntensity={0.42}
             />
         </mesh>
     );
@@ -67,14 +67,14 @@ function ColumnBase({ position }: { position: [number, number] }) {
             <mesh>
                 <cylinderGeometry args={[0.28, 0.28, 0.12, 12]} />
                 <meshStandardMaterial
-                    color="#587184"
-                    metalness={0.68}
-                    roughness={0.48}
+                    color="#839aaa"
+                    metalness={0.54}
+                    roughness={0.52}
                 />
             </mesh>
             <mesh position={[0, 0.064, 0]} rotation={[-Math.PI / 2, 0, 0]}>
                 <ringGeometry args={[0.34, 0.43, 16]} />
-                <meshBasicMaterial color="#6f9aad" transparent opacity={0.42} />
+                <meshBasicMaterial color="#5f87a0" transparent opacity={0.38} />
             </mesh>
         </group>
     );
@@ -95,28 +95,28 @@ export function FactoryFloorOutline() {
 
             <Line
                 points={OUTER_BOUNDARY}
-                color="#6f94a8"
+                color="#668ba4"
                 lineWidth={1.35}
                 transparent
                 opacity={0.58}
             />
             <Line
                 points={EQUIPMENT_ZONE}
-                color="#426b80"
+                color="#7a9bb0"
                 lineWidth={0.9}
                 transparent
                 opacity={0.38}
             />
             <Line
                 points={SERVICE_AISLE_NORTH}
-                color="#8ba3ad"
+                color="#8da5b5"
                 lineWidth={0.8}
                 transparent
                 opacity={0.27}
             />
             <Line
                 points={SERVICE_AISLE_SOUTH}
-                color="#8ba3ad"
+                color="#8da5b5"
                 lineWidth={0.8}
                 transparent
                 opacity={0.27}

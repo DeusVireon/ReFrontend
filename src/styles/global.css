@@ -36,6 +36,36 @@
     --color-text: oklch(0.85 0 0);
 }
 
+.dashboard-light {
+    color-scheme: light;
+    --color-positive: oklch(0.55 0.13 158);
+    --color-positive-dark: oklch(0.88 0.06 158);
+    --color-attention: oklch(0.58 0.15 68);
+    --color-attention-dark: oklch(0.91 0.07 78);
+    --color-negative: oklch(0.56 0.2 24);
+    --color-negative-dark: oklch(0.91 0.06 24);
+    --color-accent-light: oklch(0.61 0.17 252);
+    --color-accent-light-t60: oklch(0.61 0.17 252 / 0.6);
+    --color-accent: oklch(0.53 0.19 255);
+    --color-accent-t60: oklch(0.53 0.19 255 / 0.6);
+    --color-accent-purple-light: oklch(0.61 0.16 292);
+    --color-accent-purple: oklch(0.52 0.18 292);
+    --color-accent-cyan-light: oklch(0.58 0.12 218);
+    --color-accent-cyan: oklch(0.49 0.11 220);
+    --color-theme-7: oklch(0.95 0.015 246);
+    --color-theme-6: oklch(0.52 0.045 246);
+    --color-theme-5: oklch(0.64 0.035 246);
+    --color-theme-4: oklch(0.76 0.028 246);
+    --color-theme-3: oklch(0.89 0.018 246);
+    --color-theme-2: oklch(0.985 0.007 246);
+    --color-theme-1: oklch(0.82 0.025 246);
+    --color-gray-7: oklch(0.5 0.025 246);
+    --color-gray-4: oklch(0.72 0.02 246);
+    --color-gray-3: oklch(0.84 0.016 246);
+    --color-gray-2: oklch(0.93 0.012 246);
+    --color-text: oklch(0.29 0.035 246);
+}
+
 /* .light {
   主题变体 空置 
 } */
@@ -193,4 +223,22 @@
     .animate-clock-digit-roll {
         animation: none;
     }
+}
+
+.dashboard-light .dashboard-surface {
+    border-color: color-mix(in oklch, var(--color-theme-5) 24%, transparent);
+    background: color-mix(in oklch, white 84%, transparent);
+    box-shadow: 0 12px 34px rgb(50 76 101 / 0.13), 0 2px 8px rgb(50 76 101 / 0.07);
+}
+
+.dashboard-light .dashboard-floating-surface {
+    border: 1px solid color-mix(in oklch, var(--color-theme-5) 28%, transparent);
+    background: color-mix(in oklch, white 91%, transparent);
+    box-shadow: 0 14px 34px rgb(50 76 101 / 0.18);
+}
+
+.dashboard-light .dashboard-tool-rail {
+    border: 1px solid color-mix(in oklch, var(--color-theme-5) 24%, transparent);
+    background: color-mix(in oklch, white 88%, transparent);
+    box-shadow: 0 10px 28px rgb(50 76 101 / 0.15);
 }

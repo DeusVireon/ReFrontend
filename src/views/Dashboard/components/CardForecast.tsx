@@ -157,7 +157,7 @@ function GaugeChart({ value, subArcProp, extraTicks, title }: { value: number, s
                 }}
                 pointer={{
                     type: "arrow",
-                    color: "#e0e0e0",
+                    color: "var(--color-theme-6)",
                     width: 14,
                     length: 0.14,
                     arrowOffset: 0.78,
@@ -180,7 +180,7 @@ function GaugeChart({ value, subArcProp, extraTicks, title }: { value: number, s
                         ticks: extraTicks,
                         defaultTickValueConfig: {
                             formatTextValue: e => e,
-                            style: { fontSize: "16px", fill: "#aaa" },
+                            style: { fontSize: "16px", fill: "var(--color-gray-7)" },
                             hide: false
                         },
                         defaultTickLineConfig: { distanceFromText: 9, hide: true },
