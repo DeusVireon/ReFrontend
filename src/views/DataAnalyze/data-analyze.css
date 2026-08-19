@@ -1,0 +1,109 @@
+.analysis-button {
+    display: inline-flex;
+    min-height: 2.25rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.625rem;
+    padding: 0.45rem 0.75rem;
+    color: var(--color-text);
+    background: color-mix(in oklch, var(--color-theme-2) 76%, transparent);
+    font-size: 0.875rem;
+    font-weight: 650;
+    transition: transform 160ms ease, border-color 160ms ease, background-color 160ms ease;
+}
+
+.analysis-button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    border-color: var(--color-accent);
+    background: color-mix(in oklch, var(--color-accent) 20%, var(--color-theme-2));
+}
+
+.analysis-button:disabled {
+    cursor: not-allowed;
+    opacity: 0.42;
+}
+
+.analysis-button--primary {
+    border-color: color-mix(in oklch, var(--color-accent) 60%, transparent);
+    background: color-mix(in oklch, var(--color-accent) 28%, var(--color-theme-2));
+}
+
+.analysis-input {
+    min-height: 2.5rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.625rem;
+    padding: 0.45rem 0.7rem;
+    color: var(--color-text);
+    background: color-mix(in oklch, var(--color-theme-1) 72%, transparent);
+    color-scheme: inherit;
+    outline: none;
+}
+
+.analysis-input:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-accent) 18%, transparent);
+}
+
+.analyze-highlight-area {
+    transform-box: fill-box;
+    transform-origin: center top;
+    animation: analyze-highlight-sweep 1.15s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes analyze-highlight-sweep {
+    0% {
+        opacity: 0;
+        transform: scaleY(0);
+        filter: brightness(2);
+    }
+    58% {
+        opacity: 1;
+        transform: scaleY(1);
+        filter: brightness(1.45);
+    }
+    100% {
+        opacity: 0.92;
+        transform: scaleY(1);
+        filter: brightness(1);
+    }
+}
+
+@keyframes expandRight {
+    from {
+        clip-path: inset(0 100% 0 0);
+        opacity: 0.35;
+    }
+    to {
+        clip-path: inset(0 0 0 0);
+        opacity: 1;
+    }
+}
+
+@keyframes flashHighlight {
+    from { filter: brightness(1.6); }
+    to { filter: brightness(1); }
+}
+
+.liquid-glass-brush .recharts-brush-slide,
+.liquid-glass-brush .recharts-brush-selection {
+    fill: color-mix(in oklch, var(--color-accent) 18%, var(--color-theme-2)) !important;
+    stroke: color-mix(in oklch, var(--color-accent) 68%, transparent) !important;
+    rx: 10px;
+    ry: 10px;
+}
+
+.liquid-glass-brush .recharts-brush-traveller rect {
+    fill: var(--color-theme-3) !important;
+    stroke: var(--color-accent-light) !important;
+    stroke-width: 1.5px;
+    rx: 4px;
+    ry: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .analyze-highlight-area {
+        animation: none;
+    }
+}

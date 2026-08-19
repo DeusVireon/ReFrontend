@@ -63,7 +63,7 @@ const POINT_COUNT = 48
 const STEP_MS = 5 * 60 * 1000
 
 function buildSeries(): TimeSeriesPoint[] {
-    const end = Date.UTC(2026, 7, 11, 10, 0, 0)
+    const end = Math.floor(Date.now() / STEP_MS) * STEP_MS
     const keys = Object.keys(BASE_VALUES)
 
     return Array.from({ length: POINT_COUNT }, (_, i) => {
@@ -115,6 +115,12 @@ export const MOCK_ANALYZE_PAYLOAD: AnalyzePayload = {
     windowLabel: '近 4 小时 · 5 分钟采样',
     series: SERIES,
     stats: buildStats(SERIES),
+    pagination: {
+        total: SERIES.length,
+        page: 1,
+        pageSize: SERIES.length,
+        totalPages: 1,
+    },
 }
 
 export function createMockAnalyzePayload(): AnalyzePayload {

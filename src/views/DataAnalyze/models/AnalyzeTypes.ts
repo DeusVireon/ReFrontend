@@ -33,6 +33,22 @@ export interface AnalyzePayload {
     windowLabel: string
     series: TimeSeriesPoint[]
     stats: SeriesStat[]
+    pagination: AnalyzePagination
+}
+
+export interface AnalyzePagination {
+    total: number
+    page: number
+    pageSize: number
+    totalPages: number
+}
+
+export interface AnalyzeQuery {
+    startTime: string
+    endTime: string
+    fields: string[]
+    page: number
+    pageSize: number
 }
 
 /** 预留接口：外部接口跳转可在此写入高亮的区段 */
@@ -43,6 +59,8 @@ export interface HighlightRange {
     attrKeys: string[] | null
     /** 来源说明，便于调试与后续联动 */
     source?: string
+    /** 每次激活递增，确保相同区间的扫光动画可以重新播放 */
+    revision?: number
 }
 
 export const FIELD_META: FieldMeta[] = [
@@ -88,12 +106,14 @@ export const FIELD_META_MAP: Record<string, FieldMeta> = Object.fromEntries(
 
 /** 图表折线颜色轮询部分 */
 export const SERIES_COLORS = [
-    'var(--color-accent)',
-    'var(--color-accent-cyan)',
-    'var(--color-accent-purple)',
-    'var(--color-positive)',
-    'var(--color-attention)',
-    'var(--color-accent-light)',
+    '#818cf8',
+    '#22d3ee',
+    '#c084fc',
+    '#34d399',
+    '#fbbf24',
+    '#60a5fa',
+    '#fb7185',
+    '#a3e635',
 ] as const
 
 //默认打开的时候写死的mock数据
