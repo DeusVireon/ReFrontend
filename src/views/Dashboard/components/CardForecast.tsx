@@ -1,9 +1,10 @@
 import { SideCard } from "./SideCard"
-import { useMemo } from "react"
+import { useMemo, useState, useEffect } from "react"
 import GaugeComponent from 'react-gauge-component'
 import { usePredictResult } from "../stores/PredictResult"
 import { useSensorData } from "../stores/SensorData"
 import { CompDataChartN } from "./SensorDataChart"
+import { formatShowTime } from "./utils"
 import {
     AreaChart,
     Area,
@@ -28,12 +29,10 @@ export function CardForecast() {
             <div className="grid grid-cols-5 gap-2 text-sm">
                 <div className="col-span-2 grid grid-rows-4 gap-2 overflow-hidden">
                     <div className="flex row-span-1 pl-16 items-center ">
-                        <div className="w-fit h-fit py-0.75 px-2 bg-gray-4/20 rounded-sm text-gray-7">
-                            15s 前更新
-                        </div>
-                        <div className="w-fit h-fit p-1 px-3 rounded-sm text-gray-7">
+                        <ForecastTime anchorTime={predictResult?.AnchorTime} />
+                        {/* <div className="w-fit h-fit p-1 px-3 rounded-sm text-gray-7">
                             数据量 120w
-                        </div>
+                        </div> */}
                     </div>
                     <div className="row-span-3 flex">
                         <MaxRiskGauge value={maxExceedProb} />
@@ -46,6 +45,25 @@ export function CardForecast() {
             </div>
         </SideCard>
     )
+}
+
+function ForecastTime({ anchorTime }: { anchorTime: string | undefined }) {
+    const [, setTick] = useState(0);
+
+    useEffect(() => {
+        // 每秒触发一次内部状态更新
+        const timer = setInterval(() => {
+            setTick((prev) => prev + 1);
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    return (
+        <div className="w-fit h-fit py-0.75 px-2 bg-theme-2/20 rounded-sm text-gray-7">
+            {anchorTime ? formatShowTime(new Date(anchorTime).toISOString()) : "UNDEFINED"} 更新
+        </div>
+    );
 }
 
 function MaxRiskGauge({ value }: { value: number }) {

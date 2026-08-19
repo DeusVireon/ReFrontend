@@ -1,6 +1,9 @@
+import { useRefClock } from "@/stores/ReferenceClock";
+
 export const formatShowTime = (isoString: string) => {
     if (!isoString) return "UNDEFINED TIME";
-    const diffInSeconds = Math.floor((new Date(isoString).getTime() - Date.now()) / 1000);
+    const baseTimestamp = useRefClock.getState().getTime();
+    const diffInSeconds = Math.floor((new Date(isoString).getTime() - baseTimestamp) / 1000);
     const rtf = new Intl.RelativeTimeFormat('zh-CN', { numeric: 'auto' });
 
     if (diffInSeconds > 0) return formatShowTimeStr(isoString);
@@ -13,9 +16,7 @@ export const formatShowTime = (isoString: string) => {
 
 const formatShowTimeStr = (isoString: string, locale = 'zh-CN') => {
     if (!isoString) return '';
-
     const date = new Date(isoString);
-
     return new Intl.DateTimeFormat(locale, {
         year: 'numeric',
         month: '2-digit',  // '2-digit' -> "07", 'short' -> "7月"
