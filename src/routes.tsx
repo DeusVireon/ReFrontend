@@ -21,6 +21,13 @@ export const router = createBrowserRouter([
                 },
             },
             {
+                path: "Settings",
+                lazy: async () => {
+                    const { SettingsView } = await import("./views/Settings/Settings");
+                    return { Component: SettingsView };
+                },
+            },
+            {
                 path: "*",
                 lazy: async () => {
                     const { NotFoundView } = await import("./views/ErrorPage/NotFound");
