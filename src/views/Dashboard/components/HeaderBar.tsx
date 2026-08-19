@@ -12,15 +12,16 @@ export function HeaderBar({ showNavigation = true }: { showNavigation?: boolean 
         <header className="pointer-events-none absolute inset-x-0 top-0 z-40 h-24 text-text">
             <div
                 aria-hidden
-                className="absolute inset-x-0 top-0 h-20 bg-linear-to-b from-theme-1/90 via-theme-1/55 via-65% to-theme-1/0 backdrop-blur-[2px]"
+                className="absolute inset-x-0 top-0 h-20 bg-linear-to-b from-theme-1/90 via-theme-1/55 via-65% to-theme-1/0"
             />
 
             <div className="pointer-events-auto absolute left-0 top-0 z-20 w-fit">
                 <TitleArea />
             </div>
 
-            <div className="pointer-events-auto relative z-10 flex h-16 items-center gap-1.5 pr-2 pl-20 min-[1024px]:gap-3 min-[1024px]:pr-6 min-[1024px]:pl-[21.5rem]">
-                <div className="flex min-w-0 items-center gap-1.5 min-[1024px]:gap-2.5">
+            <div className="pointer-events-auto relative z-10 flex h-16 items-center gap-3 pr-2 pl-20 \
+                min-[1024px]:pr-6 min-[1024px]:pl-100">
+                <div className="flex absolute left-1/2 -translate-x-1/2 min-w-0 items-center gap-6">
                     {showNavigation ? <HeaderPageNavigation /> : null}
                     <TimeArea />
                 </div>
@@ -30,11 +31,6 @@ export function HeaderBar({ showNavigation = true }: { showNavigation?: boolean 
                     <SettingsButton />
                 </div>
             </div>
-
-            <div
-                aria-hidden
-                className="absolute top-16 right-2 h-px w-[calc(100%-6rem)] bg-linear-to-r from-transparent via-theme-5/55 to-transparent min-[1024px]:right-6 min-[1024px]:w-[calc(100%-23rem)]"
-            />
         </header>
     )
 }
@@ -63,19 +59,29 @@ function TitleArea() {
 function TimeArea() {
     const [timeMs, setTimeMs] = useState(() => useRefClock.getState().getTime())
     const lastRenderedSecond = useRef(Math.floor(timeMs / 1000))
+    // 1. 新增：记录上一次 UI 实际渲染时的真实物理时间戳
+    const lastRenderTime = useRef(performance.now())
     const speed = useRefClock((state) => state.refClockSpeed)
+
+    // 2. 设置允许的最大跳动频率（例如最高 10Hz，即每 100ms 最多跳动 1 次）
+    const MAX_REFRESH_RATE = 5
+    const MIN_INTERVAL = 1000 / MAX_REFRESH_RATE
 
     useEffect(() => {
         let frameId = 0
 
         const updateClock = () => {
+            const now = performance.now()
             const nextTime = useRefClock.getState().getTime()
             const nextSecond = Math.floor(nextTime / 1000)
 
-            // The frame loop follows accelerated playback, while React only
-            // renders when the displayed second actually changes.
-            if (nextSecond !== lastRenderedSecond.current) {
+            // 3. 同时满足“秒数变化”与“达到真实时间间隔”才更新 State
+            if (
+                nextSecond !== lastRenderedSecond.current &&
+                now - lastRenderTime.current >= MIN_INTERVAL
+            ) {
                 lastRenderedSecond.current = nextSecond
+                lastRenderTime.current = now
                 setTimeMs(nextTime)
             }
             frameId = requestAnimationFrame(updateClock)
@@ -97,21 +103,24 @@ function TimeArea() {
 
     return (
         <div
-            className="relative flex h-10 min-w-[9.5rem] shrink-0 items-center overflow-hidden rounded-md border border-theme-5/65 bg-linear-to-b from-theme-3/90 via-theme-2/90 to-theme-1/90 px-2 font-mono shadow-[inset_0_1px_0_rgba(255,255,255,0.11),inset_0_-8px_16px_rgba(0,0,0,0.18),0_8px_20px_rgba(0,0,0,0.2)] min-[1024px]:h-12 min-[1024px]:min-w-[12.25rem] min-[1024px]:px-3"
+            className="relative flex h-10 min-w-45 shrink-0 items-center overflow-hidden rounded-md border border-theme-5/65 \
+             bg-theme-2/50 via-theme-2/90 to-theme-1/90 px-2 font-mono"
             aria-label={`参考时钟 ${hours}:${minutes}:${seconds}`}
         >
-            <span aria-hidden className="absolute inset-y-2 left-0 w-0.5 bg-accent shadow-[0_0_10px_rgba(105,115,255,0.8)]" />
-            <div className="relative z-10 w-full">
-                <div className="mb-0.5 hidden items-center justify-between text-[9px] leading-none tracking-[0.16em] text-gray-7 min-[1024px]:flex">
+            {/* <span aria-hidden className="absolute inset-y-2 left-0 w-0.5 bg-accent shadow-[0_0_10px_rgba(105,115,255,0.8)]" /> */}
+            <div className="relative z-10 w-full px-1">
+                <div className="hidden items-center justify-between text-[9px] leading-none tracking-[0.16em] text-gray-7 min-[1024px]:flex">
                     <span className="flex items-center gap-1.5">
-                        <span className="size-1.5 rounded-full bg-positive shadow-[0_0_7px_rgba(80,220,180,0.9)]" />
-                        REF CLOCK
+                        <span className="size-1.25 rounded-full bg-positive shadow-[0_0_7px_rgba(80,220,180,0.9)]" />
+                        CLOCK
                     </span>
                     <span className="tracking-normal">
-                        {date}{speed === 1 ? "" : ` · ×${formatClockSpeed(speed)}`}
+                        {date}{speed === 1 ? "" : ` ×${formatClockSpeed(speed)}`}
                     </span>
                 </div>
-                <div className="flex items-center justify-center text-[1.15rem] leading-none font-bold tracking-[0.02em] text-white [text-shadow:0_1px_0_rgba(255,255,255,0.2),0_4px_12px_rgba(76,90,220,0.4)] min-[1024px]:justify-start min-[1024px]:text-[1.55rem] min-[1024px]:tracking-[0.08em]">
+                <div className="flex w-full items-center justify-center leading-none font-bold tracking-[0.02em] text-white \
+                [text-shadow:0_1px_0_rgba(255,255,255,0.2),0_4px_12px_rgba(76,90,220,0.4)] \
+                 text-[1.50rem]">
                     <ClockDigits value={hours} segment="hour" />
                     <ClockSeparator />
                     <ClockDigits value={minutes} segment="minute" />
@@ -119,7 +128,6 @@ function TimeArea() {
                     <ClockDigits value={seconds} segment="second" />
                 </div>
             </div>
-            <span aria-hidden className="absolute inset-x-4 bottom-0 h-px bg-linear-to-r from-transparent via-accent/80 to-transparent" />
         </div>
     )
 }
@@ -178,12 +186,12 @@ function StatusBadge({ name, description, status }: { name: string, description:
             role="status"
             aria-label={`${name}状态${description ? `：${description}` : ""}`}
             className={cn("flex h-8 items-center rounded-sm px-1.5 text-xs whitespace-nowrap backdrop-blur-sm min-[1024px]:px-2 min-[1024px]:text-sm",
-            {
-                "bg-positive-dark/50 border border-positive-dark/75": status === 1,
-                "bg-attention-dark/50 border border-attention-dark/75": status === 0,
-                "bg-negative-dark/50 border border-negative-dark/75": status === -1,
-            }
-        )}
+                {
+                    "bg-positive-dark/50 border border-positive-dark/75": status === 1,
+                    "bg-attention-dark/50 border border-attention-dark/75": status === 0,
+                    "bg-negative-dark/50 border border-negative-dark/75": status === -1,
+                }
+            )}
         >
             {Icon && <Icon className="mr-1 size-4 shrink-0" strokeWidth={2.25} />}
             <div className={cn("font-bold",
