@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "vite",
     "dev-ex": "vite --host",
+    "mock:generate": "node scripts/generate-demo-mock.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

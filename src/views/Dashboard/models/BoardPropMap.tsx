@@ -17,7 +17,7 @@ export const BOARD_PROP_MAP: Record<ModelPartEnum, DataBoardProps> = {
         title: "环境数据",
         linkedData: [
             { attrKey: AttrKeyEnum.AmbientHumidity, showName: "环境湿度", showUnit: "%" },
-            { attrKey: AttrKeyEnum.AmbientPressure, showName: "大气压力", showUnit: "Pa" },
+            { attrKey: AttrKeyEnum.AmbientPressure, showName: "大气压力", showUnit: "kPa" },
             { attrKey: AttrKeyEnum.AmbientTemp, showName: "环境温度", showUnit: "℃" },
         ]
     },
@@ -25,8 +25,8 @@ export const BOARD_PROP_MAP: Record<ModelPartEnum, DataBoardProps> = {
         title: "废气入口数据",
         linkedData: [
             { attrKey: AttrKeyEnum.CoatingConc, showName: "进气浓度", showUnit: "mg/m³" },
-            { attrKey: AttrKeyEnum.CoatingFlow, showName: "进气湿度", showUnit: "%" },
-            { attrKey: AttrKeyEnum.CoatingPressure, showName: "涂布气压", showUnit: "Pa" },
+            { attrKey: AttrKeyEnum.CoatingFlow, showName: "进气流量", showUnit: "m³/h" },
+            { attrKey: AttrKeyEnum.CoatingPressure, showName: "涂布气压", showUnit: "kPa" },
             { attrKey: AttrKeyEnum.CoatingTemp, showName: "进气温度", showUnit: "℃" },
         ]
     },
@@ -56,7 +56,7 @@ export const BOARD_PROP_MAP: Record<ModelPartEnum, DataBoardProps> = {
         linkedData: [
             { attrKey: AttrKeyEnum.ConcentratedTemp, showName: "浓缩气温", showUnit: "℃" },
             { attrKey: AttrKeyEnum.ConcentratedFlow, showName: "浓缩气流", showUnit: "m³/h" },
-            { attrKey: AttrKeyEnum.ConcentratedPressure, showName: "浓缩气压", showUnit: "Pa" },
+            { attrKey: AttrKeyEnum.ConcentratedPressure, showName: "浓缩气压", showUnit: "kPa" },
             { attrKey: AttrKeyEnum.ConcentratedConc, showName: "浓缩浓度", showUnit: "mg/m³" },
         ]
     },
@@ -64,7 +64,7 @@ export const BOARD_PROP_MAP: Record<ModelPartEnum, DataBoardProps> = {
         title: "RTO焚烧炉系统",
         linkedData: [
             { attrKey: AttrKeyEnum.RTOInFlow, showName: "进气流量", showUnit: "m³/h" },
-            { attrKey: AttrKeyEnum.RTOInPressure, showName: "进气压力", showUnit: "Pa" },
+            { attrKey: AttrKeyEnum.RTOInPressure, showName: "进气压力", showUnit: "kPa" },
             { attrKey: AttrKeyEnum.RTOInTemp, showName: "进气温度", showUnit: "℃" },
             { attrKey: AttrKeyEnum.RTOInConc, showName: "进气浓度", showUnit: "mg/m³" },
             { attrKey: AttrKeyEnum.CombustionTemp, showName: "焚烧炉温", showUnit: "℃" },

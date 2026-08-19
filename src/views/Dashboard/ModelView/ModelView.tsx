@@ -31,10 +31,10 @@ export function ModelView({ theme }: { theme: DashboardTheme }) {
                 gl={{ antialias: true, powerPreference: 'high-performance' }}
                 onCreated={({ gl }) => {
                     gl.toneMapping = THREE.ACESFilmicToneMapping;
-                    gl.toneMappingExposure = isLight ? 1.08 : 0.96;
+                    gl.toneMappingExposure = isLight ? 1.08 : 1.06;
                 }}
             >
-                <SceneRendererSettings exposure={isLight ? 1.08 : 0.96} />
+                <SceneRendererSettings exposure={isLight ? 1.08 : 1.06} />
                 <fog attach="fog" args={isLight ? ["#e5edf4", 30, 82] : ["#0f1722", 24, 72]} />
                 <FactoryFloorOutline theme={theme} />
                 <ProdLineBody />
@@ -42,23 +42,37 @@ export function ModelView({ theme }: { theme: DashboardTheme }) {
                 <FloatingBoardEle />
                 <hemisphereLight args={isLight
                     ? ["#ffffff", "#8799a8", 1.7]
-                    : ["#9bbbd4", "#0b0f16", 0.92]}
+                    : ["#e8f1ff", "#162232", 1.12]}
+                />
+                <ambientLight
+                    intensity={isLight ? 2.2 : 1.45}
+                    color={isLight ? "#f4f8fb" : "#e6efff"}
                 />
                 <directionalLight
                     position={[18, 16, -10]}
-                    intensity={isLight ? 4.2 : 3.1}
+                    intensity={isLight ? 4.2 : 3.8}
                     color={isLight ? "#fffdf8" : "#dceaff"}
+                />
+                <directionalLight
+                    position={[-16, 10, -18]}
+                    intensity={isLight ? 2.4 : 2.5}
+                    color={isLight ? "#c8e0ef" : "#a9c9e8"}
+                />
+                <directionalLight
+                    position={[4, 8, 20]}
+                    intensity={isLight ? 1.8 : 1.55}
+                    color={isLight ? "#ffffff" : "#f4f7ff"}
                 />
                 <pointLight
                     position={[-18, isLight ? 8 : 7, -4]}
-                    intensity={isLight ? 7 : 11}
+                    intensity={isLight ? 7 : 7.5}
                     distance={isLight ? 36 : 34}
                     color={isLight ? "#7fb6dc" : "#397fba"}
                 />
                 <Environment resolution={128} frames={1}>
                     <Lightformer
                         form="rect"
-                        intensity={isLight ? 2.2 : 1.8}
+                        intensity={isLight ? 2.2 : 2.1}
                         color={isLight ? "#ffffff" : "#dcecff"}
                         position={[0, 10, -8]}
                         scale={[20, 5, 1]}
@@ -66,7 +80,7 @@ export function ModelView({ theme }: { theme: DashboardTheme }) {
                     />
                     <Lightformer
                         form="rect"
-                        intensity={isLight ? 1.05 : 0.9}
+                        intensity={isLight ? 1.05 : 1.0}
                         color={isLight ? "#a9d1ea" : "#4088b8"}
                         position={[-12, 5, 4]}
                         scale={[5, 9, 1]}
