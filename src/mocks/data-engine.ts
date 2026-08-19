@@ -6,6 +6,7 @@ export class DataEngine {
     private startTime: number = Date.now();
     private parsedData: ParsedCsvResult = { config: {}, records: [] };
     private defaultWindowMs: number = 5000;
+    private fixedElapsedMs: number | null = null;
 
     /**
      * 引擎显式初始化：在 Mock 服务启动前调用，一次性完成配置与 CSV 数据加载
@@ -49,6 +50,9 @@ export class DataEngine {
             : 1.0;
         useRefClock.getState().setAnchor(mockTimeScale);
 
+        const searchParams = new URLSearchParams(window.location.search);
+        this.fixedElapsedMs = searchParams.get('safe-demo') === '1' ? 68_000 : null;
+
         this.startTime = Date.now();
     }
 
@@ -57,7 +61,7 @@ export class DataEngine {
     }
 
     public getElapsedMs(): number {
-        return Date.now() - this.startTime;
+        return this.fixedElapsedMs ?? Date.now() - this.startTime;
     }
 
     public getDefaultWindowMs(): number {

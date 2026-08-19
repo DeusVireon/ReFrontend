@@ -86,8 +86,15 @@ function sensorValues(second) {
     ))
 }
 
-function sensorStatuses() {
-    return Array(25).fill(1)
+function sensorStatuses(second) {
+    const statuses = Array(25).fill(1)
+    if (second >= 36 && second < 90) {
+        statuses[SENSOR_KEYS.indexOf("concentrated_conc")] = 0
+        statuses[SENSOR_KEYS.indexOf("rto_in_conc")] = 0
+        statuses[SENSOR_KEYS.indexOf("combustion_temp")] = -1
+        statuses[SENSOR_KEYS.indexOf("rto_out_conc")] = 0
+    }
+    return statuses
 }
 
 function predictionForCase(realCase) {
