@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { ArrowUpIcon, Bot, CircleOff, Info, SquareArrowOutDownLeft } from "lucide-react"
+import { ArrowUpIcon, Bot, CircleOff, Info, X } from "lucide-react"
 import { useSound } from "use-sound"
 
 import { Bubble, BubbleContent } from "@/components/ui/bubble"
@@ -13,8 +13,8 @@ import { useSensorData } from "../stores/SensorData"
 const QUICK_QUESTIONS = [
     "查询 RTO 出口浓度历史",
     "查看最近一次预测预警",
-    "哪些参数先发生变化？",
 ]
+const RISK_ALARM_THRESHOLD_PCT = 16.14
 
 export function ToolAISug() {
     const [isExpanded, setExpanded] = useState(false)
@@ -51,7 +51,7 @@ function ToolAISugBtn({ onClick }: { onClick: () => void }) {
             <Button
                 variant="ghost"
                 className="relative size-12 rounded-md bg-theme-2/50"
-                aria-label="打开 VOCs 研判助手"
+                aria-label="打开 VOCs 数据助手"
                 onClick={onClick}
             >
                 <Bot className="size-lg" />
@@ -94,10 +94,12 @@ function ToolAISubChat({ onChatClose }: { onChatClose?: () => void }) {
     const messages = useAISugMessage((state) => state.idList)
     const [input, setInput] = useState("")
     const [isReplying, setReplying] = useState(false)
-    const bottomRef = useRef<HTMLDivElement>(null)
+    const messageListRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" })
+        const messageList = messageListRef.current
+        if (!messageList) return
+        messageList.scrollTo({ top: messageList.scrollHeight, behavior: "smooth" })
     }, [messages, isReplying])
 
     const sendMsg = (question = input) => {
@@ -127,38 +129,40 @@ function ToolAISubChat({ onChatClose }: { onChatClose?: () => void }) {
     }
 
     return (
-        <div className="flex h-fit w-96 flex-col overflow-hidden rounded-md bg-theme-2/90 shadow-2xl backdrop-blur-md">
-            <div className="flex items-center border-b border-theme-1/40 px-4 py-2 text-lg font-bold">
+        <div
+            className="flex w-96 max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-md bg-theme-2/90 shadow-2xl backdrop-blur-md"
+            style={{ height: "min(610px, calc(100vh - 7rem))" }}
+        >
+            <div className="flex shrink-0 items-center border-b border-theme-1/40 px-4 py-2 text-lg font-bold">
                 <Bot className="mr-2" />
                 <div>
-                    <div>VOCs 研判助手</div>
-                    <div className="text-[11px] font-normal opacity-65">演示模式 · 本地固定回复</div>
+                    <div>VOCs 数据助手</div>
+                    <div className="text-[11px] font-normal opacity-65">监测历史 · 预测查询</div>
                 </div>
                 <Button
                     variant="ghost"
                     size="icon"
                     className="ml-auto"
-                    aria-label="关闭研判助手"
+                    aria-label="关闭 VOCs 数据助手"
                     onClick={onChatClose}
                 >
-                    <SquareArrowOutDownLeft />
+                    <X />
                 </Button>
             </div>
 
-            <div className="flex max-h-[50vh] min-h-52 flex-col gap-3 overflow-auto p-4">
+            <div ref={messageListRef} className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto p-4">
                 {messages.map((item) => <MessageBubble key={item} id={item} />)}
                 {messages.length === 0 && (
                     <div className="flex flex-col items-center justify-center p-2 text-center text-sm opacity-60">
                         <CircleOff className="mb-2" />
                         <div>暂无对话记录</div>
-                        <div>可查询模拟历史数据和预测预警</div>
+                        <div>可查询监测历史和预测预警</div>
                     </div>
                 )}
-                {isReplying && <div className="text-xs opacity-60">正在整理当前模拟数据...</div>}
-                <div ref={bottomRef} />
+                {isReplying && <div className="text-xs opacity-60">正在整理数据...</div>}
             </div>
 
-            <div className="flex flex-wrap gap-1.5 border-t border-theme-1/25 px-3 pt-2">
+            <div className="flex shrink-0 flex-wrap gap-1.5 border-t border-theme-1/25 px-3 pt-2">
                 {QUICK_QUESTIONS.map((question) => (
                     <Button
                         key={question}
@@ -175,14 +179,14 @@ function ToolAISubChat({ onChatClose }: { onChatClose?: () => void }) {
             </div>
 
             <form
-                className="flex w-full items-end gap-2 bg-theme-2/50 p-2"
+                className="flex w-full shrink-0 items-end gap-2 bg-theme-2/50 p-2"
                 onSubmit={(event) => {
                     event.preventDefault()
                     sendMsg()
                 }}
             >
                 <Input
-                    placeholder="询问历史数值或预测预警"
+                    placeholder="查询历史数值或预测结果"
                     value={input}
                     onChange={(event) => setInput(event.target.value)}
                 />
@@ -201,20 +205,20 @@ function buildDemoReply(question: string) {
         return buildPredictionReply()
     }
     if (normalized.includes("参数") || normalized.includes("原因") || normalized.includes("变化")) {
-        return buildProcessReply()
+        return "可查询 RTO 出口浓度历史或最近一次预测结果。"
     }
     if (normalized.includes("历史") || normalized.includes("浓度") || normalized.includes("查询")) {
         return buildHistoryReply()
     }
 
-    return "当前为离线演示，可查询：RTO 出口浓度历史、最近一次预测预警，以及预警前先发生变化的工艺参数。"
+    return "可查询 RTO 出口浓度历史和最近一次预测结果。"
 }
 
 function buildHistoryReply() {
     const history = useSensorData.getState().attrHistory.rto_out_conc?.history ?? []
     const recent = history.slice(-24)
     if (recent.length === 0) {
-        return "模拟数据正在加载，暂未收到 RTO 出口浓度记录。"
+        return "数据正在加载，暂未收到 RTO 出口浓度记录。"
     }
 
     const values = recent.map((item) => item.value)
@@ -229,33 +233,24 @@ function buildHistoryReply() {
 function buildPredictionReply() {
     const prediction = usePredictResult.getState().predictResult
     if (!prediction || prediction.PredSteps.length === 0) {
-        return "模拟预测尚未生成，请等待预测数据更新。"
+        return "预测尚未生成，请等待数据更新。"
     }
 
     const values = prediction.PredSteps.map((step) => step.value)
     const peak = Math.max(...values)
+    const upperPeak = Math.max(...prediction.PredSteps.map((step) => step.upper90 ?? step.value))
     const firstExceedIndex = prediction.PredSteps.findIndex((step) => step.value > 80)
     const alertState = useAlertData.getState()
     const latestAlertId = alertState.idList[0]
     const latestAlert = latestAlertId ? alertState.alertByID[latestAlertId] : null
 
     if (firstExceedIndex < 0) {
-        return `最新 6 小时预测峰值为 ${peak.toFixed(1)} mg/m3，校准风险为 ${prediction.MaxExceedProb.toFixed(1)}%，当前曲线未越过 80 mg/m3。${latestAlert ? `最近状态：${latestAlert.title}。` : ""}`
+        if (prediction.MaxExceedProb >= RISK_ALARM_THRESHOLD_PCT) {
+            return `最新 6 小时点预测峰值为 ${peak.toFixed(1)} mg/m3，尚未越过 80 mg/m3；校准风险为 ${prediction.MaxExceedProb.toFixed(1)}%，已超过 ${RISK_ALARM_THRESHOLD_PCT.toFixed(1)}% 报警阈值，90% 区间上界最高为 ${upperPeak.toFixed(1)} mg/m3。`
+        }
+        return `最新 6 小时预测峰值为 ${peak.toFixed(1)} mg/m3，校准风险为 ${prediction.MaxExceedProb.toFixed(1)}%，当前曲线未越过 80 mg/m3。${latestAlert ? `最近记录：${latestAlert.title}。` : ""}`
     }
 
     const hoursAhead = ((firstExceedIndex + 1) * 0.25).toFixed(2)
-    return `最新 6 小时预测峰值为 ${peak.toFixed(1)} mg/m3，校准风险为 ${prediction.MaxExceedProb.toFixed(1)}%；预计约 ${hoursAhead} 小时后首次越过 80 mg/m3。该内容来自模拟预测数据，不会自动下发控制指令。`
-}
-
-function buildProcessReply() {
-    const sensorState = useSensorData.getState()
-    const inlet = sensorState.attrHistory.rto_in_conc?.latestValue?.value
-    const combustion = sensorState.attrHistory.combustion_temp?.latestValue?.value
-    const rotor = sensorState.attrHistory.rotor_speed?.latestValue?.value
-
-    if (inlet === undefined || combustion === undefined || rotor === undefined) {
-        return "模拟工艺数据尚未加载完整，暂时无法汇总参数变化。"
-    }
-
-    return `本次模拟事件中，RTO 入口浓度先升至 ${inlet.toFixed(1)} mg/m3，燃烧室温度同步变化至 ${combustion.toFixed(1)} C，转轮转速为 ${rotor.toFixed(2)} rpm。它们是预警前的观测变化，只表示时间先后和模型关联，不代表已经证明物理因果。`
+    return `最新 6 小时预测峰值为 ${peak.toFixed(1)} mg/m3，校准风险为 ${prediction.MaxExceedProb.toFixed(1)}%；预计约 ${hoursAhead} 小时后首次越过 80 mg/m3。`
 }

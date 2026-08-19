@@ -1,6 +1,14 @@
-import { mkdirSync, writeFileSync } from "node:fs"
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs"
 import { dirname, resolve } from "node:path"
 import { fileURLToPath } from "node:url"
+
+const scriptDir = dirname(fileURLToPath(import.meta.url))
+const realCasePath = resolve(scriptDir, "./data/pa-pft-real-cases.json")
+const realCaseBundle = JSON.parse(readFileSync(realCasePath, "utf8"))
+const REAL_CASES = [...realCaseBundle.cases].sort(
+    (left, right) => left.video_second - right.video_second,
+)
+const CASE_BY_ID = Object.fromEntries(REAL_CASES.map((item) => [item.id, item]))
 
 const SENSOR_KEYS = [
     "ambient_temp",
@@ -55,87 +63,52 @@ function smoothStep(from, to, value) {
     return x * x * (3 - 2 * x)
 }
 
-function incidentLoad(second) {
-    if (second < 6) return 0
-    if (second < 18) return smoothStep(6, 18, second)
-    if (second < 32) return 1
-    if (second < 45) return 1 - smoothStep(32, 45, second)
-    return 0
+function surroundingCases(second) {
+    const nextIndex = REAL_CASES.findIndex((item) => item.video_second >= second)
+    if (nextIndex <= 0) return [REAL_CASES[0], REAL_CASES[0], 0]
+    if (nextIndex < 0) {
+        const last = REAL_CASES.at(-1)
+        return [last, last, 0]
+    }
+
+    const previous = REAL_CASES[nextIndex - 1]
+    const next = REAL_CASES[nextIndex]
+    const ratio = smoothStep(previous.video_second, next.video_second, second)
+    return [previous, next, ratio]
 }
 
 function sensorValues(second) {
-    const load = incidentLoad(second)
-    const wave = (period, phase = 0) => Math.sin((second + phase) / period)
-
-    return [
-        round(23.4 + 0.55 * wave(11)),
-        round(62.8 + 2.1 * wave(8, 2)),
-        round(101.32 + 0.09 * wave(13)),
-        round(8460 + 1380 * load + 80 * wave(3)),
-        round(88 + 52 * load + 2.4 * wave(4)),
-        round(27.1 + 0.8 * wave(7)),
-        round(101.22 + 0.08 * wave(9)),
-        round(4.82 - 0.28 * load + 0.035 * wave(3.5)),
-        round(41.8 + 2.4 * load + 0.45 * wave(5)),
-        round(3.15 + 0.38 * load + 0.08 * wave(4)),
-        round(26.3 + 0.9 * wave(6)),
-        round(63.7 + 2.2 * wave(8, 1)),
-        round(205.6 - 8.4 * load + 0.65 * wave(4)),
-        round(848 + 128 * load + 9 * wave(4)),
-        round(426 + 218 * load + 8 * wave(3)),
-        round(184.7 + 4.8 * load + 0.8 * wave(5)),
-        round(101.46 + 0.11 * wave(8)),
-        round(998 + 74 * load + 12 * wave(5)),
-        round(418 + 184 * load + 7 * wave(3.5)),
-        round(184.5 + 4.6 * load + 0.7 * wave(4.5)),
-        round(101.41 + 0.1 * wave(9)),
-        round(32.6 + 4.2 * load + 0.35 * wave(3)),
-        round(786.5 - 30.5 * load + 1.8 * wave(2.8)),
-        round(62.1 + 2.1 * load + 0.5 * wave(5)),
-        round(21.8 + 23.6 * load + 1.2 * wave(3.4)),
-    ]
+    const [previous, next, ratio] = surroundingCases(second)
+    return SENSOR_KEYS.map((key) => round(
+        previous.sensor_values[key]
+        + (next.sensor_values[key] - previous.sensor_values[key]) * ratio,
+        3,
+    ))
 }
 
-function sensorStatuses(second) {
-    const statuses = Array(25).fill(1)
-    if (second >= 13 && second < 43) {
-        statuses[12] = 0
-        statuses[22] = 0
-    }
-    return statuses
+function sensorStatuses() {
+    return Array(25).fill(1)
 }
 
-function makePrediction(profile) {
-    const profiles = {
-        stable: (index) => 23.2 + index * 0.28 + 0.9 * Math.sin(index / 2.8),
-        rising: (index) => 27.4 + index * 1.55 + 1.8 * Math.sin(index / 3.2),
-        alarm: (index) => index <= 16
-            ? 31.5 + index * 3.05 + 0.35 * Math.sin(index / 2.5)
-            : 80.3 + (index - 16) * 0.87 + 0.12 * Math.sin(index / 2.5),
-        sustained: (index) => 34.2 + index * 2.18 + Math.max(0, index - 10) * 0.28 + 1.6 * Math.sin(index / 2.4),
-        recovery: (index) => 31.8 + 17 * Math.sin(Math.PI * index / 23) - index * 0.18,
-    }
-
-    const valueAt = profiles[profile]
-    return Array.from({ length: 24 }, (_, index) => {
-        const value = valueAt(index)
-        const intervalWidth = 3.2 + index * 0.34
-        return {
-            offsetMs: (index + 1) * 15 * 60 * 1000,
-            value: round(value),
-            lower90: round(Math.max(0, value - intervalWidth)),
-            upper90: round(value + intervalWidth * 1.18),
-            q10: round(Math.max(0, value - intervalWidth * 0.72)),
-            q50: round(value),
-            q90: round(value + intervalWidth * 0.82),
-        }
-    })
+function predictionForCase(realCase) {
+    return realCase.prediction_steps.map((step) => ({
+        offsetMs: step.offset_minutes * 60 * 1000,
+        value: round(step.point),
+        lower90: round(step.lower_90),
+        upper90: round(step.upper_90),
+        q10: round(step.q10),
+        q50: round(step.q50),
+        q90: round(step.q90),
+    }))
 }
 
-function setPrediction(cells, risk, quality, profile) {
-    cells[COL.prediction] = risk
+function setPrediction(cells, realCase, quality = 99.2) {
+    cells[COL.prediction] = round(
+        realCase.summary.calibrated_exceed_probability * 100,
+        2,
+    )
     cells[COL.prediction + 1] = quality
-    cells[COL.prediction + 2] = JSON.stringify(makePrediction(profile))
+    cells[COL.prediction + 2] = JSON.stringify(predictionForCase(realCase))
 }
 
 function setLog(cells, id, name, content, level = 1) {
@@ -288,100 +261,131 @@ function makeDcaSnapshot(stage) {
     }
 }
 
+function activeCase(second) {
+    return [...REAL_CASES]
+        .reverse()
+        .find((item) => item.video_second <= second) ?? REAL_CASES[0]
+}
+
+function dcaStageForCase(realCase) {
+    if (realCase.role === "risk_alarm" || realCase.role === "risk_confirming" || realCase.role === "point_exceed") {
+        return "warning"
+    }
+    if (realCase.role === "rising") return "attention"
+    if (realCase.role === "recovery") return "recovery"
+    return "normal"
+}
+
 function applyScenarioEvents(second, cells) {
     if (second === 0) {
         cells.splice(COL.systemStatus, 6, 1, 1, 1, "正常", "正常", "正常")
         cells.splice(COL.overall, 4, 1, "<EMPTY>", 1, "<EMPTY>")
-        setLog(cells, 1, "系统", "模拟数据链路已连接", 1)
-        setAlert(cells, 1, "系统已连接", "当前使用完整 VOCs 演示数据", 1)
-        setPrediction(cells, 12.4, 98.6, "stable")
-        cells[COL.dca] = JSON.stringify(makeDcaSnapshot("normal"))
-    }
-
-    if (second === 8) {
-        setPrediction(cells, 42.7, 98.2, "rising")
-        setLog(cells, 2, "预测", "检测到上游负荷持续上升", 2)
-        cells.splice(COL.overall, 4, 1, "<EMPTY>", 0, "预测风险正在升高")
-        cells[COL.dca] = JSON.stringify(makeDcaSnapshot("attention"))
-    }
-
-    if (second === 14) {
-        cells.splice(COL.attrStatus, 3, "combustion_temp", 0, "[2]")
-        setAlert(cells, 2, "燃烧工况偏离", "燃烧室温度下降且入口浓度持续上升", 2)
+        setLog(cells, 1, "系统", "数据链路已连接", 1)
+        setAlert(cells, 1, "系统已连接", "当前数据源连接正常", 1)
     }
 
     if (second === 18) {
-        setPrediction(cells, 78.6, 96.8, "alarm")
-        setAlert(cells, 3, "未来 6 小时 VOCs 超标风险", "预测曲线将在约 4 小时后越过 80 mg/m3", 2)
+        const realCase = CASE_BY_ID.rising_reference
+        setLog(cells, 2, "预测", `未来 6 小时预测峰值更新为 ${realCase.summary.point_max_mg_m3.toFixed(1)} mg/m3`, 1)
+        cells.splice(COL.overall, 4, 1, "<EMPTY>", 0, "预测风险正在升高")
+    }
+
+    if (second === 36) {
+        const realCase = CASE_BY_ID.early_risk
+        const risk = realCase.summary.calibrated_exceed_probability * 100
+        const threshold = realCase.summary.calibrated_alarm_threshold * 100
+        const upperPeak = Math.max(...realCase.prediction_steps.map((step) => step.upper_90))
+        setAlert(
+            cells,
+            3,
+            "未来 6 小时 VOCs 风险概率越过阈值",
+            `校准风险 ${risk.toFixed(1)}%，报警阈值 ${threshold.toFixed(1)}%`,
+            2,
+        )
         setPopup(cells, {
-            type: "预测预警",
-            title: "未来 6 小时 VOCs 存在超标风险",
+            type: "风险概率预警",
+            title: "未来 6 小时 VOCs 风险概率升高",
             level: 2,
             levelText: "关注",
             keyValueColor: 2,
-            keyValueTitle: "预测峰值",
-            keyValueContent: "86.4",
-            content: "模拟预测显示 RTO 出口浓度将在约 4 小时后越过 80 mg/m3。",
+            keyValueTitle: "校准风险",
+            keyValueContent: `${risk.toFixed(1)}%`,
+            content: `校准风险已超过 ${threshold.toFixed(1)}% 报警阈值。点预测峰值 ${realCase.summary.point_max_mg_m3.toFixed(1)} mg/m3，90% 区间上界最高 ${upperPeak.toFixed(1)} mg/m3。`,
         })
-        cells.splice(COL.overall, 4, 1, "<EMPTY>", -1, "预测推理提示超标")
-        setLog(cells, 3, "预测", "未来 6 小时风险预警已生成", 2)
+        cells.splice(COL.overall, 4, 1, "<EMPTY>", -1, "未来风险概率超过报警阈值")
+        setLog(cells, 3, "预测", "未来 6 小时风险概率预警已生成", 2)
         setAiMessage(
             cells,
             1001,
-            "检测到未来 6 小时 VOCs 超标风险：预测峰值约 86.4 mg/m3。演示数据中，RTO 入口浓度上升与燃烧室温度下降先于风险抬升。",
+            `未来 6 小时校准风险为 ${risk.toFixed(1)}%，已超过 ${threshold.toFixed(1)}% 报警阈值；正式点预测峰值 ${realCase.summary.point_max_mg_m3.toFixed(1)} mg/m3，当前尚未越过 80 mg/m3。`,
         )
         cells[COL.aiTool] = 1
-        cells[COL.aiTool + 1] = "智能体发现新的预测预警"
-        cells[COL.dca] = JSON.stringify(makeDcaSnapshot("warning"))
+        cells[COL.aiTool + 1] = "收到新的预测预警"
     }
 
-    if (second === 30) {
-        setPrediction(cells, 72.1, 97.1, "sustained")
-        setLog(cells, 4, "DCA", "工况关系偏离持续，建议关注燃烧段", 2)
-        setAlert(cells, 4, "工况关系偏离", "入口-出口时滞延长至 1.5 小时", 2)
+    if (second === 52) {
+        const realCase = CASE_BY_ID.near_event
+        setLog(
+            cells,
+            4,
+            "预测",
+            `风险提示持续，点预测峰值更新为 ${realCase.summary.point_max_mg_m3.toFixed(1)} mg/m3`,
+            2,
+        )
     }
 
-    if (second === 45) {
-        setPrediction(cells, 18.3, 99.0, "recovery")
+    if (second === 68) {
+        const realCase = CASE_BY_ID.point_exceed
+        const firstStep = realCase.summary.point_first_exceed_step
+        const minutesAhead = firstStep * 15
+        setAlert(
+            cells,
+            4,
+            "预测曲线越过 80 mg/m3",
+            `预测峰值 ${realCase.summary.point_max_mg_m3.toFixed(1)} mg/m3，首次越线约 ${minutesAhead} 分钟后`,
+            3,
+        )
+        setPopup(cells, {
+            type: "预测越线预警",
+            title: "RTO 出口浓度预测超过限值",
+            level: 3,
+            levelText: "预警",
+            keyValueColor: 3,
+            keyValueTitle: "预测峰值",
+            keyValueContent: `${realCase.summary.point_max_mg_m3.toFixed(1)}`,
+            content: `最新 24 点预测中，第 ${firstStep} 个点超过 80 mg/m3，对应约 ${minutesAhead} 分钟后。`,
+        })
+        cells.splice(COL.overall, 4, 1, "<EMPTY>", -1, "预测曲线超过 80 mg/m3")
+        setLog(cells, 5, "预测", "点预测越线预警已生成", 3)
+        setAiMessage(
+            cells,
+            1002,
+            `最新 6 小时预测峰值为 ${realCase.summary.point_max_mg_m3.toFixed(1)} mg/m3，第 ${firstStep} 个预测点超过 80 mg/m3。`,
+        )
+        cells[COL.aiTool] = 1
+        cells[COL.aiTool + 1] = "预测越线状态已更新"
+    }
+
+    if (second === 90) {
+        const realCase = CASE_BY_ID.recovery
+        const risk = realCase.summary.calibrated_exceed_probability * 100
         cells.splice(COL.overall, 4, 1, "<EMPTY>", 1, "<EMPTY>")
-        cells.splice(COL.attrStatus, 3, "combustion_temp", 1, "[]")
         setLog(cells, 5, "预测", "风险已回落至正常区间", 1)
         setAlert(cells, 5, "预测风险解除", "最新预测曲线已全部回落至 80 mg/m3 以下", 1)
         setAiMessage(
             cells,
-            1002,
-            "最新一轮模拟预测已回落至阈值以下，风险概率降至 18.3%。可继续观察 RTO 入口浓度与燃烧室温度。",
+            1003,
+            `最新 6 小时预测峰值已回落至 ${realCase.summary.point_max_mg_m3.toFixed(1)} mg/m3，校准风险为 ${risk.toFixed(1)}%，低于报警阈值。`,
         )
         cells[COL.aiTool] = 1
-        cells[COL.aiTool + 1] = "风险已回落，可查看处置记录"
-        cells[COL.dca] = JSON.stringify(makeDcaSnapshot("recovery"))
+        cells[COL.aiTool + 1] = "最新预测已更新"
     }
 }
 
 function applyPersistentScenarioState(second, cells) {
-    if (second < 8) {
-        setPrediction(cells, 12.4, 98.6, "stable")
-        cells[COL.dca] = JSON.stringify(makeDcaSnapshot("normal"))
-        return
-    }
-    if (second < 18) {
-        setPrediction(cells, 42.7, 98.2, "rising")
-        cells[COL.dca] = JSON.stringify(makeDcaSnapshot("attention"))
-        return
-    }
-    if (second < 30) {
-        setPrediction(cells, 78.6, 96.8, "alarm")
-        cells[COL.dca] = JSON.stringify(makeDcaSnapshot("warning"))
-        return
-    }
-    if (second < 45) {
-        setPrediction(cells, 72.1, 97.1, "sustained")
-        cells[COL.dca] = JSON.stringify(makeDcaSnapshot("warning"))
-        return
-    }
-
-    setPrediction(cells, 18.3, 99.0, "recovery")
-    cells[COL.dca] = JSON.stringify(makeDcaSnapshot("recovery"))
+    const realCase = activeCase(second)
+    setPrediction(cells, realCase)
+    cells[COL.dca] = JSON.stringify(makeDcaSnapshot(dcaStageForCase(realCase)))
 }
 
 function escapeCsv(value) {
@@ -450,15 +454,15 @@ const output = [
     "*,DEFAULT_WINDOW_MS,30000",
     "//,DATA",
     columnHeader.map(escapeCsv).join(","),
-    ...Array.from({ length: 76 }, (_, second) => makeRow(second)),
+    ...Array.from({ length: 121 }, (_, second) => makeRow(second)),
     "",
 ].join("\n")
 
-const scriptDir = dirname(fileURLToPath(import.meta.url))
 const outputPath = resolve(scriptDir, "../public/mock-data.csv")
 mkdirSync(dirname(outputPath), { recursive: true })
 writeFileSync(outputPath, output, "utf8")
 
 console.log(`Generated ${outputPath}`)
-console.log("Scenario: stable -> rising load -> forecast alarm -> recovery")
-console.log("Data rows: 76; payload cells per row: 90")
+console.log(`PA-PFT cases: ${realCasePath}`)
+console.log("Scenario: stable -> rising -> probability alarm -> point exceed -> recovery")
+console.log("Data rows: 121; payload cells per row: 90")

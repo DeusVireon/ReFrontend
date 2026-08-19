@@ -18,11 +18,9 @@ export function ModelView({ theme }: { theme: DashboardTheme }) {
         // 1. 使用 Tailwind 打造全屏 3D 画布容器 (relative + full w/h)
         <div
             className="absolute top-0 left-0 w-screen h-screen overflow-hidden"
-            style={{
-                background: isLight
-                    ? 'radial-gradient(ellipse at 50% 62%, #ffffff 0%, #edf3f8 48%, #dce7f0 100%)'
-                    : 'radial-gradient(ellipse at 50% 68%, #172536 0%, #0b111c 48%, #05070d 100%)',
-            }}
+            style={isLight ? {
+                background: 'radial-gradient(ellipse at 50% 62%, #ffffff 0%, #edf3f8 48%, #dce7f0 100%)',
+            } : undefined}
         >
             {/* 2. 3D 画布 */}
             <Canvas
@@ -31,62 +29,50 @@ export function ModelView({ theme }: { theme: DashboardTheme }) {
                 gl={{ antialias: true, powerPreference: 'high-performance' }}
                 onCreated={({ gl }) => {
                     gl.toneMapping = THREE.ACESFilmicToneMapping;
-                    gl.toneMappingExposure = isLight ? 1.08 : 1.06;
+                    gl.toneMappingExposure = isLight ? 1.08 : 1;
                 }}
             >
-                <SceneRendererSettings exposure={isLight ? 1.08 : 1.06} />
-                <fog attach="fog" args={isLight ? ["#e5edf4", 30, 82] : ["#0f1722", 24, 72]} />
+                <SceneRendererSettings exposure={isLight ? 1.08 : 1} />
+                <fog attach="fog" args={isLight ? ["#e5edf4", 30, 82] : ["#1c1e2e", 300, 800]} />
                 <FactoryFloorOutline theme={theme} />
                 <ProdLineBody />
                 <FloorPlane theme={theme} />
                 <FloatingBoardEle />
-                <hemisphereLight args={isLight
-                    ? ["#ffffff", "#8799a8", 1.7]
-                    : ["#e8f1ff", "#162232", 1.12]}
-                />
-                <ambientLight
-                    intensity={isLight ? 2.2 : 1.45}
-                    color={isLight ? "#f4f8fb" : "#e6efff"}
-                />
-                <directionalLight
-                    position={[18, 16, -10]}
-                    intensity={isLight ? 4.2 : 3.8}
-                    color={isLight ? "#fffdf8" : "#dceaff"}
-                />
-                <directionalLight
-                    position={[-16, 10, -18]}
-                    intensity={isLight ? 2.4 : 2.5}
-                    color={isLight ? "#c8e0ef" : "#a9c9e8"}
-                />
-                <directionalLight
-                    position={[4, 8, 20]}
-                    intensity={isLight ? 1.8 : 1.55}
-                    color={isLight ? "#ffffff" : "#f4f7ff"}
-                />
-                <pointLight
-                    position={[-18, isLight ? 8 : 7, -4]}
-                    intensity={isLight ? 7 : 7.5}
-                    distance={isLight ? 36 : 34}
-                    color={isLight ? "#7fb6dc" : "#397fba"}
-                />
-                <Environment resolution={128} frames={1}>
-                    <Lightformer
-                        form="rect"
-                        intensity={isLight ? 2.2 : 2.1}
-                        color={isLight ? "#ffffff" : "#dcecff"}
-                        position={[0, 10, -8]}
-                        scale={[20, 5, 1]}
-                        target={[0, 3, 0]}
-                    />
-                    <Lightformer
-                        form="rect"
-                        intensity={isLight ? 1.05 : 1.0}
-                        color={isLight ? "#a9d1ea" : "#4088b8"}
-                        position={[-12, 5, 4]}
-                        scale={[5, 9, 1]}
-                        target={[0, 3, 0]}
-                    />
-                </Environment>
+                {isLight ? (
+                    <>
+                        <hemisphereLight args={["#ffffff", "#8799a8", 1.7]} />
+                        <ambientLight intensity={2.2} color="#f4f8fb" />
+                        <directionalLight position={[18, 16, -10]} intensity={4.2} color="#fffdf8" />
+                        <directionalLight position={[-16, 10, -18]} intensity={2.4} color="#c8e0ef" />
+                        <directionalLight position={[4, 8, 20]} intensity={1.8} color="#ffffff" />
+                        <pointLight position={[-18, 8, -4]} intensity={7} distance={36} color="#7fb6dc" />
+                        <Environment resolution={128} frames={1}>
+                            <Lightformer
+                                form="rect"
+                                intensity={2.2}
+                                color="#ffffff"
+                                position={[0, 10, -8]}
+                                scale={[20, 5, 1]}
+                                target={[0, 3, 0]}
+                            />
+                            <Lightformer
+                                form="rect"
+                                intensity={1.05}
+                                color="#a9d1ea"
+                                position={[-12, 5, 4]}
+                                scale={[5, 9, 1]}
+                                target={[0, 3, 0]}
+                            />
+                        </Environment>
+                    </>
+                ) : (
+                    <>
+                        <ambientLight intensity={4} color="#ebedfc" />
+                        <directionalLight position={[0, 25, 10]} intensity={2} color="#9298dc" />
+                        <directionalLight position={[30, 10, -40]} intensity={5} color="#c5caf5" />
+                        <directionalLight position={[-30, 10, -40]} intensity={5} color="#c5caf5" />
+                    </>
+                )}
                 <PerspectiveCamera
                     position={[0, 20, 0]}
                     makeDefault
