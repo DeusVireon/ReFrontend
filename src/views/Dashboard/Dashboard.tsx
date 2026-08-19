@@ -8,23 +8,50 @@ import { CardAlerts } from "./components/CardAlerts"
 import { ToolAISug } from "./components/ToolAISug"
 import { VerticalToggleGroup } from './components/ToolPartSelector';
 import { CardDCA } from "./components/CardDCA"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
+import {
+    DASHBOARD_THEME_STORAGE_KEY,
+    type DashboardTheme,
+} from "./theme"
 
 export function DashboardView() {
-    useEffect(() => {
-        document.documentElement.classList.add("dashboard-light")
-        return () => document.documentElement.classList.remove("dashboard-light")
-    }, [])
+    const [theme, setTheme] = useState<DashboardTheme>(() => {
+        if (typeof window === "undefined") return "light"
+        return window.localStorage.getItem(DASHBOARD_THEME_STORAGE_KEY) === "dark"
+            ? "dark"
+            : "light"
+    })
 
-    return <div className="dashboard-light relative h-screen w-screen overflow-hidden bg-theme-7 text-text">
-        <div className="isolate"><ModelView /></div>
+    useEffect(() => {
+        const root = document.documentElement
+        root.classList.toggle("dashboard-light", theme === "light")
+        root.classList.toggle("dashboard-dark", theme === "dark")
+        root.style.colorScheme = theme
+        window.localStorage.setItem(DASHBOARD_THEME_STORAGE_KEY, theme)
+
+        return () => {
+            root.classList.remove("dashboard-light", "dashboard-dark")
+            root.style.removeProperty("color-scheme")
+        }
+    }, [theme])
+
+    const toggleTheme = () => setTheme((current) => current === "light" ? "dark" : "light")
+
+    return <div className={`${theme === "light" ? "dashboard-light" : "dashboard-dark"} relative h-screen w-screen overflow-hidden bg-theme-25 text-text`}>
+        <div className="isolate"><ModelView theme={theme} /></div>
         <BottomCardGroup />
         <RightCardGroup />
-        <LeftToolZone />
+        <LeftToolZone theme={theme} onThemeToggle={toggleTheme} />
     </div>
 }
 
-function LeftToolZone() {
+function LeftToolZone({
+    theme,
+    onThemeToggle,
+}: {
+    theme: DashboardTheme
+    onThemeToggle: () => void
+}) {
     return (
         <div>
             <div className="absolute top-20 left-0 w-1/2 h-[20vh] px-2">
@@ -35,7 +62,7 @@ function LeftToolZone() {
                 <ToolAISug />
             </div>
             <div className="absolute bottom-[25vh] left-0 pb-4 pl-6 flex">
-                <VerticalToggleGroup />
+                <VerticalToggleGroup theme={theme} onThemeToggle={onThemeToggle} />
             </div>
         </div>
 

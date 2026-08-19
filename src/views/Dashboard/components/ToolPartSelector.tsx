@@ -2,7 +2,7 @@ import {
     Dam, Radius, ZodiacAquarius,
     Fan, Flame, Factory,
     ScanBox, Rotate3d, SquareCode,
-    Siren, RotateCwSquare, type LucideIcon
+    Siren, RotateCwSquare, Sun, Moon, type LucideIcon
 } from 'lucide-react';
 import { useModelViewStateStore } from '../stores/ModelViewState';
 import { ModelPartEnum } from '../models/ModelPartEnum';
@@ -11,6 +11,7 @@ import { useAttrStatusStore } from '../stores/AttrStatus';
 import { cn } from '@/lib/utils';
 import { useSound } from 'use-sound'
 import { useState } from 'react';
+import type { DashboardTheme } from '../theme';
 
 interface ToggleOption {
     id: ModelPartEnum;
@@ -34,14 +35,20 @@ interface CamControlModeBtnProps {
 }
 
 const CAM_CONTROL_BTN_CONFIG: Record<CamControlMode, CamControlModeBtnProps> = {
-    [CamControlMode.Focus]: { style: "bg-accent text-white", icon: ScanBox, label: '控制：聚焦模式' },
-    [CamControlMode.Free]: { style: "bg-accent-purple text-white", icon: Rotate3d, label: '控制：自由视角模式' },
-    [CamControlMode.Carousel]: { style: "bg-theme-5 text-white", icon: RotateCwSquare, label: '控制：自动轮播模式' },
-    [CamControlMode.FullView]: { style: "", icon: SquareCode, label: '控制：全景视角模式' },
-    [CamControlMode.Attention]: { style: "bg-attention text-white", icon: Siren, label: '控制：关注模式' },
+    [CamControlMode.Focus]: { style: "dashboard-camera-control-primary", icon: ScanBox, label: '控制：聚焦模式' },
+    [CamControlMode.Free]: { style: "dashboard-camera-control-purple", icon: Rotate3d, label: '控制：自由视角模式' },
+    [CamControlMode.Carousel]: { style: "dashboard-camera-control-neutral", icon: RotateCwSquare, label: '控制：自动轮播模式' },
+    [CamControlMode.FullView]: { style: "dashboard-camera-control-idle", icon: SquareCode, label: '控制：全景视角模式' },
+    [CamControlMode.Attention]: { style: "dashboard-camera-control-warning", icon: Siren, label: '控制：关注模式' },
 };
 
-export function VerticalToggleGroup() {
+export function VerticalToggleGroup({
+    theme,
+    onThemeToggle,
+}: {
+    theme: DashboardTheme
+    onThemeToggle: () => void
+}) {
     const selectedId = useModelViewStateStore((state) => state.selectedGroup);
     const camControlMode = useModelViewStateStore((state) => state.camControlMode);
     const camCtrlBtn = CAM_CONTROL_BTN_CONFIG[camControlMode] ?? { style: "", icon: ScanBox, label: '视角控制模式' };
@@ -73,7 +80,7 @@ export function VerticalToggleGroup() {
                 onClick={() => onCamControlBtnClicked(camControlMode, setCamControlMode, setActiveGroup)}
                 title={camCtrlBtn.label}
                 aria-label={camCtrlBtn.label}
-                className={`relative flex items-center justify-center size-10 rounded-md \
+                className={`dashboard-camera-control relative flex items-center justify-center size-10 rounded-md \
                             transition-all duration-200
                             ${camCtrlBtn.style}`}>
                 <camCtrlBtn.icon className="size-5 stroke-[2.2]" />
@@ -93,8 +100,8 @@ export function VerticalToggleGroup() {
                             relative flex items-center justify-center size-10 rounded-md \
                             transition-all duration-200
                             `, (isActive
-                            ? 'bg-accent text-white'
-                            : 'hover:text-accent hover:bg-accent/10 active:scale-95'
+                            ? 'dashboard-tool-active'
+                            : 'dashboard-tool-idle active:scale-95'
                         ))}>
                         <Icon className="size-5 stroke-[2.2]" />
                         {getAttrStatus(option.id).status === 1 && <span className="absolute top-1 right-1 size-2 animate-ping rounded-full bg-attention opacity-75"></span>}
@@ -104,6 +111,19 @@ export function VerticalToggleGroup() {
                     </button>
                 );
             })}
+            <div className="p-1"><div className="h-px w-full bg-gray-7/35" /></div>
+            <button
+                type="button"
+                onClick={onThemeToggle}
+                title={theme === "light" ? "切换为深色主题" : "切换为浅色主题"}
+                aria-label={theme === "light" ? "切换为深色主题" : "切换为浅色主题"}
+                aria-pressed={theme === "dark"}
+                className="dashboard-theme-toggle relative flex size-10 items-center justify-center rounded-md outline-none transition-all duration-200 focus-visible:ring-2 focus-visible:ring-accent/45 active:scale-95"
+            >
+                {theme === "light"
+                    ? <Moon className="size-5 stroke-[2.1]" />
+                    : <Sun className="size-5 stroke-[2.1]" />}
+            </button>
         </div>
     );
 }

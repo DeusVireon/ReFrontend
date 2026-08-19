@@ -36,7 +36,7 @@ export function DCAStackedBar({
         <div className={cn("relative", size === "detail" ? "pb-4" : "pb-0")}>
             <div
                 className={cn(
-                    "flex w-full overflow-visible rounded-sm bg-gray-4/25 ring-1 ring-white/10",
+                    "dca-score-track flex w-full overflow-visible rounded-sm bg-gray-4/25",
                     size === "detail" ? "h-6" : "h-3",
                 )}
                 role="group"
@@ -52,10 +52,10 @@ export function DCAStackedBar({
                             type="button"
                             key={rule.id}
                             className={cn(
-                                "group relative h-full min-w-1 border-r border-theme-1/35 last:border-r-0",
-                                "outline-none transition-[filter,transform] hover:brightness-125",
-                                "focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-white/80",
-                                selected && "z-10 brightness-125 ring-2 ring-white/70",
+                                "dca-score-segment group relative h-full min-w-1 last:border-r-0",
+                                "outline-none transition-[filter,transform] hover:saturate-110",
+                                "focus-visible:z-10 focus-visible:ring-2 focus-visible:ring-accent/75",
+                                selected && "dca-score-segment-selected z-10 saturate-110",
                             )}
                             style={{
                                 width: `${percentage}%`,

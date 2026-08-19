@@ -70,11 +70,11 @@ export const DCA_APPLICABILITY_LABELS: Record<DCAPredictionApplicability, string
 }
 
 export const DCA_RULE_COLORS = [
-    "var(--color-accent)",
-    "var(--color-accent-cyan)",
-    "var(--color-accent-purple)",
-    "var(--color-attention)",
-    "var(--color-negative)",
+    "var(--color-dca-rule-1)",
+    "var(--color-dca-rule-2)",
+    "var(--color-dca-rule-3)",
+    "var(--color-dca-rule-4)",
+    "var(--color-dca-rule-5)",
 ] as const
 
 const STATUS_LEVELS = new Set<DCAStatusLevel>([

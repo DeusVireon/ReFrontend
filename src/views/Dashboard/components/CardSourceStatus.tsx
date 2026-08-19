@@ -38,11 +38,11 @@ function SensorStatusCell({ id }: { id: string }) {
     return (
         <div key={status.lastUpdated}
             className={cn(
-                "animate-flash-highlight aspect-square border rounded-xs hover:scale-105 overflow-hidden",
+                "sensor-status-cell animate-flash-highlight aspect-square rounded-xs hover:scale-105 overflow-hidden",
                 {
-                    'bg-attention/60': status.status === 0,
-                    'bg-negative/60': status.status === -1,
-                    'bg-positive/60': status.status === 1,
+                    'sensor-status-attention': status.status === 0,
+                    'sensor-status-negative': status.status === -1,
+                    'sensor-status-positive': status.status === 1,
                 },
             )}
         >

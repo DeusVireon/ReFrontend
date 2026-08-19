@@ -172,7 +172,13 @@ function GaugeChart({ value, subArcProp, extraTicks, title }: { value: number, s
                             return `${num.toFixed(1)}`
                         },
                         matchColorWithArc: true,
-                        style: { fontWeight: "bold", fontSize: "48px" },
+                        style: {
+                            fontWeight: 600,
+                            fontSize: "48px",
+                            paintOrder: "normal",
+                            stroke: "none",
+                            textShadow: "none"
+                        },
                         offsetY: -10
                     },
                     tickLabels: {

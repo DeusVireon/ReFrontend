@@ -1,5 +1,5 @@
-import { Canvas } from "@react-three/fiber"
-import { CameraControls, Environment, Html, Lightformer, PerspectiveCamera } from '@react-three/drei'
+import { Canvas, useThree } from "@react-three/fiber"
+import { Environment, Html, Lightformer, PerspectiveCamera } from '@react-three/drei'
 import { FloatingDataBoard } from './ModelItems'
 import { FloorPlane } from "./FloorPlane"
 import { ProdLineBody } from "./ProdLineBody"
@@ -8,13 +8,20 @@ import { GasFlowLine } from './GasFlow';
 import * as THREE from 'three';
 import { CameraController } from './CameraController';
 import { FactoryFloorOutline } from './FactoryFloorOutline';
-export function ModelView() {
+import type { DashboardTheme } from '../theme';
+import { useEffect } from 'react';
+
+export function ModelView({ theme }: { theme: DashboardTheme }) {
+    const isLight = theme === "light"
+
     return (
         // 1. 使用 Tailwind 打造全屏 3D 画布容器 (relative + full w/h)
         <div
             className="absolute top-0 left-0 w-screen h-screen overflow-hidden"
             style={{
-                background: 'radial-gradient(ellipse at 50% 62%, #ffffff 0%, #edf3f8 48%, #dce7f0 100%)',
+                background: isLight
+                    ? 'radial-gradient(ellipse at 50% 62%, #ffffff 0%, #edf3f8 48%, #dce7f0 100%)'
+                    : 'radial-gradient(ellipse at 50% 68%, #172536 0%, #0b111c 48%, #05070d 100%)',
             }}
         >
             {/* 2. 3D 画布 */}
@@ -24,30 +31,43 @@ export function ModelView() {
                 gl={{ antialias: true, powerPreference: 'high-performance' }}
                 onCreated={({ gl }) => {
                     gl.toneMapping = THREE.ACESFilmicToneMapping;
-                    gl.toneMappingExposure = 1.08;
+                    gl.toneMappingExposure = isLight ? 1.08 : 0.96;
                 }}
             >
-                <fog attach="fog" args={["#e5edf4", 30, 82]} />
-                <FactoryFloorOutline />
+                <SceneRendererSettings exposure={isLight ? 1.08 : 0.96} />
+                <fog attach="fog" args={isLight ? ["#e5edf4", 30, 82] : ["#0f1722", 24, 72]} />
+                <FactoryFloorOutline theme={theme} />
                 <ProdLineBody />
-                <FloorPlane />
+                <FloorPlane theme={theme} />
                 <FloatingBoardEle />
-                <hemisphereLight args={["#ffffff", "#8799a8", 1.7]} />
-                <directionalLight position={[18, 16, -10]} intensity={4.2} color="#fffdf8" />
-                <pointLight position={[-18, 8, -4]} intensity={7} distance={36} color="#7fb6dc" />
+                <hemisphereLight args={isLight
+                    ? ["#ffffff", "#8799a8", 1.7]
+                    : ["#9bbbd4", "#0b0f16", 0.92]}
+                />
+                <directionalLight
+                    position={[18, 16, -10]}
+                    intensity={isLight ? 4.2 : 3.1}
+                    color={isLight ? "#fffdf8" : "#dceaff"}
+                />
+                <pointLight
+                    position={[-18, isLight ? 8 : 7, -4]}
+                    intensity={isLight ? 7 : 11}
+                    distance={isLight ? 36 : 34}
+                    color={isLight ? "#7fb6dc" : "#397fba"}
+                />
                 <Environment resolution={128} frames={1}>
                     <Lightformer
                         form="rect"
-                        intensity={2.2}
-                        color="#ffffff"
+                        intensity={isLight ? 2.2 : 1.8}
+                        color={isLight ? "#ffffff" : "#dcecff"}
                         position={[0, 10, -8]}
                         scale={[20, 5, 1]}
                         target={[0, 3, 0]}
                     />
                     <Lightformer
                         form="rect"
-                        intensity={1.05}
-                        color="#a9d1ea"
+                        intensity={isLight ? 1.05 : 0.9}
+                        color={isLight ? "#a9d1ea" : "#4088b8"}
                         position={[-12, 5, 4]}
                         scale={[5, 9, 1]}
                         target={[0, 3, 0]}
@@ -65,6 +85,17 @@ export function ModelView() {
             </Canvas>
         </div>
     )
+}
+
+function SceneRendererSettings({ exposure }: { exposure: number }) {
+    const gl = useThree((state) => state.gl)
+
+    useEffect(() => {
+        gl.toneMapping = THREE.ACESFilmicToneMapping
+        gl.toneMappingExposure = exposure
+    }, [exposure, gl])
+
+    return null
 }
 
 function FloatingBoardEle() {

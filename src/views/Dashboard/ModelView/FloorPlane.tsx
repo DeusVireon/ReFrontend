@@ -2,6 +2,7 @@ import { ContactShadows } from '@react-three/drei';
 import { useThree } from '@react-three/fiber';
 import { useEffect, useMemo } from 'react';
 import * as THREE from 'three';
+import type { DashboardTheme } from '../theme';
 
 const TEXTURE_SIZE = 512;
 const FLOOR_REPEAT = 128;
@@ -148,8 +149,9 @@ function createIndustrialFloorTextures(anisotropy: number): FloorTextureSet {
     };
 }
 
-export function FloorPlane() {
+export function FloorPlane({ theme }: { theme: DashboardTheme }) {
     const gl = useThree((state) => state.gl);
+    const isLight = theme === "light";
     const textures = useMemo(
         () => createIndustrialFloorTextures(gl.capabilities.getMaxAnisotropy()),
         [gl],
@@ -171,20 +173,20 @@ export function FloorPlane() {
                     normalScale={FLOOR_NORMAL_SCALE}
                     roughness={0.62}
                     roughnessMap={textures.roughness}
-                    metalness={0.58}
+                    metalness={isLight ? 0.58 : 0.82}
                     envMapIntensity={0.72}
-                    color="#e5eaed"
+                    color={isLight ? "#e5eaed" : "#aeb4b8"}
                 />
             </mesh>
             <ContactShadows
                 position={[0, 0.018, 0]}
                 scale={72}
-                opacity={0.24}
+                opacity={isLight ? 0.24 : 0.34}
                 blur={2.2}
                 far={14}
                 resolution={512}
                 frames={2}
-                color="#647587"
+                color={isLight ? "#647587" : "#05070a"}
             />
         </>
     );
