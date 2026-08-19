@@ -14,13 +14,15 @@ export function ModelView() {
             {/* 2. 3D 画布 */}
             <Canvas shadows>
                 <ProdLineBody />
-                <fogExp2 attach="fog" args={["#a0a6dd", 0.002]} />
+                <fog attach="fog" args={["#1c1e2e", 300, 800]} />
                 <FloorPlane />
                 <FloatingBoardEle />
                 <axesHelper />
                 <gridHelper />
-                <ambientLight intensity={4} color="#ffffff" />
-                <directionalLight position={[30, 10, 30]} intensity={7} color={"#a0a6dd"} />
+                <ambientLight intensity={4} color="#ebedfc" />
+                <directionalLight position={[0, 25, 10]} intensity={2} color={"#9298dc"} />
+                <directionalLight position={[30, 10, -40]} intensity={5} color={"#c5caf5"} />
+                <directionalLight position={[-30, 10, -40]} intensity={5} color={"#c5caf5"} />
                 <PerspectiveCamera
                     position={[0, 20, 0]}
                     makeDefault

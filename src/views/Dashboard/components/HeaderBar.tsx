@@ -25,7 +25,7 @@ export function HeaderBar() {
 
 function TitleArea() {
     return (
-        <div className="flex items-center px-4 pb-2 pr-12 rounded-br-full gap-4 bg-theme-2/40 \
+        <div className="flex items-center px-4 pb-2 pr-12 rounded-br-full gap-4 bg-theme-1/50 \
         mask-b-from-70% mask-b-to-100% \
         mask-r-from-80% mask-r-to-100%">
             <img src="/system-logo.png"

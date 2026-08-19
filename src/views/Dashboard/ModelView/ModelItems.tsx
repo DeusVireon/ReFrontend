@@ -23,7 +23,8 @@ export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
             (linkedAlerts.length > 0 ? 'translate-y-1/3' : '')
         )}>
             <div className="flex flex-col p-2 px-3 min-w-110 \
-            rounded-sm backdrop-blur-xs shadow-xl bg-theme-2/60">
+            rounded-sm backdrop-blur-xs shadow-xl bg-theme-2/60 \
+            border border-theme-1/60 ring-2 ring-theme-8/15">
 
                 {/* 标题 */}
                 <div className="text-lg text-text font-bold pb-2">{title}</div>
