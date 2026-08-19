@@ -1,6 +1,5 @@
 import { SideCard } from "./components/SideCard"
 import { ModelView } from "./ModelView/ModelView"
-import { HeaderBar } from "./components/HeaderBar"
 import { CardSourceStatus } from "./components/CardSourceStatus"
 import { CardSysStatus } from "./components/CardSysStatus"
 import { CardForecast } from "./components/CardForecast"
@@ -16,7 +15,6 @@ export function DashboardView() {
         <BottomCardGroup />
         <RightCardGroup />
         <LeftToolZone />
-        <HeaderBar />
     </div>
 }
 
