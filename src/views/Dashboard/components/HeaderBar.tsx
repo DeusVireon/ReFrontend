@@ -1,37 +1,49 @@
+import { useEffect, useRef, useState } from "react"
+import { ChevronRight, CircleCheck, OctagonAlert, Settings, TriangleAlert } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { CircleCheck, TriangleAlert, OctagonAlert, ChevronRight, Settings } from "lucide-react"
-import { useState, useEffect } from 'react';
-import { useOverallStatus } from "../stores/OverallStatus";
-import { useRefClock } from "@/stores/ReferenceClock";
-export function HeaderBar() {
-    const overallStatus = useOverallStatus((state) => state.overallStatus);
+import { useRefClock } from "@/stores/ReferenceClock"
+import { useOverallStatus } from "../stores/OverallStatus"
+import { HeaderPageNavigation } from "./HeaderPageNavigation"
+
+export function HeaderBar({ showNavigation = true }: { showNavigation?: boolean }) {
+    const overallStatus = useOverallStatus((state) => state.overallStatus)
+
     return (
-        <div>
-            <div className="absolute top-0 left-0 w-full h-16 \
-        bg-linear-to-b from-theme-1/75 via-theme-1/20 via-75% to-theme-1/0 \
-        text-text flex justify-between">
-                <div className="flex py-2.5 pl-90"><TimeArea /></div>
-                <div className="flex py-3 pr-6 gap-4">
+        <header className="pointer-events-none absolute inset-x-0 top-0 z-40 h-24 text-text">
+            <div
+                aria-hidden
+                className="absolute inset-x-0 top-0 h-20 bg-linear-to-b from-theme-1/90 via-theme-1/55 via-65% to-theme-1/0"
+            />
+
+            <div className="pointer-events-auto absolute left-0 top-0 z-20 w-fit">
+                <TitleArea />
+            </div>
+
+            <div className="pointer-events-auto relative z-10 flex h-16 items-center gap-3 pr-2 pl-20 \
+                min-[1024px]:pr-6 min-[1024px]:pl-100">
+                <div className="flex absolute left-1/2 -translate-x-1/2 min-w-0 items-center gap-6">
+                    {showNavigation ? <HeaderPageNavigation /> : null}
+                    <TimeArea />
+                </div>
+                <div className="ml-auto flex shrink-0 items-center gap-1 min-[1024px]:gap-2">
                     <StatusBadge name="监测" description={overallStatus.bizPrompt} status={overallStatus.bizStatus} />
                     <StatusBadge name="系统" description={overallStatus.sysPrompt} status={overallStatus.sysStatus} />
                     <SettingsButton />
                 </div>
-
             </div>
-            <div className="flex w-fit text-text"><TitleArea /></div>
-        </div>
-    );
+        </header>
+    )
 }
 
 function TitleArea() {
     return (
-        <div className="flex items-center px-4 pb-2 pr-12 rounded-br-full gap-4 bg-theme-1/50 \
-        mask-b-from-70% mask-b-to-100% \
-        mask-r-from-80% mask-r-to-100%">
-            <img src="/system-logo.png"
+        <div className="flex items-center gap-3 rounded-br-full bg-theme-1/70 px-2 pb-1 pr-3 mask-b-from-70% mask-b-to-100% mask-r-from-80% mask-r-to-100% min-[1024px]:px-4 min-[1024px]:pb-2 min-[1024px]:pr-12">
+            <img
+                src="/system-logo.png"
                 alt="System Logo"
-                className="size-20 " />
-            <div className="">
+                className="size-16 min-[1024px]:size-20"
+            />
+            <div className="hidden min-[1024px]:block">
                 <div className="flex">
                     <div className="italic text-4xl font-bold text-accent">Deus</div>
                     <div className="italic text-4xl font-bold">Vireon</div>
@@ -45,49 +57,113 @@ function TitleArea() {
 }
 
 function TimeArea() {
-    const [time, setTime] = useState<Date | null>(null);
+    const [timeMs, setTimeMs] = useState(() => useRefClock.getState().getTime())
+    const lastRenderedSecond = useRef(Math.floor(timeMs / 1000))
+    // 1. 新增：记录上一次 UI 实际渲染时的真实物理时间戳
+    const lastRenderTime = useRef(performance.now())
+    const speed = useRefClock((state) => state.refClockSpeed)
+
+    // 2. 设置允许的最大跳动频率（例如最高 10Hz，即每 100ms 最多跳动 1 次）
+    const MAX_REFRESH_RATE = 5
+    const MIN_INTERVAL = 1000 / MAX_REFRESH_RATE
 
     useEffect(() => {
-        // 首次加载获取初始时间
-        setTime(useRefClock.getState().getDateObj());
+        let frameId = 0
 
-        // 每秒更新一次状态
-        const timer = setInterval(() => {
-            setTime(useRefClock.getState().getDateObj());
-        }, 1000);
+        const updateClock = () => {
+            const now = performance.now()
+            const nextTime = useRefClock.getState().getTime()
+            const nextSecond = Math.floor(nextTime / 1000)
 
-        // 组件卸载时清理定时器，防止内存泄漏
-        return () => clearInterval(timer);
-    }, []);
+            // 3. 同时满足“秒数变化”与“达到真实时间间隔”才更新 State
+            if (
+                nextSecond !== lastRenderedSecond.current &&
+                now - lastRenderTime.current >= MIN_INTERVAL
+            ) {
+                lastRenderedSecond.current = nextSecond
+                lastRenderTime.current = now
+                setTimeMs(nextTime)
+            }
+            frameId = requestAnimationFrame(updateClock)
+        }
 
-    if (!time) return null;
-    const timeString = time.toLocaleTimeString('zh-CN', {
-        hour12: false,
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-    });
+        frameId = requestAnimationFrame(updateClock)
+        return () => cancelAnimationFrame(frameId)
+    }, [])
+
+    const time = new Date(timeMs)
+    const hours = String(time.getHours()).padStart(2, "0")
+    const minutes = String(time.getMinutes()).padStart(2, "0")
+    const seconds = String(time.getSeconds()).padStart(2, "0")
+    const date = time.toLocaleDateString("zh-CN", {
+        month: "2-digit",
+        day: "2-digit",
+        weekday: "short",
+    })
 
     return (
-        <div className="grid grid-rows-2 text-text font-mono">
-            <div className="text-4xl font-bold tracking-widest">
-                {timeString}
+        <div
+            className="relative flex h-10 min-w-45 shrink-0 items-center overflow-hidden rounded-md border border-theme-5/65 \
+             bg-theme-2/50 via-theme-2/90 to-theme-1/90 px-2 font-mono"
+            aria-label={`参考时钟 ${hours}:${minutes}:${seconds}`}
+        >
+            {/* <span aria-hidden className="absolute inset-y-2 left-0 w-0.5 bg-accent shadow-[0_0_10px_rgba(105,115,255,0.8)]" /> */}
+            <div className="relative z-10 w-full px-1">
+                <div className="hidden items-center justify-between text-[9px] leading-none tracking-[0.16em] text-gray-7 min-[1024px]:flex">
+                    <span className="flex items-center gap-1.5">
+                        <span className="size-1.25 rounded-full bg-positive shadow-[0_0_7px_rgba(80,220,180,0.9)]" />
+                        CLOCK
+                    </span>
+                    <span className="tracking-normal">
+                        {date}{speed === 1 ? "" : ` ×${formatClockSpeed(speed)}`}
+                    </span>
+                </div>
+                <div className="flex w-full items-center justify-center leading-none font-bold tracking-[0.02em] text-white \
+                [text-shadow:0_1px_0_rgba(255,255,255,0.2),0_4px_12px_rgba(76,90,220,0.4)] \
+                 text-[1.50rem]">
+                    <ClockDigits value={hours} segment="hour" />
+                    <ClockSeparator />
+                    <ClockDigits value={minutes} segment="minute" />
+                    <ClockSeparator />
+                    <ClockDigits value={seconds} segment="second" />
+                </div>
             </div>
-            <div className="bg-accent/50 z-10 w-full h-2 mt-0.5" />
         </div>
-    );
+    )
+}
+
+function ClockDigits({ value, segment }: { value: string; segment: string }) {
+    return (
+        <span className="inline-flex tabular-nums">
+            {Array.from(value).map((digit, index) => (
+                <span key={`${segment}-${index}-${digit}`} className="inline-grid w-[0.72em] place-items-center overflow-hidden">
+                    <span className="animate-clock-digit-roll">{digit}</span>
+                </span>
+            ))}
+        </span>
+    )
+}
+
+function ClockSeparator() {
+    return <span aria-hidden className="mx-0.5 -translate-y-px text-accent-light/80">:</span>
+}
+
+function formatClockSpeed(speed: number) {
+    return Number.isInteger(speed) ? speed.toFixed(0) : speed.toFixed(1)
 }
 
 function SettingsButton() {
     return (
-        <div className="flex h-fit w-fit px-2 py-0.5 pr-0 rounded-xs \
-        bg-theme-2/25 border border-theme-2/50 hover:bg-theme-2/50 hover:border-theme-2/75 \
-        font-bold">
-            <Settings className="py-0.75 pr-1" strokeWidth={2.5} />
-            设置
-            <ChevronRight className="py-0.75" strokeWidth={2.5} />
-        </div>
-    );
+        <button
+            type="button"
+            aria-label="打开设置"
+            className="flex h-8 items-center gap-0.5 rounded-sm border border-theme-5/55 bg-theme-2/55 px-1.5 text-xs font-bold whitespace-nowrap transition-colors hover:border-theme-5/85 hover:bg-theme-3/75 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent min-[1024px]:gap-1 min-[1024px]:px-2 min-[1024px]:text-sm"
+        >
+            <Settings className="size-4" strokeWidth={2.25} />
+            <span className="hidden min-[1120px]:inline">设置</span>
+            <ChevronRight className="size-3.5" strokeWidth={2.25} />
+        </button>
+    )
 }
 
 function StatusBadge({ name, description, status }: { name: string, description: string, status: number }) {
@@ -106,20 +182,24 @@ function StatusBadge({ name, description, status }: { name: string, description:
             break;
     }
     return (
-        <div className={cn("flex h-fit w-fit px-2 py-0.5 rounded-xs",
-            {
-                "bg-positive-dark/50 border border-positive-dark/75": status === 1,
-                "bg-attention-dark/50 border border-attention-dark/75": status === 0,
-                "bg-negative-dark/50 border border-negative-dark/75": status === -1,
-            }
-        )}>
-            {Icon && <Icon className="py-0.75 pr-1" strokeWidth={2.5} />}
+        <div
+            role="status"
+            aria-label={`${name}状态${description ? `：${description}` : ""}`}
+            className={cn("flex h-8 items-center rounded-sm px-1.5 text-xs whitespace-nowrap backdrop-blur-sm min-[1024px]:px-2 min-[1024px]:text-sm",
+                {
+                    "bg-positive-dark/50 border border-positive-dark/75": status === 1,
+                    "bg-attention-dark/50 border border-attention-dark/75": status === 0,
+                    "bg-negative-dark/50 border border-negative-dark/75": status === -1,
+                }
+            )}
+        >
+            {Icon && <Icon className="mr-1 size-4 shrink-0" strokeWidth={2.25} />}
             <div className={cn("font-bold",
                 {
-                    "pr-2": description !== "",
+                    "min-[1240px]:pr-2": description !== "",
                 })
             }>{name}</div>
-            {description}
+            {description ? <span className="hidden min-[1240px]:inline">{description}</span> : null}
         </div >
-    );
+    )
 }

@@ -79,6 +79,7 @@
     --animate-slide-down-fade: slideDownFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     --animate-countdown-bar: countdownBar var(--duration, 5s) cubic-bezier(0.25, 0.45, 0.3, 0.95) forwards;
     --animate-pulse-brightness: pulse-brightness 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    --animate-clock-digit-roll: clockDigitRoll 180ms cubic-bezier(0.2, 0.85, 0.3, 1) both;
 
     /* shadcn/ui color palette */
     --color-background: var(--color-theme-2);
@@ -169,5 +170,25 @@
 
     50% {
         filter: brightness(1);
+    }
+}
+
+@keyframes clockDigitRoll {
+    0% {
+        opacity: 0.65;
+        transform: perspective(24px) translateY(-16%) rotateX(-28deg);
+        filter: blur(0.4px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: perspective(24px) translateY(0) rotateX(0deg);
+        filter: blur(0);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .animate-clock-digit-roll {
+        animation: none;
     }
 }
