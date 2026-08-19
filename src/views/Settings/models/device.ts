@@ -48,14 +48,14 @@ export const ATTR_KEY_OPTIONS = [
 ] as const
 
 export const INITIAL_DEVICE_DRAFT: DeviceDraft = {
-    displayName: "RTO 入口三合一监测仪",
+    displayName: "RTO 入口气体传感器",
     primaryAttrKey: "rto_in_conc",
-    description: "采集 RTO 入口浓度、流量与温度，用于预测模型输入。",
+    description: "采集 RTO 入口浓度、流量与温度",
     mode: "active",
-    ip: "192.168.10.46",
-    port: "8080",
+    ip: "192.168.10.210",
+    port: "17263",
     requestInterval: "15",
-    requestTimeout: "3",
+    requestTimeout: "3000",
     retryCount: "3",
     routePath: "/sensor/upload/rto-inlet-02",
     publishInterval: "15",

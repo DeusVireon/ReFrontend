@@ -119,10 +119,11 @@ export function DeviceConnectionDialog({
     const runAiParse = async () => {
         if (!rawData || aiStatus === "running") return
         setAiStatus("running")
-        setAiTokens(84)
-        for (const tokens of [196, 328, 472, 641, 816]) {
-            await delay(360)
-            setAiTokens(tokens)
+        setAiTokens(0)
+        await delay(3000)
+        for (let i = 1; i <= 40; i++) {
+            await delay(80)
+            setAiTokens(i * 29)
         }
         setMappingText(SAMPLE_MAPPING_TEXT)
         setAiTokens(864)
@@ -170,11 +171,11 @@ export function DeviceConnectionDialog({
                 <PlugZap />
                 接入新设备
             </DialogTrigger>
-            <DialogContent className="h-[84vh] w-[calc(100vw-2rem)] max-w-[1180px] grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-0 overflow-hidden rounded-md border border-theme-4 bg-theme-2/96 p-0 text-text shadow-2xl sm:w-[82vw] sm:max-w-[82vw]">
+            <DialogContent className="h-[84vh] w-[calc(100vw-2rem)] max-w-295 grid-rows-[auto_auto_minmax(0,1fr)_auto] gap-0 overflow-hidden rounded-md border border-theme-4 bg-theme-2/96 p-0 text-text shadow-2xl sm:w-[82vw] sm:max-w-[82vw]">
                 <DialogHeader className="border-b border-theme-4 px-5 py-4 pr-14">
                     <DialogTitle className="text-xl font-semibold">接入新设备</DialogTitle>
                     <DialogDescription>
-                        建立设备连接，并将原始字段映射为系统标准 attrKey。
+                        配置新设备连接，并指定解析方案
                     </DialogDescription>
                 </DialogHeader>
 
@@ -297,7 +298,7 @@ function BasicInfoStep({
         <div className="mx-auto max-w-2xl space-y-5">
             <StepHeading
                 title="定义设备身份"
-                description="设备 ID 由系统生成；attrKey 决定设备数据在监控、分析和预测中的标准语义。"
+                description="此处设定仅用于显示，设备 ID 由系统生成。"
             />
             <FormField label="设备显示名称" required>
                 <Input
@@ -306,27 +307,12 @@ function BasicInfoStep({
                     placeholder="例如：RTO 入口在线监测仪"
                 />
             </FormField>
-            <FormField
-                label="主属性 attrKey"
-                required
-                help="attrKey 是系统内部统一的业务字段名，不是设备序列号。解析配置可继续映射同一设备输出的其他属性。"
-            >
-                <select
-                    value={draft.primaryAttrKey}
-                    onChange={(event) => onChange("primaryAttrKey", event.target.value)}
-                    className={SELECT_CLASS_NAME}
-                >
-                    {ATTR_KEY_OPTIONS.map((option) => (
-                        <option key={option.value} value={option.value}>{option.label} · {option.value}</option>
-                    ))}
-                </select>
-            </FormField>
             <FormField label="设备描述" help="用于运维人员识别安装位置、采集范围或设备用途。">
                 <textarea
                     value={draft.description}
                     onChange={(event) => onChange("description", event.target.value)}
                     className={TEXTAREA_CLASS_NAME}
-                    rows={4}
+                    rows={6}
                     placeholder="可选"
                 />
             </FormField>
@@ -356,7 +342,7 @@ function ConnectionStep({
                     active={draft.mode === "active"}
                     icon={<RadioTower />}
                     title="主动采集"
-                    description="平台轮询设备网络地址"
+                    description="系统主动向设备请求数据"
                     onClick={() => onChange("mode", "active")}
                 />
                 <ModeButton
@@ -379,7 +365,7 @@ function ConnectionStep({
                     <FormField label="请求周期" unit="s" help="系统主动拉取数据的时间间隔。">
                         <Input type="number" value={draft.requestInterval} onChange={(event) => onChange("requestInterval", event.target.value)} />
                     </FormField>
-                    <FormField label="请求超时" unit="s">
+                    <FormField label="请求超时" unit="ms">
                         <Input type="number" value={draft.requestTimeout} onChange={(event) => onChange("requestTimeout", event.target.value)} />
                     </FormField>
                     <FormField label="断联前重试" unit="次" help="连续失败达到该次数后，设备状态转为离线。">
@@ -405,7 +391,7 @@ function ConnectionStep({
                     <div>
                         <div className="font-medium">连通性测试</div>
                         <div className="text-xs text-gray-7">
-                            验证网络、端口或接入路由是否可达，不会写入业务数据。
+                            验证通信是否正确建立，不记录任何数据。
                         </div>
                     </div>
                     <Button variant="outline" disabled={status === "running"} onClick={onTest}>
@@ -447,9 +433,9 @@ function ParserConfigStep({
     onAiParse: () => void
 }) {
     return (
-        <div className="grid min-h-[520px] gap-4 lg:grid-rows-[minmax(130px,0.7fr)_minmax(280px,1.5fr)_auto]">
-            <section className="grid min-h-0 gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
-                <div className="min-h-28 overflow-auto rounded-sm border border-theme-4 bg-theme-1/45 p-3 font-mono text-xs leading-5 text-accent-cyan-light">
+        <div className="grid min-h-130 gap-2 lg:grid-rows-[minmax(130px,0.7fr)_minmax(280px,1.5fr)_auto]">
+            <section className="grid min-h-0 h-30 gap-2 lg:grid-cols-[minmax(0,1fr)_auto]">
+                <div className="min-h-10 overflow-auto rounded-sm border border-theme-4 bg-theme-1/45 p-3 font-mono text-xs leading-5 text-accent-cyan-light">
                     {rawData ? <pre className="whitespace-pre-wrap">{rawData}</pre> : (
                         <div className="flex h-full items-center justify-center font-sans text-gray-7">
                             尚未获取设备样本
@@ -460,38 +446,47 @@ function ParserConfigStep({
                     <div className="text-sm font-medium">获取设备数据</div>
                     <Button
                         variant="outline"
-                        disabled={sampleStatus === "running" || (mode === "active" && sampleStatus !== "idle")}
+                        disabled={sampleStatus === "running" || (mode !== "active" && sampleStatus !== "idle")}
                         onClick={onRequestSample}
                     >
                         {sampleStatus === "running" && <LoaderCircle className="animate-spin" />}
                         {sampleStatus === "running"
                             ? "正在等待数据"
                             : sampleStatus === "success"
-                                ? "样本已接收"
-                                : mode === "active"
+                                ? "重新获取样本"
+                                : mode !== "active"
                                     ? "正在等待数据"
                                     : "请求数据"}
                     </Button>
                     <p className="text-xs text-gray-7">
-                        {mode === "active" ? "按请求周期自动获取" : "手动触发一次样本请求"}
+                        {mode !== "active" ? "按请求周期自动获取" : "手动触发一次样本请求"}
                     </p>
                 </div>
             </section>
 
-            <section className="relative flex min-h-0 flex-col overflow-hidden rounded-sm border border-theme-4 bg-theme-1/30">
+            <section className="-mt-4 relative flex min-h-0 flex-col overflow-hidden rounded-sm border border-theme-4 bg-theme-1/30">
                 {aiStatus === "success" && (
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-positive-dark/60 bg-positive-dark/25 px-3 py-2 text-xs text-positive">
-                        <CheckCircle2 className="size-4" />
-                        <span className="font-semibold">AI 解析完成</span>
-                        <span>识别 3 个标准属性；推测 rto_in_temp 为华氏度，已加入换算。</span>
+
+                    <div className="flex-col flex-wrap items-center gap-x-3 gap-y-1 border-b border-positive-dark/60 bg-positive-dark/25 px-3 py-2 text-xs text-positive">
+                        <div className="flex gap-2">
+                            <CheckCircle2 className="size-4" />
+                            <span className="font-semibold">AI 解析完成</span>
+                            <span>提取的 AttrKey 计数：3</span>
+                        </div>
+
+                        <div className="mt-2 flex flex-col">
+                            <span className="font-bold">提请注意： </span>
+                            <span>- rto_in_temp 被推断为华氏单位</span>
+                        </div>
                     </div>
                 )}
                 {aiStatus === "running" && (
                     <div className="flex items-center justify-between border-b border-accent/50 bg-accent/15 px-3 py-2 text-xs text-accent-light">
                         <span className="flex items-center gap-2"><LoaderCircle className="size-4 animate-spin" />AI 自动解析运行中</span>
-                        <span className="font-mono tabular-nums">{aiTokens} tokens</span>
+                        <span className="font-mono tabular-nums">{aiTokens === 0 ? '等待首字响应 / 0' : '收集回传配置 / ' + aiTokens} tokens</span>
                     </div>
                 )}
+
                 <div className="flex flex-wrap items-center justify-between gap-2 border-b border-theme-4 px-3 py-2">
                     <div>
                         <div className="text-sm font-medium">解析配置</div>
@@ -509,6 +504,16 @@ function ParserConfigStep({
                         </Button>
                     </div>
                 </div>
+                <div className={cn(
+                    "flex min-h-9 items-center gap-2 border px-3 py-2 text-xs",
+                    validation.valid
+                        ? "border-theme-4 bg-theme-1/30 text-gray-7"
+                        : "border-attention-dark/70 bg-attention-dark/20 text-attention",
+                )}>
+                    {validation.valid ? <CheckCircle2 className="size-4" /> : <TriangleAlert className="size-4" />}
+                    <span className="font-semibold">JSON 校验</span>
+                    <span>{validation.message}</span>
+                </div>
                 <textarea
                     value={mappingText}
                     disabled={aiStatus === "running"}
@@ -520,16 +525,7 @@ function ParserConfigStep({
                 />
             </section>
 
-            <div className={cn(
-                "flex min-h-9 items-center gap-2 border px-3 py-2 text-xs",
-                validation.valid
-                    ? "border-positive-dark/70 bg-positive-dark/20 text-positive"
-                    : "border-theme-4 bg-theme-1/30 text-gray-7",
-            )}>
-                {validation.valid ? <CheckCircle2 className="size-4" /> : <TriangleAlert className="size-4" />}
-                <span className="font-semibold">JSON 校验</span>
-                <span>{validation.message}</span>
-            </div>
+
         </div>
     )
 }
@@ -546,7 +542,7 @@ function AccessTestStep({
     onTest: () => void
 }) {
     return (
-        <div className="grid min-h-[500px] gap-4 lg:grid-cols-2">
+        <div className="grid min-h-100 gap-4 lg:grid-cols-2">
             <section className="flex min-h-0 flex-col overflow-hidden rounded-sm border border-theme-4 bg-theme-1/30">
                 <div className="flex items-center justify-between gap-3 border-b border-theme-4 px-3 py-2">
                     <div>
@@ -570,7 +566,7 @@ function AccessTestStep({
             <section className="flex min-h-0 flex-col overflow-hidden rounded-sm border border-theme-4 bg-theme-1/30">
                 <div className="border-b border-theme-4 px-3 py-2">
                     <div className="font-medium">数据解析结果</div>
-                    <div className="text-xs text-gray-7">attrKey · value · time</div>
+                    <div className="text-xs text-gray-7">请核对数据是否正确解析</div>
                 </div>
                 <div className="min-h-0 flex-1 overflow-auto p-3">
                     {parsedValues.length > 0 ? (
@@ -589,7 +585,7 @@ function AccessTestStep({
                             ))}
                             <div className="flex items-center gap-2 pt-2 text-xs text-positive">
                                 <CheckCircle2 className="size-4" />
-                                3 个属性解析成功，时间戳与数值均有效
+                                全部解析成功，AttrKey 计数：3
                             </div>
                         </div>
                     ) : (
@@ -693,9 +689,9 @@ function ConnectionFeedback({ status, mode }: { status: AsyncStatus; mode: Devic
         )}>
             {status === "running" ? <LoaderCircle className="size-4 animate-spin" /> : <CheckCircle2 className="size-4" />}
             {status === "running"
-                ? "正在进行 DNS、TCP 与应用层握手…"
+                ? "尝试建立连接..."
                 : mode === "active"
-                    ? "连接成功，设备响应 46 ms，返回 HTTP 200。"
+                    ? "连接成功，延迟 346 ms，返回 HTTP 200。"
                     : "接入路由已注册，测试发布返回 HTTP 202。"}
         </div>
     )
