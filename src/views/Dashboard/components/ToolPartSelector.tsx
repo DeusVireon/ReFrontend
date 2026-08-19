@@ -2,7 +2,7 @@ import {
     Dam, Radius, ZodiacAquarius,
     Fan, Flame, Factory,
     ScanBox, Rotate3d, SquareCode,
-    SearchAlert, RotateCwSquare, type LucideIcon
+    Siren, RotateCwSquare, type LucideIcon
 } from 'lucide-react';
 import { useModelViewStateStore } from '../stores/ModelViewState';
 import { ModelPartEnum } from '../models/ModelPartEnum';
@@ -38,7 +38,7 @@ const CAM_CONTROL_BTN_CONFIG: Record<CamControlMode, CamControlModeBtnProps> = {
     [CamControlMode.Free]: { style: "bg-accent-purple/75", icon: Rotate3d, label: '控制：自由视角模式' },
     [CamControlMode.Carousel]: { style: "bg-theme-7/75", icon: RotateCwSquare, label: '控制：自动轮播模式' },
     [CamControlMode.FullView]: { style: "", icon: SquareCode, label: '控制：全景视角模式' },
-    [CamControlMode.Attention]: { style: "bg-attention/75", icon: SearchAlert, label: '控制：关注模式' },
+    [CamControlMode.Attention]: { style: "bg-attention/75", icon: Siren, label: '控制：关注模式' },
 };
 
 export function VerticalToggleGroup() {

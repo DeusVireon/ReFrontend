@@ -13,12 +13,12 @@ export function CardAlerts() {
     const alerts = useAlertData(useShallow((state) => state.idList));
 
     return (
-        <SideCard title="告警列表" className="pb-3">
+        <SideCard title="告警列表" className="pb-3"
+            headerAction={<AlertPopupDialog />}>
             <ScrollArea>
                 {alerts.map((id) => (
                     <AlertItemMemo key={id} id={id} />
                 ))}
-                <AlertPopupDialog />
             </ScrollArea>
         </SideCard>
     )

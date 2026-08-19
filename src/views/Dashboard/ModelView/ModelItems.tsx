@@ -23,8 +23,8 @@ export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
             (linkedAlerts.length > 0 ? 'translate-y-1/3' : '')
         )}>
             <div className="flex flex-col p-2 px-3 min-w-110 \
-            rounded-sm backdrop-blur-xs shadow-xl bg-theme-2/60 \
-            border border-theme-1/60 ring-2 ring-theme-8/15">
+            rounded-sm backdrop-blur-xs shadow-xl bg-theme-2/75 \
+            border border-theme-1/60 ring-2 ring-theme-8/25">
 
                 {/* 标题 */}
                 <div className="text-lg text-text font-bold pb-2">{title}</div>
@@ -47,7 +47,8 @@ export function FloatingDataBoard({ data }: { data: ModelPartEnum }) {
 
             {/* 底部指示箭头 */}
             <div
-                className="absolute -bottom-3 left-1/2 bg-theme-2/60 -translate-x-1/2 w-7 h-3 z-[-1]"
+                className="absolute -bottom-3 left-1/2 bg-theme-2/60 \
+                -translate-x-1/2 w-7 h-3 z-[-1]"
                 style={{
                     // 定义三角形：(50% 100%) 是下方的尖，(0% 0%) 和 (100% 0%) 是上方两个角
                     clipPath: 'polygon(50% 100%, 0% 0%, 100% 0%)'

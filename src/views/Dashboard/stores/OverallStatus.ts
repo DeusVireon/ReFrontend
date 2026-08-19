@@ -30,6 +30,5 @@ export const useOverallStatus = create<OverallStatusStore>((set) => ({
 }));
 
 RTEventMgrInst.handle<OverallStatus>("system.overall", (payload: OverallStatus) => {
-    console.log("Received OverallStatus payload:", payload);
     useOverallStatus.getState().updateOverallStatus(payload);
 });

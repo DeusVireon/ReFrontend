@@ -28,6 +28,7 @@
     --color-theme-25: oklch(0.24 0.032 280);
     --color-theme-2: oklch(0.2 0.032 280);
     --color-theme-1: oklch(0.12 0.032 280);
+    --color-gray-8: oklch(0.82 0.02 280);
     --color-gray-7: oklch(0.7 0.02 280);
     --color-gray-4: oklch(0.42 0.02 280);
     --color-gray-3: oklch(0.32 0.02 280);
@@ -69,6 +70,7 @@
     --color-theme-25: var(--color-theme-25);
     --color-theme-2: var(--color-theme-2);
     --color-theme-1: var(--color-theme-1);
+    --color-gray-8: var(--color-gray-8);
     --color-gray-7: var(--color-gray-7);
     --color-gray-4: var(--color-gray-4);
     --color-gray-3: var(--color-gray-3);
@@ -93,10 +95,10 @@
     --color-secondary: var(--color-theme-3);
     --color-secondary-foreground: var(--color-text);
     --color-muted: var(--color-theme-2);
-    --color-muted-foreground: var(--color-gray-7);
+    --color-muted-foreground: var(--color-gray-8);
     --color-accent-foreground: var(--color-text);
     --color-destructive: var(--color-negative);
-    --color-border: var(--color-theme-3);
+    --color-border: var(--color-theme-8);
     --color-input: var(--color-theme-3);
     --color-ring: var(--color-accent);
     --color-chart-1: var(--color-accent);

@@ -33,7 +33,6 @@ function ToolAISugBtn({ onClick }: { onClick: () => void }) {
 
     const indicator = useAISugMessage(useShallow((state) => state.indicator));
     const showTip = useAISugMessage(useShallow((state) => state.showTip));
-    console.log("ToolAISugBtn indicator:", indicator, "showTip:", showTip);
 
     if (indicator !== lastIndicator) {
         if (indicator !== 0) {

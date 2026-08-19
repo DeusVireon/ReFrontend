@@ -18,7 +18,6 @@ interface AttrStatusStore {
     getStatusScore: () => number;
     getStatusByKey: (key: string) => AttrStatus | undefined;
     getStatusByGroup: (group: ModelPartEnum) => AttrStatus;
-
 }
 
 export const useAttrStatusStore = create<AttrStatusStore>((set, get) => ({

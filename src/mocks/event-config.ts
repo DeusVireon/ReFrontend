@@ -378,6 +378,18 @@ export const attrStatusEvent = createSseEvent({
     },
 });
 
+interface AttentionFocusPayload {
+    groupName: string;
+}
+
+export const viewFocusEvent = createSseEvent({
+    event: 'view.focus',
+    parse: (cells) => {
+        const focus = cells[COL_INDEX.ViewFocusFrom] as string | null;
+        return focus !== null ? { groupName: focus } : null;
+    },
+});
+
 export const registeredEvents = [
     systemStatusEvent,
     sensorUploadEvent,
@@ -391,4 +403,5 @@ export const registeredEvents = [
     aiTipEvent,
     attrStatusEvent,
     dcaUpdateEvent,
+    viewFocusEvent,
 ] as const;

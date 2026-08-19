@@ -77,22 +77,23 @@ export function ProdLineBody() {
                 // 判断当前 Mesh 是否属于被激活的部件组
                 const isSelected = meshPrefix !== null && meshPrefix === activeGroup;
                 if (isSelected) {
-                    toggleSelectionHighlight(mesh, selectionMat, true);
+                    toggleSelectionHighlight(mesh, selectionMat, true, '__highlight__selection__');
                     setMeshBoundingBox(mesh, true, SELECTION_COLOR);
                 } else {
-                    toggleSelectionHighlight(mesh, selectionMat, false);
+                    toggleSelectionHighlight(mesh, selectionMat, false, '__highlight__selection__');
                     setMeshBoundingBox(mesh, false);
                 }
 
                 // 判断当前 Mesh 是否属于告警部件组
                 const groupStatus = meshPrefix ? getGroupStatus(meshPrefix) : null;
+
                 const groupStatusCode = groupStatus?.status ?? false;
                 if (groupStatusCode) {
-                    toggleSelectionHighlight(mesh, warningMat, true);
+                    toggleSelectionHighlight(mesh, warningMat, true, '__highlight__warning__');
+                    console.log("update", meshPrefix, groupStatus, groupStatusCode);
                 } else {
-                    toggleSelectionHighlight(mesh, warningMat, false);
+                    toggleSelectionHighlight(mesh, warningMat, false, '__highlight__warning__');
                 }
-
             }
         });
     }, [activeGroup, scene, groupStatusUpdate]);
@@ -182,25 +183,33 @@ function getGroupPrefix(meshName: string): ModelPartEnum | null {
     return prefixes.find(prefix => meshName.startsWith(prefix)) ?? null;
 }
 
-export function toggleSelectionHighlight(targetMesh: THREE.Mesh, material: THREE.Material, enable: boolean) {
-    const HIGHLIGHT_NAME = '__highlight__selection__';
-    const existingOutline = targetMesh.getObjectByName(HIGHLIGHT_NAME);
+export function toggleSelectionHighlight(
+    targetMesh: THREE.Mesh,
+    material: THREE.Material,
+    enable: boolean,
+    highlightName: string = '__highlight__selection__' // 支持传入独立名称
+) {
+    const existingOutline = targetMesh.getObjectByName(highlightName);
 
     if (!enable) {
-        // 移除描边网格并释放内存
         if (existingOutline && existingOutline instanceof THREE.Mesh) {
             targetMesh.remove(existingOutline);
-            existingOutline.geometry.dispose();
-            (existingOutline.material as THREE.Material).dispose();
+            // 注意：不要 dispose 共享的 targetMesh.geometry 和组件级别的 useMemo material
         }
         return;
     }
 
-    if (existingOutline) return; // 已存在则跳过
+    if (existingOutline) {
+        // 如果已经存在，但材质变了，更新材质
+        if (existingOutline instanceof THREE.Mesh && existingOutline.material !== material) {
+            existingOutline.material = material;
+        }
+        return;
+    }
 
     // 复用原几何体，挂载为子节点
     const fresnelMesh = new THREE.Mesh(targetMesh.geometry, material);
-    fresnelMesh.name = HIGHLIGHT_NAME;
+    fresnelMesh.name = highlightName;
 
     targetMesh.add(fresnelMesh);
 }

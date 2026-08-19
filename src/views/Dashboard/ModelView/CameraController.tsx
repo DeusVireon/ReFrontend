@@ -119,11 +119,10 @@ export function AutoCameraTour({ controlsRef }: { controlsRef: React.RefObject<C
     // 轮询播放逻辑
     useEffect(() => {
         if (curCamControlMode !== CamControlMode.Carousel) return
-
+        selectNextGroup()
         const timer = setInterval(() => {
             selectNextGroup()
         }, 10000)
-
         return () => clearInterval(timer)
     }, [curCamControlMode])
 

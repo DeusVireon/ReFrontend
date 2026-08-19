@@ -10,6 +10,7 @@ import { ForecastChart } from "./SensorDataChart"
 import { useEffect, useRef, useState } from "react"
 import { useSound } from 'use-sound'
 import { useAlertPopupStore } from "@/views/Dashboard/stores/AlertPopup"
+import { Maximize } from "lucide-react"
 
 
 export function AlertPopupDialog() {
@@ -50,13 +51,14 @@ export function AlertPopupDialog() {
         setOpen(newOpenState)
     }
 
-    console.log(isHovered, animKey, 'isHovered, animKey')
-
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             {/* 直接给 DialogTrigger 加上按钮样式，不使用 asChild 嵌套 */}
             <DialogTrigger>
-                查看详细信息
+                <div className="flex p-1.5 px-2 gap-1 items-center rounded-sm text-xs bg-theme-2/10 hover:bg-theme-2/25 text-text">
+                    <Maximize className="size-3.5" />
+                    <span className="2xl:inline">查看详情</span>
+                </div>
             </DialogTrigger>
 
             <DialogContent key={popupData?.triggerTime}

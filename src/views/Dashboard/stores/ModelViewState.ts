@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { AttrKeyEnum } from '../models/AttrKeyEnum';
 import { BOARD_PROP_MAP } from '../models/BoardPropMap';
 import { ModelPartEnum } from '../models/ModelPartEnum';
+import { RTEventMgrInst } from '@/services/RealTimeEvent';
 import * as THREE from 'three';
 
 export const MODEL_GROUP_PREFIXES = ['rotor_',
@@ -84,3 +85,15 @@ export const useModelViewStateStore = create<ViewStateStore>((set) => ({
 interface AttentionFocusPayload {
     groupName: string;
 }
+
+RTEventMgrInst.handle<AttentionFocusPayload>("view.focus", (payload: AttentionFocusPayload) => {
+    const { groupName } = payload;
+
+    // 校验 groupName 是否有效且属于 ModelPartEnum 的有效枚举值
+    if (groupName && Object.values(ModelPartEnum).includes(groupName as ModelPartEnum)) {
+        useModelViewStateStore.getState().selectGroup(groupName as ModelPartEnum);
+        useModelViewStateStore.getState().setCamControlMode(CamControlMode.Attention);
+    } else if (groupName === "<EMPTY>") {
+        useModelViewStateStore.getState().setCamControlMode(CamControlMode.Carousel);
+    }
+});
